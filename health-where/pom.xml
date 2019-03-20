@@ -8,6 +8,7 @@
     <relativePath/>
   </parent>
   <properties>
+    <checkstyle.skip>true</checkstyle.skip>
     <git.enforceBranchNames>false</git.enforceBranchNames>
     <jacoco.coverage>0.90</jacoco.coverage>
     <jacoco.skip>true</jacoco.skip>
