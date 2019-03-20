@@ -14,4 +14,10 @@ public class BingLocationResponse {
 
   private List<BingResourceSet> resourceSets;
 
+
+  public Coordinates getBingResourceCoordinates() {
+    return resourceSets.get(0).resources().get(0).point().coordinates;
+  }
 }
+
+

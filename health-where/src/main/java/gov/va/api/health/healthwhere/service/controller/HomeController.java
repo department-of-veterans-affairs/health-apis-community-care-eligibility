@@ -1,10 +1,11 @@
 package gov.va.api.health.healthwhere.service.controller;
 
 import gov.va.api.health.healthwhere.service.Address;
+import gov.va.api.health.healthwhere.service.BingClient;
+import gov.va.api.health.healthwhere.service.BingLocationResponse;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.WaitDays;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,12 @@ public class HomeController {
 
     Address patientAddress = new Address(street, city, state, zip);
 
-    Coordinates patientCoordinates = lookupFacilityCoordinate(patientAddress);
+    BingClient bingClient = new BingClient("http://dev.virtualearth.net/REST/v1/Locations",
+        "ApoyeQuWwOoDGnRxHQT9UpW-jE4XTZLzddpPJtRHzWmyHxzp71nZlpBPKWwh0wLC");
+
+    BingLocationResponse bingLocationResponse = bingClient.lookupAddress(patientAddress);
+
+    Coordinates patientCoordinates = bingLocationResponse.getBingResourceCoordinates();
 
     return vaFacilitySearch(patientCoordinates);
   }

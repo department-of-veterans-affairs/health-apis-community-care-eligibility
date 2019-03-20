@@ -37,4 +37,21 @@ public class HomeControllerTest {
                 .param("serviceType", "PrimaryCare"))
         .andExpect(status().isOk());
   }
+
+  @Test
+  @SneakyThrows
+  public void callBingService() {
+
+    mvc.perform(
+        get("http://dev.virtualearth.net/REST/v1/Locations")
+            .param("addressLine", "12 Irving Street")
+            .param("locality", "Washington")
+            .param("adminDistrict", "DC")
+            .param("postalCode", "20422")
+            .param("countryRegion", "US")
+            .param("maxResults", "1")
+            .param("key", "ApoyeQuWwOoDGnRxHQT9UpW-jE4XTZLzddpPJtRHzWmyHxzp71nZlpBPKWwh0wLC"))
+        .andExpect(status().isOk());
+  }
+
 }
