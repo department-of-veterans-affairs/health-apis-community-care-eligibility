@@ -10,6 +10,7 @@
   <properties>
     <git.enforceBranchNames>false</git.enforceBranchNames>
     <jacoco.coverage>0.90</jacoco.coverage>
+    <jacoco.skip>true</jacoco.skip>
     <spotbugs.skip>true</spotbugs.skip>
   </properties>
   <artifactId>health-where</artifactId>
