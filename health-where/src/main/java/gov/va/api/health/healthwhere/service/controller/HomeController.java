@@ -10,11 +10,17 @@ import gov.va.api.health.healthwhere.service.BingResponse;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
-import gov.va.api.health.healthwhere.service.WaitDays;
+import gov.va.api.health.healthwhere.service.VaFacilitiesResponse.VaFacility;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,7 +38,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Controller
 public class HomeController {
-
   private final RestTemplate restTemplate;
 
   private String bingApiKey;
@@ -65,14 +70,8 @@ public class HomeController {
     }
   }
 
-  private static List<Facility> generateTestFacilities() {
-    Address addressOne =
-        new Address("50 Irving Street, Northwest", "Washington", "DC", "20422-0001");
-    WaitDays waitOne = new WaitDays(23, 2);
-    Facility facilityOne =
-        new Facility(
-            "vha_688", "Washington VA Medical Center", addressOne, "202-745-8000", waitOne, 42);
-    return Collections.singletonList(facilityOne);
+  private static ObjectMapper objectMapper() {
+    return JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
   @SneakyThrows
@@ -86,20 +85,18 @@ public class HomeController {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-    ObjectMapper objectMapper =
-        JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     ResponseEntity<String> entity =
         restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
     String body = entity.getBody();
     log.error(
         "Bing API response: "
-            + objectMapper
+            + objectMapper()
                 .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(objectMapper.readTree(body)));
-    BingResponse responseObject = objectMapper.readValue(body, BingResponse.class);
+                .writeValueAsString(objectMapper().readTree(body)));
+    BingResponse responseObject = objectMapper().readValue(body, BingResponse.class);
     log.error(
         "response object: "
-            + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
+            + objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
     return responseObject;
   }
 
@@ -119,20 +116,18 @@ public class HomeController {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-    ObjectMapper objectMapper =
-        JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     ResponseEntity<String> entity =
         restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
     String body = entity.getBody();
     log.error(
         "Bing API response: "
-            + objectMapper
+            + objectMapper()
                 .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(objectMapper.readTree(body)));
-    BingResponse responseObject = objectMapper.readValue(body, BingResponse.class);
+                .writeValueAsString(objectMapper().readTree(body)));
+    BingResponse responseObject = objectMapper().readValue(body, BingResponse.class);
     log.error(
         "response object: "
-            + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
+            + objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
     return responseObject;
   }
 
@@ -146,8 +141,9 @@ public class HomeController {
   }
 
   /** Search by address and service type. */
-  @GetMapping(value = {"/search"})
   @ResponseBody
+  @SneakyThrows
+  @GetMapping(value = {"/search"})
   public List<Facility> search(
       @RequestParam(value = "street") String street,
       @RequestParam(value = "city") String city,
@@ -159,7 +155,40 @@ public class HomeController {
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
     VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
-    return generateTestFacilities();
+    List<VaFacility> filteredByServiceType =
+        vaFacilitiesResponse
+            .data()
+            .stream()
+            .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
+            .collect(Collectors.toList());
+    log.error(
+        "va facilities filtered by service type {}: {}",
+        serviceType,
+        objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
+    return filteredByServiceType
+        .stream()
+        .map(vaFacility -> toFacility(vaFacility))
+        .collect(Collectors.toList());
+  }
+
+  private Facility toFacility(@NonNull VaFacility vaFacility) {
+    return null;
+  }
+
+  private boolean hasServiceType(VaFacility vaFacility, String serviceType) {
+    return vaFacility != null
+        && vaFacility.attributes() != null
+        && vaFacility.attributes().wait_times() != null
+        && vaFacility
+            .attributes()
+            .wait_times()
+            .health()
+            .stream()
+            .anyMatch(
+                waitTime ->
+                    waitTime != null
+                        && waitTime.service() != null
+                        && StringUtils.equalsIgnoreCase(serviceType, waitTime.service()));
   }
 
   @SneakyThrows
@@ -177,23 +206,22 @@ public class HomeController {
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-    ObjectMapper objectMapper =
-        JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     ResponseEntity<String> entity =
         restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
     String body = entity.getBody();
     log.error(
         "va facilities api response: "
-            + objectMapper
+            + objectMapper()
                 .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(objectMapper.readTree(body)));
-    JsonNode root = objectMapper.readTree(body);
+                .writeValueAsString(objectMapper().readTree(body)));
+    JsonNode root = objectMapper().readTree(body);
     doHackForFieldsNamedNew(root);
     VaFacilitiesResponse responseObject =
-        objectMapper.readValue(objectMapper.writeValueAsString(root), VaFacilitiesResponse.class);
+        objectMapper()
+            .readValue(objectMapper().writeValueAsString(root), VaFacilitiesResponse.class);
     log.error(
         "va facilities response object: "
-            + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
+            + objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
     return responseObject;
   }
 }

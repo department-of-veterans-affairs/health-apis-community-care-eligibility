@@ -1,5 +1,6 @@
 package gov.va.api.health.healthwhere.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,28 +17,28 @@ public final class VaFacilityAttributes {
 
   private Phone phone;
 
-  private Services services;
+  // private Services services;
 
   private WaitTimes wait_times;
 
   @Data
   @Builder
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  private static final class Address {
+  public static final class Address {
     private PhysicalAddress physical;
   }
 
   @Data
   @Builder
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  private static final class Phone {
+  public static final class Phone {
     private String main;
   }
 
   @Data
   @Builder
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  private static final class PhysicalAddress {
+  public static final class PhysicalAddress {
     private String zip;
 
     private String city;
@@ -51,17 +52,24 @@ public final class VaFacilityAttributes {
     private String address_3;
   }
 
-  @Data
-  @Builder
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  private static final class Services {
-    private List<String> health;
-  }
+  //  @Data
+  //  @Builder
+  //  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  //  public static final class Services {
+  //    private List<String> health;
+  //
+  //    public List<String> getHealth() {
+  //      if (health == null) {
+  //        health = new ArrayList<>();
+  //      }
+  //      return health;
+  //    }
+  //  }
 
   @Data
   @Builder
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  private static final class WaitTime {
+  public static final class WaitTime {
     private String service;
 
     private int neww;
@@ -72,7 +80,14 @@ public final class VaFacilityAttributes {
   @Data
   @Builder
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  private static final class WaitTimes {
+  public static final class WaitTimes {
     private List<WaitTime> health;
+
+    public List<WaitTime> getHealth() {
+      if (health == null) {
+        health = new ArrayList<>();
+      }
+      return health;
+    }
   }
 }
