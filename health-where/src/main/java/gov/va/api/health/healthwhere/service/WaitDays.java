@@ -10,7 +10,6 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class WaitDays {
-
   int newPatient;
   int establishedPatient;
 }
