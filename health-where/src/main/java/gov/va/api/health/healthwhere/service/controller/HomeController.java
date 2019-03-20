@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.healthwhere.service.Address;
-import gov.va.api.health.healthwhere.service.BingLocationResponse;
+import gov.va.api.health.healthwhere.service.BingResponse;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
@@ -56,7 +56,7 @@ public class HomeController {
   }
 
   @SneakyThrows
-  private BingLocationResponse bingLocationSearch(Address address) {
+  private BingResponse bingLocationSearch(Address address) {
 
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/v1/Locations")
@@ -82,7 +82,38 @@ public class HomeController {
             + objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(objectMapper.readTree(body)));
-    BingLocationResponse responseObject = objectMapper.readValue(body, BingLocationResponse.class);
+    BingResponse responseObject = objectMapper.readValue(body, BingResponse.class);
+    log.error(
+        "response object: "
+            + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
+
+    return responseObject;
+  }
+
+  @SneakyThrows
+  private BingResponse bingDrivetimeSearch() {
+
+    String url =
+        UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/V1/Routes")
+            .queryParam("wp.0", "38.9311450072647,-77.010835000092")
+            .queryParam("wp.1", "38.7048241100001,-77.14011033")
+            .queryParam("key", bingApiKey)
+            .toUriString();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+    ObjectMapper objectMapper =
+        JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    ResponseEntity<String> entity =
+        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+    String body = entity.getBody();
+    log.error(
+        "Bing API response: "
+            + objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(objectMapper.readTree(body)));
+    BingResponse responseObject = objectMapper.readValue(body, BingResponse.class);
     log.error(
         "response object: "
             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
@@ -101,9 +132,11 @@ public class HomeController {
       @RequestParam(value = "serviceType") String serviceType) {
     Address patientAddress = new Address(street, city, state, zip);
 
-    BingLocationResponse bingLocationResponse = bingLocationSearch(patientAddress);
+    bingDrivetimeSearch();
 
-    Coordinates patientCoordinates = bingLocationResponse.getBingResourceCoordinates();
+    BingResponse bingResponse = bingLocationSearch(patientAddress);
+
+    Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
 
     VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
 
@@ -140,5 +173,16 @@ public class HomeController {
         "response object: "
             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
     return responseObject;
+  }
+
+  private Coordinates getBingResourceCoordinates(BingResponse bingResponse) {
+
+    // TODO: Add error checking, convert to lamda
+    Coordinates coordinates =
+        new Coordinates(
+            bingResponse.resourceSets().get(0).resources().get(0).point().coordinates()[0],
+            bingResponse.resourceSets().get(0).resources().get(0).point().coordinates()[1]);
+
+    return coordinates;
   }
 }

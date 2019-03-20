@@ -10,18 +10,8 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class BingLocationResponse {
+public class BingResponse {
 
   private List<BingResourceSet> resourceSets;
 
-  public Coordinates getBingResourceCoordinates() {
-
-    //TODO: Add error checking
-    Coordinates coordinates = new Coordinates(
-        resourceSets.get(0).resources().get(0).point.coordinates[0],
-        resourceSets.get(0).resources().get(0).point.coordinates[1]
-    );
-
-    return coordinates;
-  }
 }
