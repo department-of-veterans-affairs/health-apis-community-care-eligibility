@@ -1,0 +1,228 @@
+{
+  "data": [
+    {
+      "id": "vha_688",
+      "type": "va_facilities",
+      "attributes": {
+        "name": "Washington VA Medical Center",
+        "facility_type": "va_health_facility",
+        "classification": "VA Medical Center (VAMC)",
+        "website": "http://www.washingtondc.va.gov",
+        "lat": 38.9311137,
+        "long": -77.0109110499999,
+        "address": {
+          "mailing": {},
+          "physical": {
+            "zip": "20422-0001",
+            "city": "Washington",
+            "state": "DC",
+            "address_1": "50 Irving Street, Northwest",
+            "address_2": null,
+            "address_3": null
+          }
+        },
+        "phone": {
+          "fax": "202-745-8530 x",
+          "main": "202-745-8000 x",
+          "pharmacy": "202-745-8235 x",
+          "after_hours": "202-745-8000 x",
+          "patient_advocate": "202-745-8588 x",
+          "mental_health_clinic": "202-745-8267",
+          "enrollment_coordinator": "202-745-8000 x56333"
+        },
+        "hours": {
+          "friday": "24/7",
+          "monday": "24/7",
+          "sunday": "24/7",
+          "tuesday": "24/7",
+          "saturday": "24/7",
+          "thursday": "24/7",
+          "wednesday": "24/7"
+        },
+        "services": {
+          "other": [
+            "Online Scheduling"
+          ],
+          "health": [
+            "DentalServices",
+            "MentalHealthCare",
+            "PrimaryCare",
+            "EmergencyCare",
+            "WomensHealth",
+            "Audiology",
+            "Cardiology",
+            "Dermatology",
+            "Gastroenterology",
+            "Gynecology",
+            "Ophthalmology",
+            "Optometry",
+            "Orthopedics",
+            "Urology"
+          ],
+          "last_updated": "2019-03-18"
+        },
+        "satisfaction": {
+          "health": {
+            "primary_care_urgent": 0.72,
+            "primary_care_routine": 0.79,
+            "specialty_care_urgent": 0.69,
+            "specialty_care_routine": 0.78
+          },
+          "effective_date": "2018-05-22"
+        },
+        "wait_times": {
+          "health": [
+            {
+              "service": "Urology",
+              "new": 23,
+              "established": 2
+            },
+            {
+              "service": "Audiology",
+              "new": 26,
+              "established": 6
+            },
+            {
+              "service": "Optometry",
+              "new": 45,
+              "established": 2
+            },
+            {
+              "service": "Cardiology",
+              "new": 19,
+              "established": 7
+            },
+            {
+              "service": "Gynecology",
+              "new": 26,
+              "established": 2
+            },
+            {
+              "service": "Dermatology",
+              "new": 15,
+              "established": 6
+            },
+            {
+              "service": "Orthopedics",
+              "new": 27,
+              "established": 8
+            },
+            {
+              "service": "PrimaryCare",
+              "new": 17,
+              "established": 3
+            },
+            {
+              "service": "MentalHealth",
+              "new": 10,
+              "established": 2
+            },
+            {
+              "service": "Ophthalmology",
+              "new": 20,
+              "established": 2
+            },
+            {
+              "service": "WomensHealth",
+              "new": 16,
+              "established": 2
+            },
+            {
+              "service": "Gastroenterology",
+              "new": 36,
+              "established": 10
+            }
+          ],
+          "effective_date": "2019-03-11"
+        }
+      }
+    },
+    {
+      "id": "vha_688QA",
+      "type": "va_facilities",
+      "attributes": {
+        "name": "Franklin Street VA Clinic",
+        "facility_type": "va_health_facility",
+        "classification": "Other Outpatient Services (OOS)",
+        "website": null,
+        "lat": 38.925828,
+        "long": -76.9835070199999,
+        "address": {
+          "mailing": {},
+          "physical": {
+            "zip": "20018-2000",
+            "city": "Washington",
+            "state": "DC",
+            "address_1": "1500 Franklin Street Northeast",
+            "address_2": null,
+            "address_3": null
+          }
+        },
+        "phone": {
+          "fax": "202-636-7661 x",
+          "main": "202-636-7660 x",
+          "pharmacy": "202-745-8000 x55603",
+          "after_hours": "202-636-7660 x",
+          "patient_advocate": "202-745-8000 x58235",
+          "mental_health_clinic": "",
+          "enrollment_coordinator": "202-745-8000 x58251"
+        },
+        "hours": {
+          "friday": "24/7",
+          "monday": "24/7",
+          "sunday": "24/7",
+          "tuesday": "24/7",
+          "saturday": "24/7",
+          "thursday": "24/7",
+          "wednesday": "24/7"
+        },
+        "services": {
+          "other": [],
+          "health": [
+            "MentalHealthCare"
+          ],
+          "last_updated": "2019-03-18"
+        },
+        "satisfaction": {
+          "health": {},
+          "effective_date": null
+        },
+        "wait_times": {
+          "health": [
+            {
+              "service": "MentalHealth",
+              "new": 12,
+              "established": 15
+            }
+          ],
+          "effective_date": "2019-03-11"
+        }
+      }
+    }
+  ],
+  "links": {
+    "self": "https://dev-api.vets.gov/services/va_facilities/v0/facilities?lat=38.919580&long=-77.232896&page=1&per_page=2",
+    "first": "https://dev-api.vets.gov/services/va_facilities/v0/facilities?lat=38.919580&long=-77.232896&page=1&per_page=2",
+    "prev": null,
+    "next": "https://dev-api.vets.gov/services/va_facilities/v0/facilities?lat=38.919580&long=-77.232896&page=2&per_page=2",
+    "last": "https://dev-api.vets.gov/services/va_facilities/v0/facilities?lat=38.919580&long=-77.232896&page=1086&per_page=2"
+  },
+  "meta": {
+    "pagination": {
+      "current_page": 1,
+      "per_page": 2,
+      "total_pages": 1086,
+      "total_entries": 2172
+    },
+    "distances": [
+      {
+        "id": "vha_688",
+        "distance": 11.99
+      },
+      {
+        "id": "vha_688QA",
+        "distance": 13.45
+      }
+    ]
+  }
+}
