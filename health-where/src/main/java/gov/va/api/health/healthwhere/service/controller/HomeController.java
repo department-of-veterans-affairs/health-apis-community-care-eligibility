@@ -14,7 +14,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -94,7 +93,7 @@ public class HomeController {
             .toUriString();
 
     HttpHeaders headers = new HttpHeaders();
-    // TODO don't commit API key
+    // TODO API key should be system property
     headers.add("apiKey", "DONT_COMMIT_API_KEY");
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
