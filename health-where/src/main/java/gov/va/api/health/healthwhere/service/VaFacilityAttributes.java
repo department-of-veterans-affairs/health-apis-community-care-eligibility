@@ -1,5 +1,7 @@
 package gov.va.api.health.healthwhere.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,14 +10,72 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class VaFacilityAttributes {
+public final class VaFacilityAttributes {
   private String name;
 
-  private VaFacilityAddress address;
+  private Address address;
 
-  private VaFacilityPhone phone;
+  private Phone phone;
 
-  private VaFacilityServices services;
+  private Services services;
 
-  private VaFacilityServicesWaitTimes wait_times;
+  private WaitTimes wait_times;
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class Address {
+    private PhysicalAddress physical;
+  }
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class Phone {
+    private String main;
+  }
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class PhysicalAddress {
+    private String zip;
+
+    private String city;
+
+    private String state;
+
+    private String address_1;
+
+    private String address_2;
+
+    private String address_3;
+  }
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class Services {
+    private List<String> health;
+  }
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class WaitTime {
+    private String service;
+
+    // TODO this isn't mapping correctly
+    @JsonProperty("new")
+    private int newPatient;
+
+    private int established;
+  }
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class WaitTimes {
+    private List<WaitTime> health;
+  }
 }
