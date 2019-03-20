@@ -48,6 +48,23 @@ public class HomeController {
     this.restTemplate = restTemplate;
   }
 
+  /**
+   * To support deserialization, recursively visit all descendant nodes and, for any nodes with a
+   * "new" key, add a "neww" key alongside.
+   */
+  private static void doHackForFieldsNamedNew(JsonNode node) {
+    if (node instanceof ObjectNode) {
+      ObjectNode objNode = (ObjectNode) node;
+      JsonNode newNode = node.get("new");
+      if (newNode != null) {
+        objNode.set("neww", newNode);
+      }
+    }
+    for (JsonNode child : node) {
+      doHackForFieldsNamedNew(child);
+    }
+  }
+
   private static List<Facility> generateTestFacilities() {
     Address addressOne =
         new Address("50 Irving Street, Northwest", "Washington", "DC", "20422-0001");
@@ -117,23 +134,6 @@ public class HomeController {
         "response object: "
             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
     return responseObject;
-  }
-
-  /**
-   * To support deserialization, recursively visit all descendant nodes and, for any nodes with a
-   * "new" key, add a "neww" key alongside.
-   */
-  private void doHackForFieldsNamedNew(JsonNode node) {
-    if (node instanceof ObjectNode) {
-      ObjectNode objNode = (ObjectNode) node;
-      JsonNode newNode = node.get("new");
-      if (newNode != null) {
-        objNode.set("neww", newNode);
-      }
-    }
-    for (JsonNode child : node) {
-      doHackForFieldsNamedNew(child);
-    }
   }
 
   private Coordinates getBingResourceCoordinates(BingResponse bingResponse) {
