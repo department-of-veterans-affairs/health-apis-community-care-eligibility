@@ -13,7 +13,7 @@ import lombok.Data;
 public final class VaFacilitiesResponse {
   private List<VaFacility> data;
 
-  public List<VaFacility> getData() {
+  public List<VaFacility> data() {
     if (data == null) {
       data = new ArrayList<>();
     }
