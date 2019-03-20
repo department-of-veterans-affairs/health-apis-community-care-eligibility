@@ -68,19 +68,27 @@ public class HomeController {
   private static List<Facility> generateTestFacilities() {
     Address addressOne =
         new Address("50 Irving Street, Northwest", "Washington", "DC", "20422-0001");
+    Coordinates coordinates = new Coordinates(38.931103461947536, -77.009941162468039);
     WaitDays waitOne = new WaitDays(23, 2);
     Facility facilityOne =
         new Facility(
-            "vha_688", "Washington VA Medical Center", addressOne, "202-745-8000", waitOne, 42);
+            "vha_688",
+            "Washington VA Medical Center",
+            addressOne,
+            coordinates,
+            "202-745-8000",
+            waitOne,
+            42);
     return Collections.singletonList(facilityOne);
   }
 
   @SneakyThrows
-  private BingResponse bingDrivetimeSearch() {
+  private BingResponse bingDrivetimeSearch(
+      Coordinates patientCoordinates, Coordinates facilityCoordinates) {
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/V1/Routes")
-            .queryParam("wp.0", "38.9311450072647,-77.010835000092")
-            .queryParam("wp.1", "38.7048241100001,-77.14011033")
+            .queryParam("wp.0", patientCoordinates.toCoordinateString())
+            .queryParam("wp.1", facilityCoordinates.toCoordinateString())
             .queryParam("key", bingApiKey)
             .toUriString();
     HttpHeaders headers = new HttpHeaders();
@@ -155,10 +163,16 @@ public class HomeController {
       @RequestParam(value = "zip") String zip,
       @RequestParam(value = "serviceType") String serviceType) {
     Address patientAddress = new Address(street, city, state, zip);
-    bingDrivetimeSearch().resourceSets().get(0).resources().get(0).travelDuration();
+
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
-    VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
+
+    Coordinates exampleCoordinates = new Coordinates(38.7048241100001, -77.14011033);
+
+    bingDrivetimeSearch(patientCoordinates, exampleCoordinates);
+
+    VaFacilitiesResponse vaFaciltiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
+
     return generateTestFacilities();
   }
 

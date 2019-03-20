@@ -10,4 +10,8 @@ import lombok.Data;
 public class Coordinates {
   double latitude;
   double longitude;
+
+  public String toCoordinateString() {
+    return "" + latitude + "," + longitude;
+  }
 }

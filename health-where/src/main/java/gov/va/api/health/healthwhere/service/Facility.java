@@ -19,6 +19,8 @@ public class Facility {
 
   @NotNull Address address;
 
+  Coordinates coordinates;
+
   String phoneNumber;
 
   WaitDays waitDays;
