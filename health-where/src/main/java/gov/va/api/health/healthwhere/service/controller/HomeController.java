@@ -9,17 +9,14 @@ import gov.va.api.health.healthwhere.service.Address;
 import gov.va.api.health.healthwhere.service.BingResponse;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
+import gov.va.api.health.healthwhere.service.FacilityTransformer;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse.VaFacility;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,19 +52,35 @@ public class HomeController {
 
   /**
    * To support deserialization, recursively visit all descendant nodes and, for any nodes with a
-   * "new" key, add a "neww" key alongside.
+   * bad key (e.g. "new"), add a good key (e.g. "neww") alongside.
    */
-  private static void doHackForFieldsNamedNew(JsonNode node) {
+  private static void doHackForFieldRenaming(JsonNode node, String badName, String goodName) {
     if (node instanceof ObjectNode) {
       ObjectNode objNode = (ObjectNode) node;
-      JsonNode newNode = node.get("new");
+      JsonNode newNode = node.get(badName);
       if (newNode != null) {
-        objNode.set("neww", newNode);
+        objNode.set(goodName, newNode);
       }
     }
     for (JsonNode child : node) {
-      doHackForFieldsNamedNew(child);
+      doHackForFieldRenaming(child, badName, goodName);
     }
+  }
+
+  private static boolean hasServiceType(VaFacility vaFacility, String serviceType) {
+    return vaFacility != null
+        && vaFacility.attributes() != null
+        && vaFacility.attributes().wait_times() != null
+        && vaFacility
+            .attributes()
+            .wait_times()
+            .health()
+            .stream()
+            .anyMatch(
+                waitTime ->
+                    waitTime != null
+                        && waitTime.service() != null
+                        && StringUtils.equalsIgnoreCase(serviceType, waitTime.service()));
   }
 
   private static ObjectMapper objectMapper() {
@@ -75,11 +88,12 @@ public class HomeController {
   }
 
   @SneakyThrows
-  private BingResponse bingDrivetimeSearch() {
+  private BingResponse bingDrivetimeSearch(
+      Coordinates patientCoordinates, Coordinates facilityCoordinates) {
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/V1/Routes")
-            .queryParam("wp.0", "38.9311450072647,-77.010835000092")
-            .queryParam("wp.1", "38.7048241100001,-77.14011033")
+            .queryParam("wp.0", patientCoordinates.toCoordinateString())
+            .queryParam("wp.1", facilityCoordinates.toCoordinateString())
             .queryParam("key", bingApiKey)
             .toUriString();
     HttpHeaders headers = new HttpHeaders();
@@ -151,9 +165,10 @@ public class HomeController {
       @RequestParam(value = "zip") String zip,
       @RequestParam(value = "serviceType") String serviceType) {
     Address patientAddress = new Address(street, city, state, zip);
-    bingDrivetimeSearch().resourceSets().get(0).resources().get(0).travelDuration();
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
+    Coordinates exampleCoordinates = new Coordinates(38.7048241100001, -77.14011033);
+    bingDrivetimeSearch(patientCoordinates, exampleCoordinates);
     VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
     List<VaFacility> filteredByServiceType =
         vaFacilitiesResponse
@@ -167,28 +182,13 @@ public class HomeController {
         objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
     return filteredByServiceType
         .stream()
-        .map(vaFacility -> toFacility(vaFacility))
+        .map(
+            vaFacility ->
+                FacilityTransformer.builder()
+                    .serviceType(serviceType)
+                    .build()
+                    .toFacility(vaFacility))
         .collect(Collectors.toList());
-  }
-
-  private Facility toFacility(@NonNull VaFacility vaFacility) {
-    return null;
-  }
-
-  private boolean hasServiceType(VaFacility vaFacility, String serviceType) {
-    return vaFacility != null
-        && vaFacility.attributes() != null
-        && vaFacility.attributes().wait_times() != null
-        && vaFacility
-            .attributes()
-            .wait_times()
-            .health()
-            .stream()
-            .anyMatch(
-                waitTime ->
-                    waitTime != null
-                        && waitTime.service() != null
-                        && StringUtils.equalsIgnoreCase(serviceType, waitTime.service()));
   }
 
   @SneakyThrows
@@ -215,7 +215,8 @@ public class HomeController {
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(objectMapper().readTree(body)));
     JsonNode root = objectMapper().readTree(body);
-    doHackForFieldsNamedNew(root);
+    doHackForFieldRenaming(root, "new", "neww");
+    doHackForFieldRenaming(root, "long", "longg");
     VaFacilitiesResponse responseObject =
         objectMapper()
             .readValue(objectMapper().writeValueAsString(root), VaFacilitiesResponse.class);

@@ -13,11 +13,13 @@ import lombok.Data;
 public final class VaFacilityAttributes {
   private String name;
 
+  private double lat;
+
+  private double longg;
+
   private Address address;
 
   private Phone phone;
-
-  // private Services services;
 
   private WaitTimes wait_times;
 
@@ -51,20 +53,6 @@ public final class VaFacilityAttributes {
 
     private String address_3;
   }
-
-  //  @Data
-  //  @Builder
-  //  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  //  public static final class Services {
-  //    private List<String> health;
-  //
-  //    public List<String> getHealth() {
-  //      if (health == null) {
-  //        health = new ArrayList<>();
-  //      }
-  //      return health;
-  //    }
-  //  }
 
   @Data
   @Builder

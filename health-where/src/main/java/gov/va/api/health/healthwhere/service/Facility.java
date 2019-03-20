@@ -12,12 +12,13 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Facility {
-
   @NotBlank String id;
 
   @NotBlank String name;
 
   @NotNull Address address;
+
+  Coordinates coordinates;
 
   String phoneNumber;
 
