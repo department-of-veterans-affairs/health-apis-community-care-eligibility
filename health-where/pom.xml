@@ -8,7 +8,9 @@
     <relativePath/>
   </parent>
   <properties>
+    <git.enforceBranchNames>false</git.enforceBranchNames>
     <jacoco.coverage>0.90</jacoco.coverage>
+    <spotbugs.skip>true</spotbugs.skip>
   </properties>
   <artifactId>health-where</artifactId>
   <version>1.0.1-SNAPSHOT</version>
