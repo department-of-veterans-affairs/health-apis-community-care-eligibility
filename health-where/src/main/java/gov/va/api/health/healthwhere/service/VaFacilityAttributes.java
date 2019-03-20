@@ -71,7 +71,7 @@ public final class VaFacilityAttributes {
   public static final class WaitTimes {
     private List<WaitTime> health;
 
-    public List<WaitTime> getHealth() {
+    public List<WaitTime> health() {
       if (health == null) {
         health = new ArrayList<>();
       }
