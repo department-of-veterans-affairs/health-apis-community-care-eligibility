@@ -1,7 +1,6 @@
 package gov.va.api.health.healthwhere.service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,9 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class BingResource {
+public class BingPoint {
 
-  @NotNull String name;
-  @NotNull BingPoint point;
+  String type;
+  Coordinates coordinates;
+
 }

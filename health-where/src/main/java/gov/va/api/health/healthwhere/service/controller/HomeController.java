@@ -2,11 +2,15 @@ package gov.va.api.health.healthwhere.service.controller;
 
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.healthwhere.service.Address;
+import gov.va.api.health.healthwhere.service.BingClient;
+import gov.va.api.health.healthwhere.service.BingLocationResponse;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
 import gov.va.api.health.healthwhere.service.WaitDays;
 import lombok.SneakyThrows;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
@@ -50,9 +54,9 @@ public class HomeController {
     return Collections.singletonList(facilityOne);
   }
 
-  private static Coordinates lookupFacilityCoordinate(Address address) {
-    return new Coordinates(38.9311137, -77.0109110499999);
-  }
+  //  private static Coordinates lookupFacilityCoordinate(Address address) {
+  //    return new Coordinates(38.9311137, -77.0109110499999);
+  //  }
 
   /** Search by address and service type. */
   @GetMapping(value = {"/search"})
@@ -64,7 +68,16 @@ public class HomeController {
       @RequestParam(value = "zip") String zip,
       @RequestParam(value = "serviceType") String serviceType) {
     Address patientAddress = new Address(street, city, state, zip);
-    Coordinates patientCoordinates = lookupFacilityCoordinate(patientAddress);
+    // Coordinates patientCoordinates = lookupFacilityCoordinate(patientAddress);
+    BingClient bingClient =
+        new BingClient(
+            "http://dev.virtualearth.net/REST/v1/Locations",
+            "ApoyeQuWwOoDGnRxHQT9UpW-jE4XTZLzddpPJtRHzWmyHxzp71nZlpBPKWwh0wLC");
+
+    BingLocationResponse bingLocationResponse = bingClient.lookupAddress(patientAddress);
+
+    Coordinates patientCoordinates = bingLocationResponse.getBingResourceCoordinates();
+
     return vaFacilitySearch(patientCoordinates, serviceType);
   }
 
@@ -104,7 +117,7 @@ public class HomeController {
             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
 
     // TODO convert response object into list of facilities, filtered by serviceType
-    
+
     // try {
     //    } catch (HttpClientErrorException.NotFound e) {
     //      throw new NotFound(query);
