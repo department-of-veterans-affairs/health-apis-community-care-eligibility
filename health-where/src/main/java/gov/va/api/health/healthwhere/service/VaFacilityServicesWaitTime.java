@@ -1,7 +1,6 @@
 package gov.va.api.health.healthwhere.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

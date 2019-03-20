@@ -9,5 +9,5 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class VaFacilityPhone {
-	private String main;
+  private String main;
 }

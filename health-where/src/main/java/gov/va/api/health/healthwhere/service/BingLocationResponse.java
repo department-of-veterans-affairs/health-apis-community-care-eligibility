@@ -14,10 +14,14 @@ public class BingLocationResponse {
 
   private List<BingResourceSet> resourceSets;
 
-
   public Coordinates getBingResourceCoordinates() {
-    return resourceSets.get(0).resources().get(0).point().coordinates;
+
+    //TODO: Add error checking
+    Coordinates coordinates = new Coordinates(
+        resourceSets.get(0).resources().get(0).point.coordinates[0],
+        resourceSets.get(0).resources().get(0).point.coordinates[1]
+    );
+
+    return coordinates;
   }
 }
-
-

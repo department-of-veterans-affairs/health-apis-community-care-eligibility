@@ -9,5 +9,5 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class VaFacilityAddress {
-	private VaFacilityPhysicalAddress physical;
+  private VaFacilityPhysicalAddress physical;
 }

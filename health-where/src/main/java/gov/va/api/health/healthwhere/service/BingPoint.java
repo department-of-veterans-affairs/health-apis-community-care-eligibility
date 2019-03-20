@@ -12,6 +12,5 @@ import lombok.Data;
 public class BingPoint {
 
   String type;
-  Coordinates coordinates;
-
+  Double[] coordinates;
 }
