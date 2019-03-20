@@ -1,6 +1,5 @@
 package gov.va.api.health.healthwhere.service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -65,9 +64,7 @@ public final class VaFacilityAttributes {
   private static final class WaitTime {
     private String service;
 
-    // TODO this isn't mapping correctly
-    @JsonProperty("new")
-    private int newPatient;
+    private int neww;
 
     private int established;
   }

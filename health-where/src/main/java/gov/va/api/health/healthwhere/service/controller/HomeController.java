@@ -1,7 +1,9 @@
 package gov.va.api.health.healthwhere.service.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.healthwhere.service.Address;
 import gov.va.api.health.healthwhere.service.BingResponse;
@@ -30,6 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Controller
 public class HomeController {
+
   private final RestTemplate restTemplate;
 
   private String bingApiKey;
@@ -115,6 +118,23 @@ public class HomeController {
     return responseObject;
   }
 
+  /**
+   * To support deserialization, recursively visit all descendant nodes and, for any nodes with a
+   * "new" key, add a "neww" key alongside.
+   */
+  private void doHackForFieldsNamedNew(JsonNode node) {
+    if (node instanceof ObjectNode) {
+      ObjectNode objNode = (ObjectNode) node;
+      JsonNode newNode = node.get("new");
+      if (newNode != null) {
+        objNode.set("neww", newNode);
+      }
+    }
+    for (JsonNode child : node) {
+      doHackForFieldsNamedNew(child);
+    }
+  }
+
   private Coordinates getBingResourceCoordinates(BingResponse bingResponse) {
     // TODO: Add error checking, convert to lamda
     Coordinates coordinates =
@@ -166,7 +186,10 @@ public class HomeController {
             + objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(objectMapper.readTree(body)));
-    VaFacilitiesResponse responseObject = objectMapper.readValue(body, VaFacilitiesResponse.class);
+    JsonNode root = objectMapper.readTree(body);
+    doHackForFieldsNamedNew(root);
+    VaFacilitiesResponse responseObject =
+        objectMapper.readValue(objectMapper.writeValueAsString(root), VaFacilitiesResponse.class);
     log.error(
         "va facilities response object: "
             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
