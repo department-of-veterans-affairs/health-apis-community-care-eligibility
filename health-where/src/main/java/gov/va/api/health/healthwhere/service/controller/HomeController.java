@@ -146,7 +146,6 @@ public class HomeController {
   }
 
   private Coordinates getBingResourceCoordinates(BingResponse bingResponse) {
-    // TODO: Add error checking, convert to lamda
     Coordinates coordinates =
         new Coordinates(
             bingResponse.resourceSets().get(0).resources().get(0).point().coordinates()[0],
@@ -180,15 +179,31 @@ public class HomeController {
         "va facilities filtered by service type {}: {}",
         serviceType,
         objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
-    return filteredByServiceType
+
+    List<Facility> facilities =
+        filteredByServiceType
+            .stream()
+            .map(
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(serviceType)
+                        .build()
+                        .toFacility(vaFacility))
+            .collect(Collectors.toList());
+
+    facilities
         .stream()
-        .map(
-            vaFacility ->
-                FacilityTransformer.builder()
-                    .serviceType(serviceType)
-                    .build()
-                    .toFacility(vaFacility))
-        .collect(Collectors.toList());
+        .forEach(
+            facility ->
+                facility.driveMinutes(
+                    bingDrivetimeSearch(patientCoordinates, facility.coordinates())
+                        .resourceSets()
+                        .get(0)
+                        .resources()
+                        .get(0)
+                        .travelDuration()));
+
+    return facilities;
   }
 
   @SneakyThrows
