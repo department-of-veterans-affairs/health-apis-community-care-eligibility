@@ -95,6 +95,7 @@ public class HomeController {
             .queryParam("addressLine", address.street())
             .queryParam("maxResults", 1)
             .queryParam("key", bingApiKey)
+            .build()
             .toUriString();
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -135,7 +136,7 @@ public class HomeController {
       @RequestParam(value = "zip") String zip,
       @RequestParam(value = "serviceType") String serviceType) {
     Address patientAddress = new Address(street, city, state, zip);
-    bingDrivetimeSearch();
+    bingDrivetimeSearch().resourceSets().get(0).resources().get(0).travelDuration();
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
     VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
