@@ -30,7 +30,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Controller
 public class HomeController {
-
   private final RestTemplate restTemplate;
 
   private String bingApiKey;
@@ -169,7 +168,7 @@ public class HomeController {
                 .writeValueAsString(objectMapper.readTree(body)));
     VaFacilitiesResponse responseObject = objectMapper.readValue(body, VaFacilitiesResponse.class);
     log.error(
-        "response object: "
+        "va facilities response object: "
             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
     return responseObject;
   }

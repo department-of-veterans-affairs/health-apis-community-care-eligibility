@@ -9,6 +9,15 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class VaFacilitiesResponse {
+public final class VaFacilitiesResponse {
   private List<VaFacility> data;
+
+  @Data
+  @Builder
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  private static final class VaFacility {
+    private String id;
+
+    private VaFacilityAttributes attributes;
+  }
 }
