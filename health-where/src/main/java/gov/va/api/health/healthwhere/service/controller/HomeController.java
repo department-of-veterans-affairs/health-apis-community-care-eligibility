@@ -9,13 +9,14 @@ import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
 import gov.va.api.health.healthwhere.service.WaitDays;
 import lombok.SneakyThrows;
-import java.util.ArrayList;
+
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,12 +35,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Slf4j
 @Controller
 public class HomeController {
+  private String vaFacilitiesApiKey;
+
   private final RestTemplate restTemplate;
 
   public HomeController(
-      // @Value("${mranderson.url}") String baseUrl,
+      @Value("${va-facilities.api-key}") String vaFacilitiesApiKey,
       @Autowired RestTemplate restTemplate) {
-    // this.baseUrl = baseUrl;
+    this.vaFacilitiesApiKey = vaFacilitiesApiKey;
     this.restTemplate = restTemplate;
   }
 
@@ -53,10 +56,6 @@ public class HomeController {
     return Collections.singletonList(facilityOne);
   }
 
-  //  private static Coordinates lookupFacilityCoordinate(Address address) {
-  //    return new Coordinates(38.9311137, -77.0109110499999);
-  //  }
-
   /** Search by address and service type. */
   @GetMapping(value = {"/search"})
   @ResponseBody
@@ -67,15 +66,14 @@ public class HomeController {
       @RequestParam(value = "zip") String zip,
       @RequestParam(value = "serviceType") String serviceType) {
     Address patientAddress = new Address(street, city, state, zip);
-    // Coordinates patientCoordinates = lookupFacilityCoordinate(patientAddress);
+
     BingClient bingClient =
         new BingClient(
             "http://dev.virtualearth.net/REST/v1/Locations",
             "ApoyeQuWwOoDGnRxHQT9UpW-jE4XTZLzddpPJtRHzWmyHxzp71nZlpBPKWwh0wLC");
-
     BingLocationResponse bingLocationResponse = bingClient.lookupAddress(patientAddress);
-
     Coordinates patientCoordinates = bingLocationResponse.getBingResourceCoordinates();
+    // Coordinates patientCoordinates = new Coordinates(38.9311137, -77.0109110499999);
 
     return vaFacilitySearch(patientCoordinates, serviceType);
   }
@@ -93,8 +91,7 @@ public class HomeController {
             .toUriString();
 
     HttpHeaders headers = new HttpHeaders();
-    // TODO API key should be system property
-    headers.add("apiKey", "DONT_COMMIT_API_KEY");
+    headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
