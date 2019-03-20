@@ -16,5 +16,4 @@ public class Address {
   @NotBlank String city;
   @NotBlank String state;
   @NotBlank String zip;
-
 }

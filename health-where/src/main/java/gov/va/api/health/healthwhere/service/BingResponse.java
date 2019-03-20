@@ -13,5 +13,4 @@ import lombok.Data;
 public class BingResponse {
 
   private List<BingResourceSet> resourceSets;
-
 }
