@@ -166,8 +166,6 @@ public class HomeController {
     Address patientAddress = new Address(street, city, state, zip);
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
-    Coordinates exampleCoordinates = new Coordinates(38.7048241100001, -77.14011033);
-    bingDrivetimeSearch(patientCoordinates, exampleCoordinates);
     VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
     List<VaFacility> filteredByServiceType =
         vaFacilitiesResponse
