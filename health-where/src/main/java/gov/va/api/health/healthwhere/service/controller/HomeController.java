@@ -192,7 +192,6 @@ public class HomeController {
             .queryParam("format", "JSON")
             .build()
             .toUriString();
-    log.error("Invoking access-to-care url {}", url);
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
     ResponseEntity<String> entity =
