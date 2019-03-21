@@ -129,32 +129,29 @@ public class HomeController {
                 patientAddress.state(),
                 patientAddress.zip())
             .collect(Collectors.joining(", "));
-    log.error("Patient address for access-to-care is {}", addressString);
     Integer appointmentTypeCode = acessToCareAppointmentTypeCodeMapping().get(serviceType);
-    log.error("acccess-to-care appointment code is " + appointmentTypeCode);
     // TODO handle unknown appointment type code
     String url =
         UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
             .queryParam("location", addressString)
-            .queryParam("radius", "5")
+            .queryParam("radius", "50")
             .queryParam("apptType", appointmentTypeCode)
             .queryParam("sortOrder", "Distance")
             .queryParam("format", "JSON")
+            .build()
             .toUriString();
     log.error("Invoking access-to-care url {}", url);
     HttpHeaders headers = new HttpHeaders();
-    // headers.add("apiKey", vaFacilitiesApiKey);
-    // headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
     ResponseEntity<String> entity =
         restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
     String body = entity.getBody();
-    log.error("access-to-care api raw response: " + body);
-    // log.error(
-    // "access-to-care api response: "
-    // + objectMapper()
-    // .writerWithDefaultPrettyPrinter()
-    // .writeValueAsString(objectMapper().readTree(body)));
+    log.error(
+        "access-to-care api response: "
+            + objectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(objectMapper().readTree(body)));
+    // TODO response is list of AccessToCareFacility objects
   }
 
   @SneakyThrows
