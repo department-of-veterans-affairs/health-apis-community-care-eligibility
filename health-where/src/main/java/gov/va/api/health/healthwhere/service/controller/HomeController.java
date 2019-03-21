@@ -136,11 +136,12 @@ public class HomeController {
     String url =
         UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
             .queryParam("location", addressString)
-            .queryParam("radius", "50")
+            .queryParam("radius", "5")
             .queryParam("apptType", appointmentTypeCode)
             .queryParam("sortOrder", "Distance")
             .queryParam("format", "JSON")
             .toUriString();
+    log.error("Invoking access-to-care url {}", url);
     HttpHeaders headers = new HttpHeaders();
     // headers.add("apiKey", vaFacilitiesApiKey);
     // headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
