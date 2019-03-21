@@ -199,7 +199,7 @@ public class HomeController {
                         .get(0)
                         .resources()
                         .get(0)
-                        .travelDuration()));
+                        .travelDurationTraffic()));
 
     return facilities;
   }
