@@ -1,10 +1,12 @@
 package gov.va.api.health.healthwhere.service.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
+import gov.va.api.health.healthwhere.service.AccessToCareFacility;
 import gov.va.api.health.healthwhere.service.Address;
 import gov.va.api.health.healthwhere.service.BingResponse;
 import gov.va.api.health.healthwhere.service.CommunityCareResult;
@@ -151,7 +153,13 @@ public class HomeController {
             + objectMapper()
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(objectMapper().readTree(body)));
-    // TODO response is list of AccessToCareFacility objects
+    List<AccessToCareFacility> accessToCareFacilities =
+        objectMapper().readValue(body, new TypeReference<List<AccessToCareFacility>>() {});
+    log.error(
+        "access-to-care response objects: "
+            + objectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(accessToCareFacilities));
   }
 
   @SneakyThrows
