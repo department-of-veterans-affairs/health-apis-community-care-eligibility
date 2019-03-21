@@ -11,7 +11,6 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class CommunityCareResult {
-
   boolean communityCareEligible;
-  List<Facility> facilityList;
+  List<Facility> facilities;
 }

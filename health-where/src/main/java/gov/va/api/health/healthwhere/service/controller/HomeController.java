@@ -2,29 +2,25 @@ package gov.va.api.health.healthwhere.service.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.healthwhere.service.AccessToCareFacility;
+import gov.va.api.health.healthwhere.service.AccessToCareFacilityTransformer;
 import gov.va.api.health.healthwhere.service.Address;
 import gov.va.api.health.healthwhere.service.BingResponse;
 import gov.va.api.health.healthwhere.service.CommunityCareResult;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
-import gov.va.api.health.healthwhere.service.FacilityTransformer;
-import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
-import gov.va.api.health.healthwhere.service.VaFacilitiesResponse.VaFacility;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -47,20 +43,16 @@ public class HomeController {
 
   private String bingApiKey;
 
-  private String vaFacilitiesApiKey;
-
   private int maxDriveTime;
 
   private int maxWait;
 
   public HomeController(
       @Value("${bing.api-key}") String bingApiKey,
-      @Value("${va-facilities.api-key}") String vaFacilitiesApiKey,
       @Value("${community-care.max-drive-time}") int maxDriveTime,
       @Value("${community-care.max-wait}") int maxWait,
       @Autowired RestTemplate restTemplate) {
     this.bingApiKey = bingApiKey;
-    this.vaFacilitiesApiKey = vaFacilitiesApiKey;
     this.maxDriveTime = maxDriveTime;
     this.maxWait = maxWait;
     this.restTemplate = restTemplate;
@@ -85,81 +77,8 @@ public class HomeController {
     return map;
   }
 
-  /**
-   * To support deserialization, recursively visit all descendant nodes and, for any nodes with a
-   * bad key (e.g. "new"), add a good key (e.g. "neww") alongside.
-   */
-  private static void doHackForFieldRenaming(JsonNode node, String badName, String goodName) {
-    if (node instanceof ObjectNode) {
-      ObjectNode objNode = (ObjectNode) node;
-      JsonNode newNode = node.get(badName);
-      if (newNode != null) {
-        objNode.set(goodName, newNode);
-      }
-    }
-    for (JsonNode child : node) {
-      doHackForFieldRenaming(child, badName, goodName);
-    }
-  }
-
-  private static boolean hasServiceType(VaFacility vaFacility, String serviceType) {
-    return vaFacility != null
-        && vaFacility.attributes() != null
-        && vaFacility.attributes().wait_times() != null
-        && vaFacility
-            .attributes()
-            .wait_times()
-            .health()
-            .stream()
-            .anyMatch(
-                waitTime ->
-                    waitTime != null
-                        && waitTime.service() != null
-                        && StringUtils.equalsIgnoreCase(serviceType, waitTime.service()));
-  }
-
   private static ObjectMapper objectMapper() {
     return JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-  }
-
-  @SneakyThrows
-  private void accessToCareLookup(Address patientAddress, String serviceType) {
-    String addressString =
-        Stream.of(
-                patientAddress.street(),
-                patientAddress.city(),
-                patientAddress.state(),
-                patientAddress.zip())
-            .collect(Collectors.joining(", "));
-    Integer appointmentTypeCode = acessToCareAppointmentTypeCodeMapping().get(serviceType);
-    // TODO handle unknown appointment type code
-    String url =
-        UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
-            .queryParam("location", addressString)
-            .queryParam("radius", "50")
-            .queryParam("apptType", appointmentTypeCode)
-            .queryParam("sortOrder", "Distance")
-            .queryParam("format", "JSON")
-            .build()
-            .toUriString();
-    log.error("Invoking access-to-care url {}", url);
-    HttpHeaders headers = new HttpHeaders();
-    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-    ResponseEntity<String> entity =
-        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
-    String body = entity.getBody();
-    log.error(
-        "access-to-care api response: "
-            + objectMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(objectMapper().readTree(body)));
-    List<AccessToCareFacility> accessToCareFacilities =
-        objectMapper().readValue(body, new TypeReference<List<AccessToCareFacility>>() {});
-    log.error(
-        "access-to-care response objects: "
-            + objectMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(accessToCareFacilities));
   }
 
   @SneakyThrows
@@ -252,6 +171,48 @@ public class HomeController {
     return coordinates;
   }
 
+  @SneakyThrows
+  private List<AccessToCareFacility> retrieveAccessToCareFacilities(
+      Address patientAddress, String serviceType) {
+    String addressString =
+        Stream.of(
+                patientAddress.street(),
+                patientAddress.city(),
+                patientAddress.state(),
+                patientAddress.zip())
+            .collect(Collectors.joining(", "));
+    Integer appointmentTypeCode = acessToCareAppointmentTypeCodeMapping().get(serviceType);
+    // TODO handle unknown appointment type code
+    String url =
+        UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
+            .queryParam("location", addressString)
+            .queryParam("radius", "50")
+            .queryParam("apptType", appointmentTypeCode)
+            .queryParam("sortOrder", "Distance")
+            .queryParam("format", "JSON")
+            .build()
+            .toUriString();
+    log.error("Invoking access-to-care url {}", url);
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+    ResponseEntity<String> entity =
+        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+    String body = entity.getBody();
+    log.error(
+        "access-to-care api response: "
+            + objectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(objectMapper().readTree(body)));
+    List<AccessToCareFacility> accessToCareFacilities =
+        objectMapper().readValue(body, new TypeReference<List<AccessToCareFacility>>() {});
+    log.error(
+        "access-to-care response objects: "
+            + objectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(accessToCareFacilities));
+    return accessToCareFacilities;
+  }
+
   /** Search by address and service type. */
   @ResponseBody
   @SneakyThrows
@@ -264,30 +225,21 @@ public class HomeController {
       @RequestParam(value = "serviceType") String serviceType,
       @RequestParam(value = "establishedPatient") boolean establishedPatient) {
     Address patientAddress = new Address(street, city, state, zip);
+    List<AccessToCareFacility> accessToCareFacilities =
+        retrieveAccessToCareFacilities(patientAddress, serviceType);
+    List<Facility> facilities =
+        accessToCareFacilities
+            .stream()
+            .filter(Objects::nonNull)
+            .map(
+                accessToCareFacility ->
+                    AccessToCareFacilityTransformer.builder()
+                        .atcFacility(accessToCareFacility)
+                        .build()
+                        .toFacility())
+            .collect(Collectors.toList());
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
-    accessToCareLookup(patientAddress, serviceType);
-    VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
-    List<VaFacility> filteredByServiceType =
-        vaFacilitiesResponse
-            .data()
-            .stream()
-            .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
-            .collect(Collectors.toList());
-    log.error(
-        "va facilities filtered by service type {}: {}",
-        serviceType,
-        objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
-    List<Facility> facilities =
-        filteredByServiceType
-            .stream()
-            .map(
-                vaFacility ->
-                    FacilityTransformer.builder()
-                        .serviceType(serviceType)
-                        .build()
-                        .toFacility(vaFacility))
-            .collect(Collectors.toList());
     facilities
         .parallelStream()
         .forEach(
@@ -302,43 +254,6 @@ public class HomeController {
                         / 60));
     boolean communityCareEligible =
         checkIfEligibleForCommunityCare(patientAddress, establishedPatient, facilities);
-    CommunityCareResult communityCareResult =
-        new CommunityCareResult(communityCareEligible, facilities);
-    return communityCareResult;
-  }
-
-  @SneakyThrows
-  private VaFacilitiesResponse vaFacilitySearch(Coordinates coordinates, String serviceType) {
-    String url =
-        UriComponentsBuilder.fromHttpUrl(
-                "https://dev-api.va.gov/services/va_facilities/v0/facilities")
-            .queryParam("lat", coordinates.latitude())
-            .queryParam("long", coordinates.longitude())
-            .queryParam("type", "health")
-            .queryParam("page", 1)
-            .queryParam("per_page", 30)
-            .toUriString();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("apiKey", vaFacilitiesApiKey);
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-    ResponseEntity<String> entity =
-        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
-    String body = entity.getBody();
-    log.error(
-        "va facilities api response: "
-            + objectMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(objectMapper().readTree(body)));
-    JsonNode root = objectMapper().readTree(body);
-    doHackForFieldRenaming(root, "new", "neww");
-    doHackForFieldRenaming(root, "long", "longg");
-    VaFacilitiesResponse responseObject =
-        objectMapper()
-            .readValue(objectMapper().writeValueAsString(root), VaFacilitiesResponse.class);
-    log.error(
-        "va facilities response object: "
-            + objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(responseObject));
-    return responseObject;
+    return new CommunityCareResult(communityCareEligible, facilities);
   }
 }
