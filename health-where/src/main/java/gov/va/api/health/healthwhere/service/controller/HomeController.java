@@ -190,7 +190,7 @@ public class HomeController {
             .collect(Collectors.toList());
 
     facilities
-        .stream()
+        .parallelStream()
         .forEach(
             facility ->
                 facility.driveMinutes(
@@ -199,7 +199,7 @@ public class HomeController {
                         .get(0)
                         .resources()
                         .get(0)
-                        .travelDurationTraffic()));
+                        .travelDurationTraffic()/60));
 
     return facilities;
   }
