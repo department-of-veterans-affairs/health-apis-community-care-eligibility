@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.healthwhere.service.Address;
 import gov.va.api.health.healthwhere.service.BingResponse;
+import gov.va.api.health.healthwhere.service.CommunityCareResult;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.FacilityTransformer;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse.VaFacility;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,18 +37,27 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Controller
 public class HomeController {
+
   private final RestTemplate restTemplate;
 
   private String bingApiKey;
 
   private String vaFacilitiesApiKey;
 
+  private int maxDriveTime;
+
+  private int maxWait;
+
   public HomeController(
       @Value("${bing.api-key}") String bingApiKey,
       @Value("${va-facilities.api-key}") String vaFacilitiesApiKey,
+      @Value("${community-care.max-drive-time}") int maxDriveTime,
+      @Value("${community-care.max-wait}") int maxWait,
       @Autowired RestTemplate restTemplate) {
     this.bingApiKey = bingApiKey;
     this.vaFacilitiesApiKey = vaFacilitiesApiKey;
+    this.maxDriveTime = maxDriveTime;
+    this.maxWait = maxWait;
     this.restTemplate = restTemplate;
   }
 
@@ -145,6 +156,31 @@ public class HomeController {
     return responseObject;
   }
 
+  @SneakyThrows
+  private boolean checkIfEligibleForCommunityCare(
+      Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
+    String[] automaticallyEligibleStates = {"AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT"};
+    if (Arrays.stream(automaticallyEligibleStates).anyMatch(patientAddress.state()::equals)) {
+      // No VAMC locations in these states, automatically eligible
+      return true;
+    } else {
+
+      List<Facility> facilitiesMeetingRequirements =
+          facilities
+              .stream()
+              .filter(
+                  facility ->
+                      (facility.driveMinutes() < maxDriveTime
+                          && (establishedPatient
+                              ? (facility.waitDays().establishedPatient() < maxWait)
+                              : (facility.waitDays().newPatient() < maxWait))))
+              .collect(Collectors.toList());
+
+      return facilitiesMeetingRequirements.size()
+          == 0; // return false if NO facilities meet requirements
+    }
+  }
+
   private Coordinates getBingResourceCoordinates(BingResponse bingResponse) {
     Coordinates coordinates =
         new Coordinates(
@@ -157,12 +193,13 @@ public class HomeController {
   @ResponseBody
   @SneakyThrows
   @GetMapping(value = {"/search"})
-  public List<Facility> search(
+  public CommunityCareResult search(
       @RequestParam(value = "street") String street,
       @RequestParam(value = "city") String city,
       @RequestParam(value = "state") String state,
       @RequestParam(value = "zip") String zip,
-      @RequestParam(value = "serviceType") String serviceType) {
+      @RequestParam(value = "serviceType") String serviceType,
+      @RequestParam(value = "establishedPatient") boolean establishedPatient) {
     Address patientAddress = new Address(street, city, state, zip);
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
@@ -177,7 +214,6 @@ public class HomeController {
         "va facilities filtered by service type {}: {}",
         serviceType,
         objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
-
     List<Facility> facilities =
         filteredByServiceType
             .stream()
@@ -188,20 +224,23 @@ public class HomeController {
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
-
     facilities
         .parallelStream()
         .forEach(
             facility ->
                 facility.driveMinutes(
                     bingDrivetimeSearch(patientCoordinates, facility.coordinates())
-                        .resourceSets()
-                        .get(0)
-                        .resources()
-                        .get(0)
-                        .travelDurationTraffic()/60));
-
-    return facilities;
+                            .resourceSets()
+                            .get(0)
+                            .resources()
+                            .get(0)
+                            .travelDurationTraffic()
+                        / 60));
+    boolean communityCareEligible =
+        checkIfEligibleForCommunityCare(patientAddress, establishedPatient, facilities);
+    CommunityCareResult communityCareResult =
+        new CommunityCareResult(communityCareEligible, facilities);
+    return communityCareResult;
   }
 
   @SneakyThrows
