@@ -7,18 +7,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.healthwhere.service.Address;
 import gov.va.api.health.healthwhere.service.BingResponse;
+import gov.va.api.health.healthwhere.service.CommunityCareResult;
 import gov.va.api.health.healthwhere.service.Coordinates;
 import gov.va.api.health.healthwhere.service.Facility;
 import gov.va.api.health.healthwhere.service.FacilityTransformer;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse.VaFacility;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,19 +40,47 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Controller
 public class HomeController {
+
   private final RestTemplate restTemplate;
 
   private String bingApiKey;
 
   private String vaFacilitiesApiKey;
 
+  private int maxDriveTime;
+
+  private int maxWait;
+
   public HomeController(
       @Value("${bing.api-key}") String bingApiKey,
       @Value("${va-facilities.api-key}") String vaFacilitiesApiKey,
+      @Value("${community-care.max-drive-time}") int maxDriveTime,
+      @Value("${community-care.max-wait}") int maxWait,
       @Autowired RestTemplate restTemplate) {
     this.bingApiKey = bingApiKey;
     this.vaFacilitiesApiKey = vaFacilitiesApiKey;
+    this.maxDriveTime = maxDriveTime;
+    this.maxWait = maxWait;
     this.restTemplate = restTemplate;
+  }
+
+  private static Map<String, Integer> acessToCareAppointmentTypeCodeMapping() {
+    Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    map.put("AUDIOLOGY", 1);
+    map.put("CARDIOLOGY", 2);
+    map.put("WOMENSHEALTH", 3);
+    map.put("DERMATOLOGY", 4);
+    map.put("GASTROENTEROLOGY", 5);
+    map.put("MENTALHEALTH", 6);
+    map.put("MENTALHEALTHCARE", 6);
+    map.put("GYNECOLOGY", 7);
+    map.put("OPHTHALMOLOGY", 8);
+    map.put("OPTOMETRY", 9);
+    map.put("ORTHOPEDICS", 10);
+    map.put("PRIMARYCARE", 12);
+    map.put("UROLOGY", 14);
+    map.put("UROLOGYCLINIC", 14);
+    return map;
   }
 
   /**
@@ -89,6 +118,42 @@ public class HomeController {
 
   private static ObjectMapper objectMapper() {
     return JacksonConfig.createMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+  }
+
+  @SneakyThrows
+  private void accessToCareLookup(Address patientAddress, String serviceType) {
+    String addressString =
+        Stream.of(
+                patientAddress.street(),
+                patientAddress.city(),
+                patientAddress.state(),
+                patientAddress.zip())
+            .collect(Collectors.joining(", "));
+    log.error("Patient address for access-to-care is {}", addressString);
+    Integer appointmentTypeCode = acessToCareAppointmentTypeCodeMapping().get(serviceType);
+    log.error("acccess-to-care appointment code is " + appointmentTypeCode);
+    // TODO handle unknown appointment type code
+    String url =
+        UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
+            .queryParam("location", addressString)
+            .queryParam("radius", "50")
+            .queryParam("apptType", appointmentTypeCode)
+            .queryParam("sortOrder", "Distance")
+            .queryParam("format", "JSON")
+            .toUriString();
+    HttpHeaders headers = new HttpHeaders();
+    // headers.add("apiKey", vaFacilitiesApiKey);
+    // headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+    ResponseEntity<String> entity =
+        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+    String body = entity.getBody();
+    log.error("access-to-care api raw response: " + body);
+    // log.error(
+    // "access-to-care api response: "
+    // + objectMapper()
+    // .writerWithDefaultPrettyPrinter()
+    // .writeValueAsString(objectMapper().readTree(body)));
   }
 
   @SneakyThrows
@@ -149,6 +214,30 @@ public class HomeController {
     return responseObject;
   }
 
+  @SneakyThrows
+  private boolean checkIfEligibleForCommunityCare(
+      Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
+    String[] automaticallyEligibleStates = {"AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT"};
+    if (Arrays.stream(automaticallyEligibleStates).anyMatch(patientAddress.state()::equals)) {
+      // No VAMC locations in these states, automatically eligible
+      return true;
+    } else {
+      List<Facility> facilitiesMeetingRequirements =
+          facilities
+              .stream()
+              .filter(
+                  facility ->
+                      (facility.driveMinutes() < maxDriveTime
+                          && (establishedPatient
+                              ? (facility.waitDays().establishedPatient() < maxWait)
+                              : (facility.waitDays().newPatient() < maxWait))))
+              .collect(Collectors.toList());
+      return facilitiesMeetingRequirements.size()
+          == // return false if NO facilities meet requirements
+          0;
+    }
+  }
+
   private Coordinates getBingResourceCoordinates(BingResponse bingResponse) {
     Coordinates coordinates =
         new Coordinates(
@@ -161,12 +250,13 @@ public class HomeController {
   @ResponseBody
   @SneakyThrows
   @GetMapping(value = {"/search"})
-  public List<Facility> search(
+  public CommunityCareResult search(
       @RequestParam(value = "street") String street,
       @RequestParam(value = "city") String city,
       @RequestParam(value = "state") String state,
       @RequestParam(value = "zip") String zip,
-      @RequestParam(value = "serviceType") String serviceType) {
+      @RequestParam(value = "serviceType") String serviceType,
+      @RequestParam(value = "establishedPatient") boolean establishedPatient) {
     Address patientAddress = new Address(street, city, state, zip);
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
@@ -182,7 +272,6 @@ public class HomeController {
         "va facilities filtered by service type {}: {}",
         serviceType,
         objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
-
     List<Facility> facilities =
         filteredByServiceType
             .stream()
@@ -193,7 +282,6 @@ public class HomeController {
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
-
     facilities
         .parallelStream()
         .forEach(
@@ -206,64 +294,11 @@ public class HomeController {
                             .get(0)
                             .travelDurationTraffic()
                         / 60));
-
-    return facilities;
-  }
-
-  @SneakyThrows
-  private void accessToCareLookup(Address patientAddress, String serviceType) {
-    String addressString =
-        Stream.of(
-                patientAddress.street(),
-                patientAddress.city(),
-                patientAddress.state(),
-                patientAddress.zip())
-            .collect(Collectors.joining(", "));
-    log.error("Patient address for access-to-care is {}", addressString);
-
-    Integer appointmentTypeCode = acessToCareAppointmentTypeCodeMapping().get(serviceType);
-    log.error("acccess-to-care appointment code is " + appointmentTypeCode);
-    // TODO handle unknown appointment type code
-    String url =
-        UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
-            .queryParam("location", addressString)
-            .queryParam("radius", "50")
-            .queryParam("apptType", appointmentTypeCode)
-            .queryParam("sortOrder", "Distance")
-            .queryParam("format", "JSON")
-            .toUriString();
-    HttpHeaders headers = new HttpHeaders();
-    // headers.add("apiKey", vaFacilitiesApiKey);
-    // headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
-    ResponseEntity<String> entity =
-        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
-    String body = entity.getBody();
-    log.error("access-to-care api raw response: " + body);
-    //    log.error(
-    //        "access-to-care api response: "
-    //            + objectMapper()
-    //                .writerWithDefaultPrettyPrinter()
-    //                .writeValueAsString(objectMapper().readTree(body)));
-  }
-
-  private static Map<String, Integer> acessToCareAppointmentTypeCodeMapping() {
-    Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    map.put("AUDIOLOGY", 1);
-    map.put("CARDIOLOGY", 2);
-    map.put("WOMENSHEALTH", 3);
-    map.put("DERMATOLOGY", 4);
-    map.put("GASTROENTEROLOGY", 5);
-    map.put("MENTALHEALTH", 6);
-    map.put("MENTALHEALTHCARE", 6);
-    map.put("GYNECOLOGY", 7);
-    map.put("OPHTHALMOLOGY", 8);
-    map.put("OPTOMETRY", 9);
-    map.put("ORTHOPEDICS", 10);
-    map.put("PRIMARYCARE", 12);
-    map.put("UROLOGY", 14);
-    map.put("UROLOGYCLINIC", 14);
-    return map;
+    boolean communityCareEligible =
+        checkIfEligibleForCommunityCare(patientAddress, establishedPatient, facilities);
+    CommunityCareResult communityCareResult =
+        new CommunityCareResult(communityCareEligible, facilities);
+    return communityCareResult;
   }
 
   @SneakyThrows
