@@ -14,7 +14,11 @@ import gov.va.api.health.healthwhere.service.VaFacilitiesResponse;
 import gov.va.api.health.healthwhere.service.VaFacilitiesResponse.VaFacility;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -166,6 +170,7 @@ public class HomeController {
     Address patientAddress = new Address(street, city, state, zip);
     BingResponse bingResponse = bingLocationSearch(patientAddress);
     Coordinates patientCoordinates = getBingResourceCoordinates(bingResponse);
+    accessToCareLookup(patientAddress, serviceType);
     VaFacilitiesResponse vaFacilitiesResponse = vaFacilitySearch(patientCoordinates, serviceType);
     List<VaFacility> filteredByServiceType =
         vaFacilitiesResponse
@@ -195,13 +200,70 @@ public class HomeController {
             facility ->
                 facility.driveMinutes(
                     bingDrivetimeSearch(patientCoordinates, facility.coordinates())
-                        .resourceSets()
-                        .get(0)
-                        .resources()
-                        .get(0)
-                        .travelDurationTraffic()/60));
+                            .resourceSets()
+                            .get(0)
+                            .resources()
+                            .get(0)
+                            .travelDurationTraffic()
+                        / 60));
 
     return facilities;
+  }
+
+  @SneakyThrows
+  private void accessToCareLookup(Address patientAddress, String serviceType) {
+    String addressString =
+        Stream.of(
+                patientAddress.street(),
+                patientAddress.city(),
+                patientAddress.state(),
+                patientAddress.zip())
+            .collect(Collectors.joining(", "));
+    log.error("Patient address for access-to-care is {}", addressString);
+
+    Integer appointmentTypeCode = acessToCareAppointmentTypeCodeMapping().get(serviceType);
+    log.error("acccess-to-care appointment code is " + appointmentTypeCode);
+    // TODO handle unknown appointment type code
+    String url =
+        UriComponentsBuilder.fromHttpUrl("https://www.accesstocare.va.gov/PWT/getRawData")
+            .queryParam("location", addressString)
+            .queryParam("radius", "50")
+            .queryParam("apptType", appointmentTypeCode)
+            .queryParam("sortOrder", "Distance")
+            .queryParam("format", "JSON")
+            .toUriString();
+    HttpHeaders headers = new HttpHeaders();
+    // headers.add("apiKey", vaFacilitiesApiKey);
+    // headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+    ResponseEntity<String> entity =
+        restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+    String body = entity.getBody();
+    log.error("access-to-care api raw response: " + body);
+    //    log.error(
+    //        "access-to-care api response: "
+    //            + objectMapper()
+    //                .writerWithDefaultPrettyPrinter()
+    //                .writeValueAsString(objectMapper().readTree(body)));
+  }
+
+  private static Map<String, Integer> acessToCareAppointmentTypeCodeMapping() {
+    Map<String, Integer> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    map.put("AUDIOLOGY", 1);
+    map.put("CARDIOLOGY", 2);
+    map.put("WOMENSHEALTH", 3);
+    map.put("DERMATOLOGY", 4);
+    map.put("GASTROENTEROLOGY", 5);
+    map.put("MENTALHEALTH", 6);
+    map.put("MENTALHEALTHCARE", 6);
+    map.put("GYNECOLOGY", 7);
+    map.put("OPHTHALMOLOGY", 8);
+    map.put("OPTOMETRY", 9);
+    map.put("ORTHOPEDICS", 10);
+    map.put("PRIMARYCARE", 12);
+    map.put("UROLOGY", 14);
+    map.put("UROLOGYCLINIC", 14);
+    return map;
   }
 
   @SneakyThrows

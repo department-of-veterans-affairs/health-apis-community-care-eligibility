@@ -11,7 +11,6 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Address {
-
   @NotBlank String street;
   @NotBlank String city;
   @NotBlank String state;
