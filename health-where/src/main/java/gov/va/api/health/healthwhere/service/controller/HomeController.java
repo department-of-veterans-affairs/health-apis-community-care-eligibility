@@ -143,7 +143,8 @@ public class HomeController {
   private boolean checkIfEligibleForCommunityCare(
       Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
     String[] automaticallyEligibleStates = {"AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT"};
-    if (Arrays.stream(automaticallyEligibleStates).anyMatch(patientAddress.state()::equals)) {
+    if (Arrays.stream(automaticallyEligibleStates)
+        .anyMatch(patientAddress.state()::equalsIgnoreCase)) {
       // No VAMC locations in these states, automatically eligible
       return true;
     } else {
@@ -153,10 +154,12 @@ public class HomeController {
               .filter(
                   facility ->
                       (facility.driveMinutes() < maxDriveTime
+                          && facility.address().state().equals(patientAddress.state())
                           && (establishedPatient
                               ? (facility.waitDays().establishedPatient() < maxWait)
                               : (facility.waitDays().newPatient() < maxWait))))
               .collect(Collectors.toList());
+
       return facilitiesMeetingRequirements.size()
           == // return false if NO facilities meet requirements
           0;
