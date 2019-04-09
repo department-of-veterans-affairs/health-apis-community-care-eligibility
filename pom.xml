@@ -10,7 +10,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>community-care-eligibility-api</module>
+    <!--<module>community-care-eligibility-api</module>-->
     <module>community-care-eligibility</module>
   </modules>
 </project>

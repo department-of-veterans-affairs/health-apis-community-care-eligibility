@@ -14,7 +14,9 @@ Options
 
 Secrets Configuration
  This bash file is sourced and expected to set the following variables
+ - BING_MAPS_API_KEY
  - KEYSTORE_PASSWORD
+ - VA_FACILITIES_API_KEY
 
 $1
 EOF
@@ -46,7 +48,9 @@ echo "Loading secrets: $SECRETS"
 . $SECRETS
 
 MISSING_SECRETS=false
+[ -z "$BING_MAPS_API_KEY" ] && echo "Missing configuration: BING_MAPS_API_KEY" && MISSING_SECRETS=true
 [ -z "$KEYSTORE_PASSWORD" ] && echo "Missing configuration: KEYSTORE_PASSWORD" && MISSING_SECRETS=true
+[ -z "$VA_FACILITIES_API_KEY" ] && echo "Missing configuration: VA_FACILITIES_API_KEY" && MISSING_SECRETS=true
 [ $MISSING_SECRETS == true ] && usage "Missing configuration secrets, please update $SECRETS"
 
 makeConfig() {
@@ -109,6 +113,7 @@ sendMoarSpams() {
 }
 
 makeConfig community-care-eligibility $PROFILE
-#configValue community-care-eligibility $PROFILE argonaut.url https://localhost:8090
+configValue community-care-eligibility $PROFILE bing-maps.api-key "$VA_FACILITIES_API_KEY"
+configValue community-care-eligibility $PROFILE va-facilities.api-key "$BING_MAPS_API_KEY"
 
 checkForUnsetValues community-care-eligibility $PROFILE
