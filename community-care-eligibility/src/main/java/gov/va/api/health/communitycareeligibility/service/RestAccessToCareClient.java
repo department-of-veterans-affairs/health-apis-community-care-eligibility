@@ -1,11 +1,14 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import gov.va.api.health.autoconfig.configuration.JacksonConfig;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -14,11 +17,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import gov.va.api.health.autoconfig.configuration.JacksonConfig;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

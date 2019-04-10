@@ -38,7 +38,7 @@ public class HomeController {
   }
 
   @SneakyThrows
-  private boolean checkIfEligibleForCommunityCare(
+  private boolean computeEligibility(
       Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
     String[] automaticallyEligibleStates = {"AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT"};
     if (Arrays.stream(automaticallyEligibleStates)
@@ -95,7 +95,7 @@ public class HomeController {
         .forEach(
             facility -> facility.driveMinutes(bingMaps.driveTimeMinutes(patientAddress, facility)));
     boolean communityCareEligible =
-        checkIfEligibleForCommunityCare(patientAddress, establishedPatient, facilities);
+        computeEligibility(patientAddress, establishedPatient, facilities);
     return CommunityCareEligibilityResponse.builder()
         .communityCareEligible(communityCareEligible)
         .facilities(facilities)

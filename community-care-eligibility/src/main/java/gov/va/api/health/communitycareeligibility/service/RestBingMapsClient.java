@@ -1,8 +1,14 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import gov.va.api.health.autoconfig.configuration.JacksonConfig;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.service.BingResponse.Point;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -12,13 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import gov.va.api.health.autoconfig.configuration.JacksonConfig;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -65,11 +64,13 @@ public class RestBingMapsClient implements BingMapsClient {
             + JacksonConfig.createMapper()
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(responseObject));
+    if (responseObject == null) {
+      throw new IllegalStateException();
+    }
+    Point point = responseObject.resourceSets().get(0).resources().get(0).point();
     return Coordinates.builder()
-        .latitude(
-            responseObject.resourceSets().get(0).resources().get(0).point().coordinates().get(0))
-        .longitude(
-            responseObject.resourceSets().get(0).resources().get(0).point().coordinates().get(1))
+        .latitude(point.coordinates().get(0))
+        .longitude(point.coordinates().get(1))
         .build();
   }
 
@@ -92,6 +93,9 @@ public class RestBingMapsClient implements BingMapsClient {
             + JacksonConfig.createMapper()
                 .writerWithDefaultPrettyPrinter()
                 .writeValueAsString(responseObject));
+    if (responseObject == null) {
+      throw new IllegalStateException();
+    }
     return (int)
         TimeUnit.SECONDS.toMinutes(
             responseObject.resourceSets().get(0).resources().get(0).travelDurationTraffic());
