@@ -1,12 +1,14 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 
 @Validated
 @RestController
@@ -36,6 +34,7 @@ public class CommunityCareEligibilityV1ApiController {
   private int maxWait;
 
   /** Autowired constructor. */
+  @Builder
   public CommunityCareEligibilityV1ApiController(
       @Value("${community-care.max-drive-time}") int maxDriveTime,
       @Value("${community-care.max-wait}") int maxWait,
@@ -55,28 +54,30 @@ public class CommunityCareEligibilityV1ApiController {
         .anyMatch(patientAddress.state()::equalsIgnoreCase)) {
       // No VAMC locations in these states, automatically eligible
       return true;
-    } else {
-      List<Facility> facilitiesMeetingRequirements =
-          facilities
-              .stream()
-              .filter(
-                  facility ->
-                      (facility.driveMinutes() < maxDriveTime
-                          && facility.address().state().equals(patientAddress.state())
-                          && (establishedPatient
-                              ? (facility.waitDays().establishedPatient() < maxWait)
-                              : (facility.waitDays().newPatient() < maxWait))))
-              .collect(Collectors.toList());
-
-      return facilitiesMeetingRequirements.size()
-          == // return false if NO facilities meet requirements
-          0;
     }
+
+    List<Facility> facilitiesMeetingRequirements =
+        facilities
+            .stream()
+            .filter(
+                facility ->
+                    (facility.driveMinutes() < maxDriveTime
+                        && facility.address() != null
+                        && facility.address().state().equals(patientAddress.state())
+                        && (establishedPatient
+                            ? (facility.waitDays().establishedPatient() < maxWait)
+                            : (facility.waitDays().newPatient() < maxWait))))
+            .collect(Collectors.toList());
+
+    return facilitiesMeetingRequirements.size()
+        == // return false if NO facilities meet requirements
+        0;
   }
 
+  /** Search community care eligibility. */
   @SneakyThrows
   @GetMapping(value = "/search")
-  public CommunityCareEligibilityResponse queryResourceVersion(
+  public CommunityCareEligibilityResponse search(
       @NotBlank @RequestParam(value = "street") String street,
       @NotBlank @RequestParam(value = "city") String city,
       @NotBlank @RequestParam(value = "state") String state,
