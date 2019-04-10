@@ -1,22 +1,32 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-public class HomeController {
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+
+@Validated
+@RestController
+@RequestMapping(
+  value = {"/api"},
+  produces = "application/json"
+)
+public class CommunityCareEligibilityV1ApiController {
   private AccessToCareClient accessToCare;
 
   private BingMapsClient bingMaps;
@@ -26,7 +36,7 @@ public class HomeController {
   private int maxWait;
 
   /** Autowired constructor. */
-  public HomeController(
+  public CommunityCareEligibilityV1ApiController(
       @Value("${community-care.max-drive-time}") int maxDriveTime,
       @Value("${community-care.max-wait}") int maxWait,
       @Autowired AccessToCareClient accessToCare,
@@ -64,16 +74,14 @@ public class HomeController {
     }
   }
 
-  /** Search by address and service type. */
-  @ResponseBody
   @SneakyThrows
-  @GetMapping(value = {"/search"})
-  public CommunityCareEligibilityResponse search(
-      @RequestParam(value = "street") String street,
-      @RequestParam(value = "city") String city,
-      @RequestParam(value = "state") String state,
-      @RequestParam(value = "zip") String zip,
-      @RequestParam(value = "serviceType") String serviceType) {
+  @GetMapping(value = "/search")
+  public CommunityCareEligibilityResponse queryResourceVersion(
+      @NotBlank @RequestParam(value = "street") String street,
+      @NotBlank @RequestParam(value = "city") String city,
+      @NotBlank @RequestParam(value = "state") String state,
+      @NotBlank @RequestParam(value = "zip") String zip,
+      @NotBlank @RequestParam(value = "serviceType") String serviceType) {
     boolean establishedPatient = true;
     Address patientAddress =
         Address.builder().street(street).city(city).state(state).zip(zip).build();

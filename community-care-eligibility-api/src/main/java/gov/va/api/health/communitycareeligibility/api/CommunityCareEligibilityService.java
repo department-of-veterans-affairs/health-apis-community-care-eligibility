@@ -103,13 +103,19 @@ public interface CommunityCareEligibilityService {
     responseCode = "400",
     description = "Not found",
     content =
-        @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = ErrorResponse.class)
+        )
   )
   @ApiResponse(
     responseCode = "404",
     description = "Bad request",
     content =
-        @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = ErrorResponse.class)
+        )
   )
   CommunityCareEligibilityResponse communityCareEligibilitySearch(
       @Parameter(in = ParameterIn.QUERY, required = true, name = "serviceType") String serviceType,
