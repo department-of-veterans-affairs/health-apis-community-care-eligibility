@@ -2,7 +2,6 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.communitycareeligibility.api.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareResult;
