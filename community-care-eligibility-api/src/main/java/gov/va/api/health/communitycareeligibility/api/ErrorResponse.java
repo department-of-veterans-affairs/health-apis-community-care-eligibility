@@ -15,7 +15,9 @@ import lombok.NonNull;
 @JsonDeserialize(builder = ErrorResponse.ErrorResponseBuilder.class)
 public class ErrorResponse {
   long timestamp;
+
   String type;
+
   String message;
 
   /** Create a new error response based on the given exception. */
