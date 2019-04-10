@@ -3,10 +3,10 @@ package gov.va.api.health.communitycareeligibility.service;
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
-import gov.va.api.health.communitycareeligibility.api.Address;
-import gov.va.api.health.communitycareeligibility.api.Coordinates;
-import gov.va.api.health.communitycareeligibility.api.Facility;
-import gov.va.api.health.communitycareeligibility.api.WaitDays;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
 import lombok.Builder;
 import lombok.NonNull;
 
