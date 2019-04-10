@@ -2,8 +2,6 @@ package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +12,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@JsonAutoDetect(
+  fieldVisibility = JsonAutoDetect.Visibility.ANY,
+  isGetterVisibility = JsonAutoDetect.Visibility.NONE
+)
+// @Schema(
+//      description =
+//
+// "http://www.fhir.org/guides/argonaut/r2/StructureDefinition-argo-allergyintolerance.html",
+//      example = "SWAGGER_EXAMPLE_ALLERGY_INTOLERANCE"
+//    )
 public final class CommunityCareEligibilityResponse {
   boolean communityCareEligible;
 
@@ -26,13 +33,13 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
-    @NotBlank String street;
+    String street;
 
-    @NotBlank String city;
+    String city;
 
-    @NotBlank String state;
+    String state;
 
-    @NotBlank String zip;
+    String zip;
   }
 
   @Data
@@ -52,11 +59,11 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Facility {
-    @NotBlank String id;
+    String id;
 
-    @NotBlank String name;
+    String name;
 
-    @NotNull Address address;
+    Address address;
 
     Coordinates coordinates;
 

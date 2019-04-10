@@ -73,8 +73,8 @@ public class HomeController {
       @RequestParam(value = "city") String city,
       @RequestParam(value = "state") String state,
       @RequestParam(value = "zip") String zip,
-      @RequestParam(value = "serviceType") String serviceType,
-      @RequestParam(value = "establishedPatient") boolean establishedPatient) {
+      @RequestParam(value = "serviceType") String serviceType) {
+    boolean establishedPatient = true;
     Address patientAddress =
         Address.builder().street(street).city(city).state(state).zip(zip).build();
     List<AccessToCareFacility> accessToCareFacilities =
