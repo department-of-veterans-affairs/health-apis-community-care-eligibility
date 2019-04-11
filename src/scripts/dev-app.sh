@@ -13,11 +13,11 @@ Commands
  k, stop      Stop applications
 
 Options
- -c, --community-care    Include Community Care Eligibility
+ --community-care   Include Community Care Eligibility
 
 Examples
- # Start both
- $0 -ma s
+ $0 start --community-care
+ $0 stop --community-care
 
 $1
 EOF
@@ -62,17 +62,17 @@ statusOf() {
 }
 
 doStatus() {
-  statusOf community-care
+  statusOf community-care-eligibility
 }
 
 doStart() {
   export SPRING_PROFILES_ACTIVE
   echo "Using profile: $SPRING_PROFILES_ACTIVE"
-  [ $COMMUNITYCARE == true ] && startApp community-care
+  [ $COMMUNITYCARE == true ] && startApp community-care-eligibility
 }
 
 doStop() {
-  [ $COMMUNITYCARE == true ] && stopApp community-care
+  [ $COMMUNITYCARE == true ] && stopApp community-care-eligibility
 }
 
 
@@ -88,7 +88,7 @@ eval set -- "$ARGS"
 while true
 do
   case "$1" in
-    -d|--community-care) COMMUNITYCARE=true;;
+    --community-care) COMMUNITYCARE=true;;
     --debug) set -x;;
     -h|--help) usage "halp! what this do?";;
     --) shift;break;;

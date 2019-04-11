@@ -1,12 +1,10 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Point;
 import java.util.Collections;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +39,6 @@ public class RestBingMapsClient implements BingMapsClient {
     return headers;
   }
 
-  @SneakyThrows
   private Coordinates coordinates(Address address) {
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/v1/Locations")
@@ -58,11 +55,7 @@ public class RestBingMapsClient implements BingMapsClient {
         restTemplate
             .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
             .getBody();
-    log.error(
-        "response object: "
-            + JacksonConfig.createMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(responseObject));
+    log.info("Bing Maps locations: " + responseObject);
     if (responseObject == null) {
       throw new IllegalStateException();
     }
@@ -74,7 +67,6 @@ public class RestBingMapsClient implements BingMapsClient {
   }
 
   @Override
-  @SneakyThrows
   public BingResponse routes(Address patientAddress, Facility facility) {
     Coordinates patientCoordinates = coordinates(patientAddress);
     String url =
@@ -87,11 +79,7 @@ public class RestBingMapsClient implements BingMapsClient {
         restTemplate
             .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
             .getBody();
-    log.error(
-        "response object: "
-            + JacksonConfig.createMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(responseObject));
+    log.info("Bing Maps routes: " + responseObject);
     if (responseObject == null) {
       throw new IllegalStateException();
     }

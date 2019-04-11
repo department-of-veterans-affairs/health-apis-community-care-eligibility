@@ -1,13 +1,11 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.autoconfig.configuration.JacksonConfig;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -47,7 +45,6 @@ public class RestAccessToCareClient implements AccessToCareClient {
   }
 
   @Override
-  @SneakyThrows
   public List<AccessToCareFacility> facilities(Address patientAddress, String serviceType) {
     String addressString =
         Stream.of(
@@ -75,11 +72,7 @@ public class RestAccessToCareClient implements AccessToCareClient {
                 new HttpEntity<>(new HttpHeaders()),
                 new ParameterizedTypeReference<List<AccessToCareFacility>>() {})
             .getBody();
-    log.error(
-        "access-to-care response objects: "
-            + JacksonConfig.createMapper()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(accessToCareFacilities));
+    log.info("Access-to-care facilities: " + accessToCareFacilities);
     return accessToCareFacilities;
   }
 }
