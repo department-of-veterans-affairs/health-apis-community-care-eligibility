@@ -18,11 +18,11 @@ public final class AccessToCareFacility {
   private String facilityId;
 
   @JsonProperty("VISN")
-  private int visn;
+  private Integer visn;
 
   private String name;
 
-  private int type;
+  private Integer type;
 
   private String address;
 
@@ -38,42 +38,42 @@ public final class AccessToCareFacility {
 
   private String url;
 
-  private double latitude;
+  private Double latitude;
 
-  private double longitude;
+  private Double longitude;
 
   @JsonProperty("ApptTypeName")
   private String apptTypeName;
 
-  private double estWaitTime;
+  private Double estWaitTime;
 
-  private double newWaitTime;
+  private Double newWaitTime;
 
   private String sliceEndDate;
 
   @JsonProperty("ED")
-  private boolean ed;
+  private Boolean ed;
 
   @JsonProperty("UC")
-  private boolean uc;
+  private Boolean uc;
 
   @JsonProperty("SameDayPC")
-  private boolean sameDayPc;
+  private Boolean sameDayPc;
 
   @JsonProperty("SameDayMH")
-  private boolean sameDayMh;
+  private Boolean sameDayMh;
 
   @JsonProperty("WalkInPC")
-  private boolean walkInPc;
+  private Boolean walkInPc;
 
   @JsonProperty("WalkInMH")
-  private boolean walkInMh;
+  private Boolean walkInMh;
 
   @JsonProperty("TelehealthPC")
-  private boolean telehealthPc;
+  private Boolean telehealthPc;
 
   @JsonProperty("TelehealthMH")
-  private boolean telehealthMh;
+  private Boolean telehealthMh;
 
-  private int distance;
+  private Integer distance;
 }

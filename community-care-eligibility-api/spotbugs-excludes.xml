@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
-  <!-- Exclusions can be defined here and should include a comment on why the finding can be ignored -->
-  <!-- Example:
   <Match>
-    <Class name="gov.va.dvp.SomeClass$SomeInnerClass" />
-    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
+    <Method name="equals"/>
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
   </Match>
-  -->
+  <Match>
+    <Method name="hashCode"/>
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
+  </Match>
 </FindBugsFilter>

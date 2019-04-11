@@ -4,5 +4,5 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 
 public interface BingMapsClient {
-  int driveTimeMinutes(Address patientAddress, Facility facility);
+  BingResponse routes(Address patientAddress, Facility facility);
 }

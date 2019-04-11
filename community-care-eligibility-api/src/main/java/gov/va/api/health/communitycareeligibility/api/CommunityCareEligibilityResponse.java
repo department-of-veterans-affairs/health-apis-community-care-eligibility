@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -23,9 +24,17 @@ import lombok.NoArgsConstructor;
 //      example = "SWAGGER_EXAMPLE_ALLERGY_INTOLERANCE"
 //    )
 public final class CommunityCareEligibilityResponse {
-  boolean communityCareEligible;
+  Boolean communityCareEligible;
 
   List<Facility> facilities;
+
+  /** Lazy getter. */
+  public List<Facility> facilities() {
+    if (facilities == null) {
+      facilities = new ArrayList<>();
+    }
+    return facilities;
+  }
 
   @Data
   @Builder
@@ -48,9 +57,9 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Coordinates {
-    double latitude;
+    Double latitude;
 
-    double longitude;
+    Double longitude;
   }
 
   @Data
@@ -71,7 +80,7 @@ public final class CommunityCareEligibilityResponse {
 
     WaitDays waitDays;
 
-    int driveMinutes;
+    Integer driveMinutes;
   }
 
   @Data
@@ -80,8 +89,8 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class WaitDays {
-    int newPatient;
+    Integer newPatient;
 
-    int establishedPatient;
+    Integer establishedPatient;
   }
 }

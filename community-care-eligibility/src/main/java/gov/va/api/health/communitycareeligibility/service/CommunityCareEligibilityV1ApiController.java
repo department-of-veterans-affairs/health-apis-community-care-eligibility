@@ -3,9 +3,12 @@ package gov.va.api.health.communitycareeligibility.service;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
+import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -61,7 +64,8 @@ public class CommunityCareEligibilityV1ApiController {
             .stream()
             .filter(
                 facility ->
-                    (facility.driveMinutes() < maxDriveTime
+                    (facility.driveMinutes() != null
+                        && facility.driveMinutes() < maxDriveTime
                         && facility.address() != null
                         && facility.address().state().equals(patientAddress.state())
                         && (establishedPatient
@@ -85,7 +89,12 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
     boolean establishedPatient = true;
     Address patientAddress =
-        Address.builder().street(street).city(city).state(state).zip(zip).build();
+        Address.builder()
+            .street(street.trim())
+            .city(city.trim())
+            .state(state.trim())
+            .zip(zip.trim())
+            .build();
     List<AccessToCareFacility> accessToCareFacilities =
         accessToCare.facilities(patientAddress, serviceType);
     List<Facility> facilities =
@@ -98,16 +107,30 @@ public class CommunityCareEligibilityV1ApiController {
                         .atcFacility(accessToCareFacility)
                         .build()
                         .toFacility())
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    facilities
-        .parallelStream()
-        .forEach(
-            facility -> facility.driveMinutes(bingMaps.driveTimeMinutes(patientAddress, facility)));
+    facilities.parallelStream().forEach(facility -> setDriveMinutes(patientAddress, facility));
     boolean communityCareEligible =
         computeEligibility(patientAddress, establishedPatient, facilities);
     return CommunityCareEligibilityResponse.builder()
         .communityCareEligible(communityCareEligible)
         .facilities(facilities)
         .build();
+  }
+
+  private void setDriveMinutes(Address patientAddress, Facility facility) {
+    BingResponse routes = bingMaps.routes(patientAddress, facility);
+    if (routes.resourceSets().isEmpty()) {
+      return;
+    }
+    Resources resources = routes.resourceSets().get(0);
+    if (resources.resources().isEmpty()) {
+      return;
+    }
+    Resource resource = resources.resources().get(0);
+    if (resource.travelDurationTraffic() == null) {
+      return;
+    }
+    facility.driveMinutes((int) TimeUnit.SECONDS.toMinutes(resource.travelDurationTraffic()));
   }
 }

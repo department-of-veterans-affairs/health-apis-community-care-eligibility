@@ -2,11 +2,13 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.upperCase;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
+import java.util.Locale;
 import lombok.Builder;
 import lombok.NonNull;
 
@@ -22,27 +24,48 @@ final class AccessToCareFacilityTransformer {
     return Address.builder()
         .street(trimToNull(atcFacility.address()))
         .city(trimToNull(atcFacility.city()))
-        .state(trimToNull(atcFacility.state()))
+        .state(trimToNull(upperCase(atcFacility.state(), Locale.US)))
         .zip(trimToNull(atcFacility.zip()))
         .build();
   }
 
+  private Coordinates coordinates() {
+    if (allBlank(atcFacility.latitude(), atcFacility.longitude())) {
+      return null;
+    }
+    return Coordinates.builder()
+        .latitude(atcFacility.latitude())
+        .longitude(atcFacility.longitude())
+        .build();
+  }
+
   Facility toFacility() {
+    String id = trimToNull(atcFacility.facilityId());
+    String name = trimToNull(atcFacility.name());
+    Address address = address();
+    Coordinates coordinates = coordinates();
+    String phoneNumber = trimToNull(atcFacility.phone());
+    WaitDays waitDays = waitDays();
+    if (allBlank(id, name, address, coordinates, phoneNumber, waitDays)) {
+      return null;
+    }
     return Facility.builder()
-        .id(trimToNull(atcFacility.facilityId()))
-        .name(trimToNull(atcFacility.name()))
-        .address(address())
-        .coordinates(
-            Coordinates.builder()
-                .latitude(atcFacility.latitude())
-                .longitude(atcFacility.longitude())
-                .build())
-        .phoneNumber(trimToNull(atcFacility.phone()))
-        .waitDays(
-            WaitDays.builder()
-                .establishedPatient((int) atcFacility.estWaitTime())
-                .newPatient((int) atcFacility.newWaitTime())
-                .build())
+        .id(id)
+        .name(name)
+        .address(address)
+        .coordinates(coordinates)
+        .phoneNumber(phoneNumber)
+        .waitDays(waitDays)
+        .build();
+  }
+
+  private WaitDays waitDays() {
+    if (allBlank(atcFacility.estWaitTime(), atcFacility.newWaitTime())) {
+      return null;
+    }
+    return WaitDays.builder()
+        .establishedPatient(atcFacility.estWaitTime().intValue())
+        .newPatient(atcFacility.newWaitTime().intValue())
         .build();
   }
 }

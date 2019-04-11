@@ -6,7 +6,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Point;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +75,7 @@ public class RestBingMapsClient implements BingMapsClient {
 
   @Override
   @SneakyThrows
-  public int driveTimeMinutes(Address patientAddress, Facility facility) {
+  public BingResponse routes(Address patientAddress, Facility facility) {
     Coordinates patientCoordinates = coordinates(patientAddress);
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/V1/Routes")
@@ -96,8 +95,6 @@ public class RestBingMapsClient implements BingMapsClient {
     if (responseObject == null) {
       throw new IllegalStateException();
     }
-    return (int)
-        TimeUnit.SECONDS.toMinutes(
-            responseObject.resourceSets().get(0).resources().get(0).travelDurationTraffic());
+    return responseObject;
   }
 }
