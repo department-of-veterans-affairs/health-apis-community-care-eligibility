@@ -131,19 +131,17 @@ public interface CommunityCareEligibilityService {
     }
   }
 
-  // PETERTODO
-  class SearchFailed extends CommunityCareEligibilityServiceException {
-    @SuppressWarnings("WeakerAccess")
-    public SearchFailed(String id, String reason) {
-      super(id + " Reason: " + reason);
-    }
-  }
+  //  class SearchFailed extends CommunityCareEligibilityServiceException {
+  //    @SuppressWarnings("WeakerAccess")
+  //    public SearchFailed(String id, String reason) {
+  //      super(id + " Reason: " + reason);
+  //    }
+  //  }
 
-  // PETERTODO
-  class UnknownResource extends CommunityCareEligibilityServiceException {
-    @SuppressWarnings("WeakerAccess")
-    public UnknownResource(String id) {
-      super(id);
-    }
-  }
+  //  class UnknownResource extends CommunityCareEligibilityServiceException {
+  //    @SuppressWarnings("WeakerAccess")
+  //    public UnknownResource(String id) {
+  //      super(id);
+  //    }
+  //  }
 }

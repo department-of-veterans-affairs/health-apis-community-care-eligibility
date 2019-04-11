@@ -23,20 +23,9 @@
       <artifactId>community-care-eligibility-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <!-- <dependency>
-      <groupId>gov.va.dvp</groupId>
-      <artifactId>cdw-schemas</artifactId>
-    </dependency> -->
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
     </dependency>
-    <!-- <dependency>
-      <groupId>gov.va.api.health</groupId>
-      <artifactId>data-query-api</artifactId>
-      <version>${project.version}</version>
-      <classifier>tests</classifier>
-      <scope>test</scope>
-    </dependency> -->
   </dependencies>
 </project>

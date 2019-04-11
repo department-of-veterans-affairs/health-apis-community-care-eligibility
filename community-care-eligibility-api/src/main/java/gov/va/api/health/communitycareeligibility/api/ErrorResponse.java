@@ -13,7 +13,7 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonDeserialize(builder = ErrorResponse.ErrorResponseBuilder.class)
-public class ErrorResponse {
+public final class ErrorResponse {
   long timestamp;
 
   String type;
