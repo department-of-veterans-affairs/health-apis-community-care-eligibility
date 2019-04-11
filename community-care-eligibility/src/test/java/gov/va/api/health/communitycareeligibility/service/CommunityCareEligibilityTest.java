@@ -18,33 +18,18 @@ import java.util.concurrent.TimeUnit;
 import lombok.SneakyThrows;
 import org.junit.Test;
 
-public class CommunityCareEligibilityTest {
-
+public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void empty() {
     AccessToCareClient accessToCare = mock(AccessToCareClient.class);
-    when(accessToCare.facilities(
-            eq(
-                Address.builder()
-                    .street("66 Main St")
-                    .city("Melbourne")
-                    .state("fl")
-                    .zip("12345")
-                    .build()),
-            eq("primarycare")))
+    when(accessToCare.facilities(any(Address.class), any(String.class)))
         .thenReturn(singletonList(AccessToCareFacility.builder().build()));
+
     BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.routes(
-            eq(
-                Address.builder()
-                    .street("66 Main St")
-                    .city("Melbourne")
-                    .state("fl")
-                    .zip("12345")
-                    .build()),
-            any(Facility.class)))
+    when(bingMaps.routes(any(Address.class), any(Facility.class)))
         .thenReturn(BingResponse.builder().build());
+
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
             .accessToCare(accessToCare)
@@ -52,6 +37,7 @@ public class CommunityCareEligibilityTest {
             .maxDriveTime(1)
             .maxWait(1)
             .build();
+
     CommunityCareEligibilityResponse result =
         controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
     assertThat(result)
@@ -86,6 +72,7 @@ public class CommunityCareEligibilityTest {
                     .estWaitTime(10.0)
                     .newWaitTime(1.0)
                     .build()));
+
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.routes(
             eq(
@@ -109,6 +96,7 @@ public class CommunityCareEligibilityTest {
                                         .build()))
                             .build()))
                 .build());
+
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
             .accessToCare(accessToCare)
@@ -116,6 +104,7 @@ public class CommunityCareEligibilityTest {
             .maxDriveTime(1)
             .maxWait(1)
             .build();
+
     CommunityCareEligibilityResponse result =
         controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
     assertThat(result)
