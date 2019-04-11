@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -52,30 +54,30 @@ public class CommunityCareEligibilityV1ApiController {
   @SneakyThrows
   private boolean computeEligibility(
       Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
-    String[] automaticallyEligibleStates = {"AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT"};
-    if (Arrays.stream(automaticallyEligibleStates)
+    if (Arrays.asList("AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT")
+        .stream()
         .anyMatch(patientAddress.state()::equalsIgnoreCase)) {
       // No VAMC locations in these states, automatically eligible
       return true;
     }
 
-    List<Facility> facilitiesMeetingRequirements =
+    // Filter facilities in same state, within a certain drive time and wait time
+    List<Facility> filtered =
         facilities
             .stream()
             .filter(
                 facility ->
-                    (facility.driveMinutes() != null
+                    (StringUtils.equalsIgnoreCase(
+                            facility.address().state(), patientAddress.state())
+                        && facility.driveMinutes() != null
                         && facility.driveMinutes() < maxDriveTime
-                        && facility.address() != null
-                        && facility.address().state().equals(patientAddress.state())
                         && (establishedPatient
                             ? (facility.waitDays().establishedPatient() < maxWait)
                             : (facility.waitDays().newPatient() < maxWait))))
             .collect(Collectors.toList());
 
-    return facilitiesMeetingRequirements.size()
-        == // return false if NO facilities meet requirements
-        0;
+    // return false if NO facilities meet requirements
+    return filtered.isEmpty();
   }
 
   /** Search community care eligibility. */
@@ -128,9 +130,9 @@ public class CommunityCareEligibilityV1ApiController {
       return;
     }
     Resource resource = resources.resources().get(0);
-    if (resource.travelDurationTraffic() == null) {
+    if (resource.travelDuration() == null) {
       return;
     }
-    facility.driveMinutes((int) TimeUnit.SECONDS.toMinutes(resource.travelDurationTraffic()));
+    facility.driveMinutes((int) TimeUnit.SECONDS.toMinutes(resource.travelDuration()));
   }
 }

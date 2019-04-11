@@ -128,7 +128,7 @@ public final class CommunityCareEligibilityTest {
                             .phoneNumber("867-5309")
                             .waitDays(
                                 WaitDays.builder().newPatient(1).establishedPatient(10).build())
-                            .driveMinutes(45)
+                            .driveMinutes(30)
                             .build()))
                 .build());
   }
