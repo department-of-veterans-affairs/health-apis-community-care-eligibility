@@ -5,17 +5,16 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
+import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.EligibilityAndEnrollmentClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
-import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.EnrollmentEligibilityClient;
-import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.Query;
-import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import lombok.Builder;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static gov.va.api.health.communitycareeligibility.service.Transformers.hasPayload;
-
+@Slf4j
 @Validated
 @RestController
 @RequestMapping(
@@ -38,7 +36,8 @@ public class CommunityCareEligibilityV1ApiController {
 
   private BingMapsClient bingMaps;
 
-  private EnrollmentEligibilityClient enrollmentEligibility;
+  //  private EnrollmentEligibilityClient enrollmentEligibility;
+  private EligibilityAndEnrollmentClient eeClient;
 
   private int maxDriveTime;
 
@@ -51,13 +50,14 @@ public class CommunityCareEligibilityV1ApiController {
       @Value("${community-care.max-wait}") int maxWait,
       @Autowired AccessToCareClient accessToCare,
       @Autowired BingMapsClient bingMaps,
-      @Autowired EnrollmentEligibilityClient enrollmentEligibility) {
-
+      // @Autowired EnrollmentEligibilityClient enrollmentEligibility
+      @Autowired EligibilityAndEnrollmentClient eeClient) {
     this.maxDriveTime = maxDriveTime;
     this.maxWait = maxWait;
     this.accessToCare = accessToCare;
     this.bingMaps = bingMaps;
-    this.enrollmentEligibility = enrollmentEligibility;
+    this.eeClient = eeClient;
+    // this.enrollmentEligibility = enrollmentEligibility;
   }
 
   @SneakyThrows
@@ -99,8 +99,10 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
     boolean establishedPatient = true;
-    Query<GetEESummaryResponse> query = Query.forType(GetEESummaryResponse.class).id("1008679665V880686").build();
-    GetEESummaryResponse eeSummaryResponse = hasPayload(enrollmentEligibility.search(query));
+    //    Query<GetEESummaryResponse> query =
+    //        Query.forType(GetEESummaryResponse.class).id("1008679665V880686").build();
+    //    GetEESummaryResponse eeSummaryResponse = hasPayload(enrollmentEligibility.search(query));
+    log.error("E&E raw response: " + eeClient.requestEligibility("1008679665V880686"));
     Address patientAddress =
         Address.builder()
             .street(street.trim())

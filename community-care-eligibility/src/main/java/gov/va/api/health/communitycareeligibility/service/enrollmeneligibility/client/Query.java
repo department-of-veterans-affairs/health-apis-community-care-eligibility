@@ -15,7 +15,6 @@ import lombok.Value;
 @Value
 @Builder(toBuilder = true)
 public class Query<T> {
-
   String id;
 
   Class<T> type;
@@ -29,7 +28,7 @@ public class Query<T> {
    * Returns a Enrollment Eligibility formatted query string. Enrollment Eligibility only gets a
    * single query parameter, an id. example: ?id=1010101010V666666
    */
-  String toQueryString() {
+  public String toQueryString() {
     StringBuilder queryString = new StringBuilder();
     queryString.append("?id=").append(id);
     return queryString.toString();

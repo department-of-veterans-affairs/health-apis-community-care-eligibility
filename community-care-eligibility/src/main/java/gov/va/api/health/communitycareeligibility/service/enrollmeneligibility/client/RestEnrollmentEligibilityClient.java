@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client;
 
+import gov.va.api.health.communitycareeligibility.service.EnrollmentEligibilityClient;
 import gov.va.api.health.communitycareeligibility.service.config.WithJaxb;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;

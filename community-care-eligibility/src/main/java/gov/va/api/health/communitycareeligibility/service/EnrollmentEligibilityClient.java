@@ -1,4 +1,6 @@
-package gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client;
+package gov.va.api.health.communitycareeligibility.service;
+
+import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.Query;
 
 public interface EnrollmentEligibilityClient {
   /** Returns a deserialized result of the EnrollmentEligibility EE search. */

@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service.config;
 
 import gov.va.api.health.autoconfig.configuration.SecureRestTemplateConfig;
-import java.util.Collections;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -26,7 +25,7 @@ public class JaxbRestTemplateConfig {
   @WithJaxb
   public RestTemplate jaxbRestTemplate(@Autowired RestTemplateBuilder restTemplateBuilder) {
     RestTemplate restTemplate = secureConfig.restTemplate(restTemplateBuilder);
-    restTemplate.getMessageConverters().add(0,new Jaxb2RootElementHttpMessageConverter());
+    restTemplate.getMessageConverters().add(0, new Jaxb2RootElementHttpMessageConverter());
     return restTemplate;
   }
 }
