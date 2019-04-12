@@ -1,0 +1,3 @@
+spring\.datasource\.url=(secret|unset|\${?[a-zA-Z_]+}?)
+spring\.datasource\.username=(secret|unset|\${?[a-zA-Z_]+}?)
+[a-z.-]+(\.|-)password=(secret|unset|\${?[a-zA-Z_]+}?)
