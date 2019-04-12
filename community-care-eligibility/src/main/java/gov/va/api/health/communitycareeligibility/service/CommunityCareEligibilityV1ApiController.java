@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 
 import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.EnrollmentEligibilityClient;
+import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.Query;
+import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static gov.va.api.health.communitycareeligibility.service.Transformers.hasPayload;
 
 @Validated
 @RestController
@@ -95,6 +99,8 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
     boolean establishedPatient = true;
+    Query<GetEESummaryResponse> query = Query.forType(GetEESummaryResponse.class).id("1008679665V880686").build();
+    GetEESummaryResponse eeSummaryResponse = hasPayload(enrollmentEligibility.search(query));
     Address patientAddress =
         Address.builder()
             .street(street.trim())
