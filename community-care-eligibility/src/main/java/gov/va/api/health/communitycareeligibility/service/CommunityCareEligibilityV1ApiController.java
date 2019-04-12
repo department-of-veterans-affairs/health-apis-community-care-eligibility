@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
+
+import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.EnrollmentEligibilityClient;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,8 @@ public class CommunityCareEligibilityV1ApiController {
 
   private BingMapsClient bingMaps;
 
+  private EnrollmentEligibilityClient enrollmentEligibility;
+
   private int maxDriveTime;
 
   private int maxWait;
@@ -43,11 +47,13 @@ public class CommunityCareEligibilityV1ApiController {
       @Value("${community-care.max-drive-time}") int maxDriveTime,
       @Value("${community-care.max-wait}") int maxWait,
       @Autowired AccessToCareClient accessToCare,
-      @Autowired BingMapsClient bingMaps) {
+      @Autowired BingMapsClient bingMaps,
+      @Autowired EnrollmentEligibilityClient enrollmentEligibility) {
     this.maxDriveTime = maxDriveTime;
     this.maxWait = maxWait;
     this.accessToCare = accessToCare;
     this.bingMaps = bingMaps;
+    this.enrollmentEligibility = enrollmentEligibility;
   }
 
   @SneakyThrows

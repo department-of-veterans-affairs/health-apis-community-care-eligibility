@@ -26,8 +26,7 @@ public class JaxbRestTemplateConfig {
   @WithJaxb
   public RestTemplate jaxbRestTemplate(@Autowired RestTemplateBuilder restTemplateBuilder) {
     RestTemplate restTemplate = secureConfig.restTemplate(restTemplateBuilder);
-    restTemplate.setMessageConverters(
-        Collections.singletonList(new Jaxb2RootElementHttpMessageConverter()));
+    restTemplate.getMessageConverters().add(0,new Jaxb2RootElementHttpMessageConverter());
     return restTemplate;
   }
 }
