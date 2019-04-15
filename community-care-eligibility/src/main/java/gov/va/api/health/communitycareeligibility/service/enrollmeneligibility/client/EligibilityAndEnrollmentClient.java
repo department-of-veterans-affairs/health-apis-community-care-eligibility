@@ -1,5 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client;
 
+import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
+
 public interface EligibilityAndEnrollmentClient {
-  String requestEligibility(String id);
+  GetEESummaryResponse requestEligibility(String id);
 }

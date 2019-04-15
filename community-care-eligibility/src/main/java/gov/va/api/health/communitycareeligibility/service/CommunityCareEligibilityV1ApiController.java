@@ -102,7 +102,7 @@ public class CommunityCareEligibilityV1ApiController {
     //    Query<GetEESummaryResponse> query =
     //        Query.forType(GetEESummaryResponse.class).id("1008679665V880686").build();
     //    GetEESummaryResponse eeSummaryResponse = hasPayload(enrollmentEligibility.search(query));
-    log.error("E&E raw response: " + eeClient.requestEligibility("1008679665V880686"));
+    log.error("E&E deserialized response: " + eeClient.requestEligibility("1008679665V880686"));
     Address patientAddress =
         Address.builder()
             .street(street.trim())
