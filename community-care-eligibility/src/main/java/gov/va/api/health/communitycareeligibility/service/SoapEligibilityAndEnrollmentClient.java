@@ -10,6 +10,9 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +40,18 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     this.eeRequestName = eeRequestName;
   }
 
+  /** Unmarshal the XML string into the given class. */
+  @SneakyThrows
+  @SuppressWarnings("cast")
+  private static <T> T unmarshal(String xml, Class<T> resultClass) {
+    try (Reader reader = new StringReader(xml)) {
+      Unmarshaller jaxbUnmarshaller = JAXBContext.newInstance(resultClass).createUnmarshaller();
+      JAXBElement<T> jaxbElement =
+          (JAXBElement<T>) jaxbUnmarshaller.unmarshal(new StreamSource(reader), resultClass);
+      return jaxbElement.getValue();
+    }
+  }
+
   @Override
   public GetEESummaryResponse requestEligibility(String id) {
     return unmarshal(
@@ -48,14 +63,5 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
                 .eeRequestName(eeRequestName)
                 .build()),
         GetEESummaryResponse.class);
-  }
-
-  /** Unmarshal the XML string into the given class. */
-  @SneakyThrows
-  @SuppressWarnings("unchecked")
-  public static <T> T unmarshal(String xml, Class<T> resultClass) {
-    try (Reader reader = new StringReader(xml)) {
-      return (T) JAXBContext.newInstance(resultClass).createUnmarshaller().unmarshal(reader);
-    }
   }
 }
