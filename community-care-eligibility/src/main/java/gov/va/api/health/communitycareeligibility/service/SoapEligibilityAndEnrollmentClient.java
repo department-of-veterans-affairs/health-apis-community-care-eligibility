@@ -3,16 +3,13 @@ package gov.va.api.health.communitycareeligibility.service;
 import gov.va.api.health.queenelizabeth.ee.Eligibilities;
 import gov.va.api.health.queenelizabeth.ee.SoapMessageGenerator;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
-import lombok.SneakyThrows;
-
 import java.io.Reader;
 import java.io.StringReader;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
