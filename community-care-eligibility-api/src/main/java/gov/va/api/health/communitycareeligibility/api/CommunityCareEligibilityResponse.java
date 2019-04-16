@@ -1,13 +1,18 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.Pattern;
 
 @Data
 @Builder
@@ -26,7 +31,17 @@ import lombok.NoArgsConstructor;
 public final class CommunityCareEligibilityResponse {
   Boolean communityCareEligible;
 
+  List<CommunityCareEligibilities> communityCareEligibilities;
+
   List<Facility> facilities;
+
+  /** Javadoc. */
+  public List<CommunityCareEligibilities> communityCareEligibilities() {
+    if (communityCareEligibilities == null) {
+      communityCareEligibilities = new ArrayList<>();
+    }
+    return communityCareEligibilities;
+  }
 
   /** Lazy getter. */
   public List<Facility> facilities() {
@@ -60,6 +75,19 @@ public final class CommunityCareEligibilityResponse {
     Double latitude;
 
     Double longitude;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class CommunityCareEligibilities {
+    String description;
+
+    String effectiveDate;
+
+    String code;
   }
 
   @Data

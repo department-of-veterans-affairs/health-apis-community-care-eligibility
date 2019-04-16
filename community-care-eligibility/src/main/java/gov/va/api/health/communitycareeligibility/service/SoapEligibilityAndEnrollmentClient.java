@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.service.enrollmeneligibility.client.EligibilityAndEnrollmentClient;
 import gov.va.api.health.queenelizabeth.ee.Eligibilities;
 import gov.va.api.health.queenelizabeth.ee.SoapMessageGenerator;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
