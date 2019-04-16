@@ -6,8 +6,10 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
+import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,6 @@ public class CommunityCareEligibilityV1ApiController {
 
   private BingMapsClient bingMaps;
 
-  //  private EnrollmentEligibilityClient enrollmentEligibility;
   private EligibilityAndEnrollmentClient eeClient;
 
   private int maxDriveTime;
@@ -58,7 +59,6 @@ public class CommunityCareEligibilityV1ApiController {
     this.accessToCare = accessToCare;
     this.bingMaps = bingMaps;
     this.eeClient = eeClient;
-    // this.enrollmentEligibility = enrollmentEligibility;
   }
 
   @SneakyThrows
@@ -99,13 +99,7 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
-    boolean establishedPatient = true;
-    //    Query<GetEESummaryResponse> query =
-    //        Query.forType(GetEESummaryResponse.class).id("1008679665V880686").build();
-    //    GetEESummaryResponse eeSummaryResponse = hasPayload(enrollmentEligibility.search(query));
-    // log.error("E&E deserialized response: " + eeClient.requestEligibility("1008679665V880686"));
-    // GetEESummaryResponse eeSummaryResponse = eeClient.requestEligibility("1008679665V880686");
-    // List<CommunityCareEligibilities> eligibilities;
+
     Address patientAddress =
         Address.builder()
             .street(street.trim())
@@ -113,13 +107,16 @@ public class CommunityCareEligibilityV1ApiController {
             .state(state.trim())
             .zip(zip.trim())
             .build();
+    GetEESummaryResponse response = eeClient.requestEligibility("1008679665V880686");
+
     List<VceEligibilityInfo> vceEligibilityCollection =
-        eeClient
-            .requestEligibility("1008679665V880686")
-            .getSummary()
-            .getCommunityCareEligibilityInfo()
-            .getEligibilities()
-            .getEligibility();
+        response.getSummary() == null
+            ? Collections.emptyList()
+            : response
+                .getSummary()
+                .getCommunityCareEligibilityInfo()
+                .getEligibilities()
+                .getEligibility();
     List<CommunityCareEligibilities> communityCareEligibilities =
         vceEligibilityCollection
             .stream()
