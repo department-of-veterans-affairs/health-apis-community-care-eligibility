@@ -30,7 +30,7 @@ public final class CommunityCareEligibilityResponse {
 
   List<Facility> facilities;
 
-  /** Javadoc. */
+  /** Lazy getter. */
   public List<CommunityCareEligibilities> communityCareEligibilities() {
     if (communityCareEligibilities == null) {
       communityCareEligibilities = new ArrayList<>();
