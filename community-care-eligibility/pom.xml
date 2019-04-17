@@ -11,6 +11,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
+    <ee-artifacts.version>1.1.35</ee-artifacts.version>
     <jacoco.coverage>0.50</jacoco.coverage>
   </properties>
   <dependencies>
@@ -22,6 +23,16 @@
       <groupId>gov.va.api.health</groupId>
       <artifactId>community-care-eligibility-api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>gov.va.api.health</groupId>
+      <artifactId>hand-of-queen-elizabeth</artifactId>
+      <version>${ee-artifacts.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>gov.va.api.health</groupId>
+      <artifactId>ee-artifacts</artifactId>
+      <version>${ee-artifacts.version}</version>
     </dependency>
     <dependency>
       <groupId>io.rest-assured</groupId>

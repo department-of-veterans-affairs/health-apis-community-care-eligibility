@@ -14,7 +14,18 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
+import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
+import gov.va.med.esr.webservices.jaxws.schemas.EeSummary;
+import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
+import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityCollection;
+import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.SneakyThrows;
 import org.junit.Test;
 
@@ -22,6 +33,10 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void empty() {
+
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility(any(String.class))).thenReturn(new GetEESummaryResponse());
+
     AccessToCareClient accessToCare = mock(AccessToCareClient.class);
     when(accessToCare.facilities(any(Address.class), any(String.class)))
         .thenReturn(singletonList(AccessToCareFacility.builder().build()));
@@ -34,6 +49,7 @@ public final class CommunityCareEligibilityTest {
         CommunityCareEligibilityV1ApiController.builder()
             .accessToCare(accessToCare)
             .bingMaps(bingMaps)
+            .eeClient(eeClient)
             .maxDriveTime(1)
             .maxWait(1)
             .build();
@@ -41,22 +57,50 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityResponse result =
         controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
     assertThat(result)
-        .isEqualTo(CommunityCareEligibilityResponse.builder().communityCareEligible(true).build());
+        .isEqualTo(CommunityCareEligibilityResponse.builder().communityCareEligible(null).build());
   }
 
   @Test
   @SneakyThrows
   public void happyPath() {
+    SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    Date date = isoFormat.parse("2019-03-27T14:37:48");
+
+    GregorianCalendar gCal = new GregorianCalendar();
+    gCal.setTime(date);
+    XMLGregorianCalendar xmlGregorianCalendar =
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
+
+    VceEligibilityInfo info = new VceEligibilityInfo();
+    info.setVceCode("H");
+    info.setVceDescription("Hardship");
+    info.setVceEffectiveDate(xmlGregorianCalendar);
+
+    VceEligibilityCollection vceEligibilityCollection = new VceEligibilityCollection();
+    vceEligibilityCollection.getEligibility().add(info);
+
+    CommunityCareEligibilityInfo communityCareEligibilityInfo = new CommunityCareEligibilityInfo();
+    communityCareEligibilityInfo.setEligibilities(vceEligibilityCollection);
+
+    EeSummary summary = new EeSummary();
+    summary.setCommunityCareEligibilityInfo(communityCareEligibilityInfo);
+
+    GetEESummaryResponse getEESummaryResponse = new GetEESummaryResponse();
+    getEESummaryResponse.setSummary(summary);
+
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("1008679665V880686")).thenReturn(getEESummaryResponse);
+
     AccessToCareClient accessToCare = mock(AccessToCareClient.class);
     when(accessToCare.facilities(
-            eq(
-                Address.builder()
-                    .street("66 Main St")
-                    .city("Melbourne")
-                    .state("fl")
-                    .zip("12345")
-                    .build()),
-            eq("primarycare")))
+            Address.builder()
+                .street("66 Main St")
+                .city("Melbourne")
+                .state("fl")
+                .zip("12345")
+                .build(),
+            "primarycare"))
         .thenReturn(
             singletonList(
                 AccessToCareFacility.builder()
@@ -103,6 +147,7 @@ public final class CommunityCareEligibilityTest {
             .bingMaps(bingMaps)
             .maxDriveTime(1)
             .maxWait(1)
+            .eeClient(eeClient)
             .build();
 
     CommunityCareEligibilityResponse result =
@@ -110,7 +155,6 @@ public final class CommunityCareEligibilityTest {
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
-                .communityCareEligible(true)
                 .facilities(
                     singletonList(
                         Facility.builder()
@@ -129,6 +173,13 @@ public final class CommunityCareEligibilityTest {
                             .waitDays(
                                 WaitDays.builder().newPatient(1).establishedPatient(10).build())
                             .driveMinutes(30)
+                            .build()))
+                .communityCareEligibilities(
+                    singletonList(
+                        CommunityCareEligibilityResponse.CommunityCareEligibilities.builder()
+                            .description("Hardship")
+                            .code("H")
+                            .effectiveDate("2019-03-27T14:37:48Z")
                             .build()))
                 .build());
   }

@@ -26,7 +26,17 @@ import lombok.NoArgsConstructor;
 public final class CommunityCareEligibilityResponse {
   Boolean communityCareEligible;
 
+  List<CommunityCareEligibilities> communityCareEligibilities;
+
   List<Facility> facilities;
+
+  /** Lazy getter. */
+  public List<CommunityCareEligibilities> communityCareEligibilities() {
+    if (communityCareEligibilities == null) {
+      communityCareEligibilities = new ArrayList<>();
+    }
+    return communityCareEligibilities;
+  }
 
   /** Lazy getter. */
   public List<Facility> facilities() {
@@ -60,6 +70,19 @@ public final class CommunityCareEligibilityResponse {
     Double latitude;
 
     Double longitude;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class CommunityCareEligibilities {
+    String description;
+
+    String effectiveDate;
+
+    String code;
   }
 
   @Data
