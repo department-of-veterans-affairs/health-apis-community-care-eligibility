@@ -52,7 +52,6 @@ public class CommunityCareEligibilityV1ApiController {
       @Value("${community-care.max-wait}") int maxWait,
       @Autowired AccessToCareClient accessToCare,
       @Autowired BingMapsClient bingMaps,
-      // @Autowired EnrollmentEligibilityClient enrollmentEligibility
       @Autowired EligibilityAndEnrollmentClient eeClient) {
     this.maxDriveTime = maxDriveTime;
     this.maxWait = maxWait;

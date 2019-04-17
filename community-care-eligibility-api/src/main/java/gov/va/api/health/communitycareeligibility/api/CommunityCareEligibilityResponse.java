@@ -39,6 +39,14 @@ public final class CommunityCareEligibilityResponse {
   }
 
   /** Lazy getter. */
+  public List<CommunityCareEligibilities> communityCareEligibilities() {
+    if (communityCareEligibilities == null) {
+      communityCareEligibilities = new ArrayList<>();
+    }
+    return communityCareEligibilities;
+  }
+
+  /** Lazy getter. */
   public List<Facility> facilities() {
     if (facilities == null) {
       facilities = new ArrayList<>();
