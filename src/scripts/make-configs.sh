@@ -113,7 +113,7 @@ sendMoarSpams() {
 }
 
 makeConfig community-care-eligibility $PROFILE
-configValue community-care-eligibility $PROFILE bing-maps.api-key "$VA_FACILITIES_API_KEY"
-configValue community-care-eligibility $PROFILE va-facilities.api-key "$BING_MAPS_API_KEY"
+configValue community-care-eligibility $PROFILE bing-maps.api-key "$BING_MAPS_API_KEY"
+configValue community-care-eligibility $PROFILE va-facilities.api-key "$VA_FACILITIES_API_KEY"
 
 checkForUnsetValues community-care-eligibility $PROFILE
