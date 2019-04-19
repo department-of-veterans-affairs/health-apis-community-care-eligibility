@@ -39,7 +39,8 @@ public class RestBingMapsClient implements BingMapsClient {
     return headers;
   }
 
-  private Coordinates coordinates(Address address) {
+  @Override
+  public Coordinates coordinates(Address address) {
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/v1/Locations")
             .queryParam("countryRegion", "US")
