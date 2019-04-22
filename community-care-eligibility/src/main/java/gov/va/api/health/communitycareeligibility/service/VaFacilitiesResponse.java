@@ -13,7 +13,7 @@ import lombok.Data;
 public final class VaFacilitiesResponse {
   private List<VaFacility> data;
 
-  /** Javadoc Placeholder. */
+  /** Lazy Getter. */
   public List<VaFacility> data() {
     if (data == null) {
       data = new ArrayList<>();
