@@ -30,6 +30,7 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
+
   @Test
   @SneakyThrows
   public void empty() {
@@ -37,17 +38,17 @@ public final class CommunityCareEligibilityTest {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility(any(String.class))).thenReturn(new GetEESummaryResponse());
 
-    AccessToCareClient accessToCare = mock(AccessToCareClient.class);
-    when(accessToCare.facilities(any(Address.class), any(String.class)))
-        .thenReturn(singletonList(AccessToCareFacility.builder().build()));
-
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.routes(any(Address.class), any(Facility.class)))
         .thenReturn(BingResponse.builder().build());
 
+    FacilityClient facilityClient = mock(FacilityClient.class);
+    when(facilityClient.facilities(any(Coordinates.class), any(String.class)))
+        .thenReturn(VaFacilitiesResponse.builder().build());
+
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
-            .accessToCare(accessToCare)
+            .facilityClient(facilityClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
             .maxDriveTime(1)
@@ -92,30 +93,46 @@ public final class CommunityCareEligibilityTest {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility("1008679665V880686")).thenReturn(getEESummaryResponse);
 
-    AccessToCareClient accessToCare = mock(AccessToCareClient.class);
-    when(accessToCare.facilities(
-            Address.builder()
-                .street("66 Main St")
-                .city("Melbourne")
-                .state("fl")
-                .zip("12345")
-                .build(),
-            "primarycare"))
+    FacilityClient facilityClient = mock(FacilityClient.class);
+    when(facilityClient.facilities(null, "primarycare"))
         .thenReturn(
-            singletonList(
-                AccessToCareFacility.builder()
-                    .facilityId(" FAC123 ")
-                    .name(" some facility ")
-                    .address(" 911 derp st ")
-                    .city(" Palm Bay ")
-                    .state(" fl ")
-                    .zip(" 75319 ")
-                    .phone(" 867-5309 ")
-                    .latitude(100.0)
-                    .longitude(200.0)
-                    .estWaitTime(10.0)
-                    .newWaitTime(1.0)
-                    .build()));
+            VaFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaFacilitiesResponse.VaFacility.builder()
+                            .id(" FAC123 ")
+                            .attributes(
+                                VaFacilityAttributes.builder()
+                                    .lat(100.00)
+                                    .longg(200.00)
+                                    .name(" some facility ")
+                                    .phone(
+                                        VaFacilityAttributes.Phone.builder()
+                                            .main(" 867-5309 ")
+                                            .build())
+                                    .waitTimes(
+                                        VaFacilityAttributes.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilityAttributes.WaitTime.builder()
+                                                        .established(10)
+                                                        .neww(1)
+                                                        .service("primarycare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilityAttributes.Address.builder()
+                                            .physical(
+                                                VaFacilityAttributes.PhysicalAddress.builder()
+                                                    .address1(" 911 derp st ")
+                                                    .city(" Palm Bay ")
+                                                    .state(" FL ")
+                                                    .zip(" 75319 ")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
 
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.routes(
@@ -143,7 +160,7 @@ public final class CommunityCareEligibilityTest {
 
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
-            .accessToCare(accessToCare)
+            .facilityClient(facilityClient)
             .bingMaps(bingMaps)
             .maxDriveTime(1)
             .maxWait(1)
