@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Component
-public class RestFacilityClient implements FacilitiesClient {
+public class RestFacilitiesClient implements FacilitiesClient {
 
   private final String vaFacilitiesApiKey;
 
@@ -25,7 +25,7 @@ public class RestFacilityClient implements FacilitiesClient {
   private final RestTemplate restTemplate;
 
   /** Autowired constructor. */
-  public RestFacilityClient(
+  public RestFacilitiesClient(
       @Value("${va-facilities.api-key}") String vaFacilitiesApiKey,
       @Value("${facilities.endpoint.url}") String baseUrl,
       @Autowired RestTemplate restTemplate) {
@@ -34,13 +34,11 @@ public class RestFacilityClient implements FacilitiesClient {
     this.baseUrl = baseUrl;
   }
 
-
   @Override
   @SneakyThrows
   public VaFacilitiesResponse facilities(Coordinates coordinates, String serviceType) {
     String url =
-        UriComponentsBuilder.fromHttpUrl(
-                baseUrl)
+        UriComponentsBuilder.fromHttpUrl(baseUrl)
             .queryParam("lat", coordinates.latitude())
             .queryParam("long", coordinates.longitude())
             .queryParam("type", "health")
@@ -51,7 +49,9 @@ public class RestFacilityClient implements FacilitiesClient {
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     VaFacilitiesResponse responseObject =
-        restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class).getBody();
+        restTemplate
+            .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+            .getBody();
     log.info("Va Facilities Response" + responseObject);
     if (responseObject == null) {
       throw new IllegalStateException();

@@ -70,6 +70,9 @@ public final class CommunityCareEligibilityTest {
 
     GregorianCalendar gCal = new GregorianCalendar();
     gCal.setTime(date);
+
+
+
     XMLGregorianCalendar xmlGregorianCalendar =
         DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
 
@@ -93,51 +96,19 @@ public final class CommunityCareEligibilityTest {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility("1008679665V880686")).thenReturn(getEESummaryResponse);
 
-    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(null, "primarycare"))
-        .thenReturn(
-            VaFacilitiesResponse.builder()
-                .data(
-                    singletonList(
-                        VaFacilitiesResponse.VaFacility.builder()
-                            .id(" FAC123 ")
-                            .attributes(
-                                VaFacilityAttributes.builder()
-                                    .lat(100.00)
-                                    .longg(200.00)
-                                    .name(" some facility ")
-                                    .phone(
-                                        VaFacilityAttributes.Phone.builder()
-                                            .main(" 867-5309 ")
-                                            .build())
-                                    .waitTimes(
-                                        VaFacilityAttributes.WaitTimes.builder()
-                                            .health(
-                                                singletonList(
-                                                    VaFacilityAttributes.WaitTime.builder()
-                                                        .established(10)
-                                                        .neww(1)
-                                                        .service("primarycare")
-                                                        .build()))
-                                            .build())
-                                    .address(
-                                        VaFacilityAttributes.Address.builder()
-                                            .physical(
-                                                VaFacilityAttributes.PhysicalAddress.builder()
-                                                    .address1(" 911 derp st ")
-                                                    .city(" Palm Bay ")
-                                                    .state(" FL ")
-                                                    .zip(" 75319 ")
-                                                    .build())
-                                            .build())
-                                    .build())
-                            .build()))
-                .build());
+
 
     BingMapsClient bingMaps = mock(BingMapsClient.class);
+    when(bingMaps.coordinates(
+            Address.builder()
+                .city("Melbourne")
+                .state("fl")
+                .zip("12345")
+                .street("66 Main St")
+                .build()))
+        .thenReturn(Coordinates.builder().latitude(200.00).longitude(100.00).build());
     when(bingMaps.routes(
-            eq(
-                null),
+            eq(Coordinates.builder().longitude(100.00).latitude(200.00).build()),
             any(Facility.class)))
         .thenReturn(
             BingResponse.builder()
@@ -150,6 +121,51 @@ public final class CommunityCareEligibilityTest {
                                         .travelDuration((int) TimeUnit.MINUTES.toSeconds(30))
                                         .travelDurationTraffic((int) TimeUnit.MINUTES.toSeconds(45))
                                         .build()))
+                            .build()))
+                .build());
+
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.facilities(
+            Coordinates.builder().longitude(100.00).latitude(200.00).build(), "primarycare"))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaFacilitiesResponse.VaFacility.builder()
+                            .id(" FAC123 ")
+                            .attributes(
+                                VaFacilitiesResponse.VaFacilityAttributes.builder()
+                                    .lat(200.00)
+                                    .longg(100.00)
+                                    .name(" some facility ")
+                                    .phone(
+                                        VaFacilitiesResponse.VaFacilityAttributes.Phone.builder()
+                                            .main(" 867-5309 ")
+                                            .build())
+                                    .waitTimes(
+                                        VaFacilitiesResponse.VaFacilityAttributes.WaitTimes
+                                            .builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.VaFacilityAttributes
+                                                        .WaitTime.builder()
+                                                        .established(10)
+                                                        .neww(1)
+                                                        .service("primarycare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.VaFacilityAttributes.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.VaFacilityAttributes
+                                                    .PhysicalAddress.builder()
+                                                    .address1(" 911 derp st ")
+                                                    .city(" Palm Bay ")
+                                                    .state(" FL ")
+                                                    .zip(" 75319 ")
+                                                    .build())
+                                            .build())
+                                    .build())
                             .build()))
                 .build());
 
@@ -180,7 +196,7 @@ public final class CommunityCareEligibilityTest {
                                     .zip("75319")
                                     .build())
                             .coordinates(
-                                Coordinates.builder().latitude(100.0).longitude(200.0).build())
+                                Coordinates.builder().latitude(200.0).longitude(100.0).build())
                             .phoneNumber("867-5309")
                             .waitDays(
                                 WaitDays.builder().newPatient(1).establishedPatient(10).build())

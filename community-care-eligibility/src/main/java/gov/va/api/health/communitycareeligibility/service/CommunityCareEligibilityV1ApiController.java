@@ -1,7 +1,5 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-
-
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibilities;
@@ -117,14 +115,14 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
-    Address patientAddress =
-        Address.builder()
-            .street(street.trim())
-            .city(city.trim())
-            .state(state.trim())
-            .zip(zip.trim())
-            .build();
-    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
+    Coordinates patientCoordinates =
+        bingMaps.coordinates(
+            Address.builder()
+                .street(street.trim())
+                .city(city.trim())
+                .state(state.trim())
+                .zip(zip.trim())
+                .build());
     GetEESummaryResponse response = eeClient.requestEligibility("1008679665V880686");
     List<VceEligibilityInfo> vceEligibilityCollection =
         response.getSummary() == null
@@ -156,10 +154,7 @@ public class CommunityCareEligibilityV1ApiController {
                 .stream()
                 .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
                 .collect(Collectors.toList());
-    log.info(
-        "va facilities filtered by service type {}: {}",
-        serviceType,
-        vaFacilitiesResponse);
+    log.info("va facilities filtered by service type {}: {}", serviceType, vaFacilitiesResponse);
     List<Facility> facilities =
         filteredByServiceType
             .stream()

@@ -5,8 +5,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
 import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.VaFacility;
-import gov.va.api.health.communitycareeligibility.service.VaFacilityAttributes.PhysicalAddress;
-import gov.va.api.health.communitycareeligibility.service.VaFacilityAttributes.WaitTime;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
@@ -17,15 +15,15 @@ public class FacilityTransformer {
   @NonNull private final String serviceType;
 
   private static Address address(VaFacility vaFacility) {
-    VaFacilityAttributes attributes = vaFacility.attributes();
+    VaFacilitiesResponse.VaFacilityAttributes attributes = vaFacility.attributes();
     if (attributes == null) {
       return null;
     }
-    VaFacilityAttributes.Address address = attributes.address();
+    VaFacilitiesResponse.VaFacilityAttributes.Address address = attributes.address();
     if (address == null) {
       return null;
     }
-    PhysicalAddress physical = address.physical();
+    VaFacilitiesResponse.VaFacilityAttributes.PhysicalAddress physical = address.physical();
     if (physical == null) {
       return null;
     }
@@ -92,7 +90,7 @@ public class FacilityTransformer {
     if (vaFacility.attributes().waitTimes() == null) {
       return null;
     }
-    Optional<WaitTime> optWaitTime =
+    Optional<VaFacilitiesResponse.VaFacilityAttributes.WaitTime> optWaitTime =
         vaFacility
             .attributes()
             .waitTimes()

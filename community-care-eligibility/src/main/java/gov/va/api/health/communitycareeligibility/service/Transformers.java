@@ -21,9 +21,7 @@ public final class Transformers {
     return true;
   }
 
-  /**
-   * Return true if the value is a blank string, or any other object that is null.
-   */
+  /** Return true if the value is a blank string, or any other object that is null. */
   public static boolean isBlank(Object value) {
     if (value instanceof CharSequence) {
       return StringUtils.isBlank((CharSequence) value);
