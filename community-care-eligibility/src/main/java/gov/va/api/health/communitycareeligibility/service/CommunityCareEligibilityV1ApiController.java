@@ -1,8 +1,11 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static gov.va.api.health.communitycareeligibility.service.RestFacilityClient.objectMapper;
+
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibilities;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
@@ -35,7 +38,8 @@ import org.springframework.web.bind.annotation.RestController;
   produces = "application/json"
 )
 public class CommunityCareEligibilityV1ApiController {
-  private AccessToCareClient accessToCare;
+
+  private FacilityClient facilityClient;
 
   private BingMapsClient bingMaps;
 
@@ -50,14 +54,31 @@ public class CommunityCareEligibilityV1ApiController {
   public CommunityCareEligibilityV1ApiController(
       @Value("${community-care.max-drive-time}") int maxDriveTime,
       @Value("${community-care.max-wait}") int maxWait,
-      @Autowired AccessToCareClient accessToCare,
       @Autowired BingMapsClient bingMaps,
-      @Autowired EligibilityAndEnrollmentClient eeClient) {
+      @Autowired EligibilityAndEnrollmentClient eeClient,
+      @Autowired FacilityClient facilityClient) {
     this.maxDriveTime = maxDriveTime;
     this.maxWait = maxWait;
-    this.accessToCare = accessToCare;
     this.bingMaps = bingMaps;
     this.eeClient = eeClient;
+    this.facilityClient = facilityClient;
+  }
+
+  private static boolean hasServiceType(
+      VaFacilitiesResponse.VaFacility vaFacility, String serviceType) {
+    return vaFacility != null
+        && vaFacility.attributes() != null
+        && vaFacility.attributes().waitTimes() != null
+        && vaFacility
+            .attributes()
+            .waitTimes()
+            .health()
+            .stream()
+            .anyMatch(
+                waitTime ->
+                    waitTime != null
+                        && waitTime.service() != null
+                        && StringUtils.equalsIgnoreCase(serviceType, waitTime.service()));
   }
 
   @SneakyThrows
@@ -69,7 +90,6 @@ public class CommunityCareEligibilityV1ApiController {
       // No VAMC locations in these states, automatically eligible
       return true;
     }
-
     // Filter facilities in same state, within a certain drive time and wait time
     List<Facility> filtered =
         facilities
@@ -84,7 +104,6 @@ public class CommunityCareEligibilityV1ApiController {
                             ? (facility.waitDays().establishedPatient() < maxWait)
                             : (facility.waitDays().newPatient() < maxWait))))
             .collect(Collectors.toList());
-
     // return false if NO facilities meet requirements
     return filtered.isEmpty();
   }
@@ -98,7 +117,6 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
-
     Address patientAddress =
         Address.builder()
             .street(street.trim())
@@ -106,8 +124,8 @@ public class CommunityCareEligibilityV1ApiController {
             .state(state.trim())
             .zip(zip.trim())
             .build();
+    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     GetEESummaryResponse response = eeClient.requestEligibility("1008679665V880686");
-
     List<VceEligibilityInfo> vceEligibilityCollection =
         response.getSummary() == null
             ? Collections.emptyList()
@@ -128,19 +146,29 @@ public class CommunityCareEligibilityV1ApiController {
                         .toCommunityCareEligibilities())
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    List<AccessToCareFacility> accessToCareFacilities =
-        accessToCare.facilities(patientAddress, serviceType);
+    VaFacilitiesResponse vaFacilitiesResponses =
+        facilityClient.facilities(patientCoordinates, serviceType);
+    List<VaFacilitiesResponse.VaFacility> filteredByServiceType =
+        vaFacilitiesResponses == null
+            ? Collections.emptyList()
+            : vaFacilitiesResponses
+                .data()
+                .stream()
+                .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
+                .collect(Collectors.toList());
+    log.error(
+        "va facilities filtered by service type {}: {}",
+        serviceType,
+        objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
     List<Facility> facilities =
-        accessToCareFacilities
+        filteredByServiceType
             .stream()
-            .filter(Objects::nonNull)
             .map(
-                accessToCareFacility ->
-                    AccessToCareFacilityTransformer.builder()
-                        .atcFacility(accessToCareFacility)
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(serviceType)
                         .build()
-                        .toFacility())
-            .filter(Objects::nonNull)
+                        .toFacility(vaFacility))
             .collect(Collectors.toList());
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientAddress, facility));
     return CommunityCareEligibilityResponse.builder()
