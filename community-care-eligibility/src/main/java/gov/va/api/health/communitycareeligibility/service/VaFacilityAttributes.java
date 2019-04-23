@@ -20,9 +20,10 @@ import lombok.NoArgsConstructor;
 public final class VaFacilityAttributes {
   private String name;
 
-  private double lat;
+  private Double lat;
 
-  private double longg;
+  @JsonProperty("long")
+  private Double longg;
 
   private Address address;
 
@@ -83,9 +84,10 @@ public final class VaFacilityAttributes {
   public static final class WaitTime {
     private String service;
 
-    private int neww;
+    @JsonProperty("new")
+    private Integer neww;
 
-    private int established;
+    private Integer established;
   }
 
   @Data

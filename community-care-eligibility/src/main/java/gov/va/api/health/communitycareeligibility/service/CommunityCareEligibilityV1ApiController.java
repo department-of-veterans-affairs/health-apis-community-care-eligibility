@@ -1,6 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import static gov.va.api.health.communitycareeligibility.service.RestFacilityClient.objectMapper;
+
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class CommunityCareEligibilityV1ApiController {
 
-  private FacilityClient facilityClient;
+  private FacilitiesClient facilitiesClient;
 
   private BingMapsClient bingMaps;
 
@@ -56,12 +56,12 @@ public class CommunityCareEligibilityV1ApiController {
       @Value("${community-care.max-wait}") int maxWait,
       @Autowired BingMapsClient bingMaps,
       @Autowired EligibilityAndEnrollmentClient eeClient,
-      @Autowired FacilityClient facilityClient) {
+      @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveTime = maxDriveTime;
     this.maxWait = maxWait;
     this.bingMaps = bingMaps;
     this.eeClient = eeClient;
-    this.facilityClient = facilityClient;
+    this.facilitiesClient = facilitiesClient;
   }
 
   private static boolean hasServiceType(
@@ -146,20 +146,20 @@ public class CommunityCareEligibilityV1ApiController {
                         .toCommunityCareEligibilities())
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    VaFacilitiesResponse vaFacilitiesResponses =
-        facilityClient.facilities(patientCoordinates, serviceType);
+    VaFacilitiesResponse vaFacilitiesResponse =
+        facilitiesClient.facilities(patientCoordinates, serviceType);
     List<VaFacilitiesResponse.VaFacility> filteredByServiceType =
-        vaFacilitiesResponses == null
+        vaFacilitiesResponse == null
             ? Collections.emptyList()
-            : vaFacilitiesResponses
+            : vaFacilitiesResponse
                 .data()
                 .stream()
                 .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
                 .collect(Collectors.toList());
-    log.error(
+    log.info(
         "va facilities filtered by service type {}: {}",
         serviceType,
-        objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(filteredByServiceType));
+        vaFacilitiesResponse);
     List<Facility> facilities =
         filteredByServiceType
             .stream()
@@ -170,15 +170,15 @@ public class CommunityCareEligibilityV1ApiController {
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
-    facilities.parallelStream().forEach(facility -> setDriveMinutes(patientAddress, facility));
+    facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     return CommunityCareEligibilityResponse.builder()
         .communityCareEligibilities(communityCareEligibilities)
         .facilities(facilities)
         .build();
   }
 
-  private void setDriveMinutes(Address patientAddress, Facility facility) {
-    BingResponse routes = bingMaps.routes(patientAddress, facility);
+  private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
+    BingResponse routes = bingMaps.routes(patientCoordinates, facility);
     if (routes.resourceSets().isEmpty()) {
       return;
     }

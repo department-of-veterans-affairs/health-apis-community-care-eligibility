@@ -39,16 +39,16 @@ public final class CommunityCareEligibilityTest {
     when(eeClient.requestEligibility(any(String.class))).thenReturn(new GetEESummaryResponse());
 
     BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.routes(any(Address.class), any(Facility.class)))
+    when(bingMaps.routes(any(Coordinates.class), any(Facility.class)))
         .thenReturn(BingResponse.builder().build());
 
-    FacilityClient facilityClient = mock(FacilityClient.class);
-    when(facilityClient.facilities(any(Coordinates.class), any(String.class)))
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.facilities(any(Coordinates.class), any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
 
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
-            .facilityClient(facilityClient)
+            .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
             .maxDriveTime(1)
@@ -93,8 +93,8 @@ public final class CommunityCareEligibilityTest {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility("1008679665V880686")).thenReturn(getEESummaryResponse);
 
-    FacilityClient facilityClient = mock(FacilityClient.class);
-    when(facilityClient.facilities(null, "primarycare"))
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.facilities(null, "primarycare"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -137,12 +137,7 @@ public final class CommunityCareEligibilityTest {
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.routes(
             eq(
-                Address.builder()
-                    .street("66 Main St")
-                    .city("Melbourne")
-                    .state("fl")
-                    .zip("12345")
-                    .build()),
+                null),
             any(Facility.class)))
         .thenReturn(
             BingResponse.builder()
@@ -160,7 +155,7 @@ public final class CommunityCareEligibilityTest {
 
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
-            .facilityClient(facilityClient)
+            .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .maxDriveTime(1)
             .maxWait(1)

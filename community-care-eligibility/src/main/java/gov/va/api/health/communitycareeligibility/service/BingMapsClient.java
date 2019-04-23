@@ -6,7 +6,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 
 public interface BingMapsClient {
 
-  Coordinates coordinates(Address patientAddress);
+  Coordinates coordinates(Address address);
 
-  BingResponse routes(Address patientAddress, Facility facility);
+  BingResponse routes(Coordinates patientCoordinates, Facility facility);
 }
