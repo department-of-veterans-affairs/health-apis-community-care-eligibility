@@ -2,10 +2,10 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
@@ -15,8 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 public class FacilityTransformer {
   @NonNull private final String serviceType;
 
-  private static Address address(
-      VaFacilitiesResponse.Facility vaFacility) {
+  private static Address address(VaFacilitiesResponse.Facility vaFacility) {
     VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
     if (attributes == null) {
       return null;
@@ -46,8 +45,7 @@ public class FacilityTransformer {
         .build();
   }
 
-  private static Coordinates coordinates(
-      VaFacilitiesResponse.Facility vaFacility) {
+  private static Coordinates coordinates(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }
@@ -78,8 +76,7 @@ public class FacilityTransformer {
   }
 
   /** Check for Facility. */
-  public Facility toFacility(
-      VaFacilitiesResponse.Facility vaFacility) {
+  public Facility toFacility(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility == null) {
       return null;
     }
@@ -93,8 +90,7 @@ public class FacilityTransformer {
         .build();
   }
 
-  private WaitDays waitDays(
-      VaFacilitiesResponse.Facility vaFacility) {
+  private WaitDays waitDays(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }

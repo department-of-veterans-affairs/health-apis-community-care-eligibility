@@ -1,10 +1,10 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibilities;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibilities;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -81,9 +81,7 @@ public class CommunityCareEligibilityV1ApiController {
 
   @SneakyThrows
   private boolean computeEligibility(
-      Address patientAddress,
-      boolean establishedPatient,
-      List<Facility> facilities) {
+      Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
     if (Arrays.asList("AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT")
         .stream()
         .anyMatch(patientAddress.state()::equalsIgnoreCase)) {
@@ -174,9 +172,7 @@ public class CommunityCareEligibilityV1ApiController {
         .build();
   }
 
-  private void setDriveMinutes(
-      Coordinates patientCoordinates,
-      Facility facility) {
+  private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
     BingResponse routes = bingMaps.routes(patientCoordinates, facility);
     if (routes.resourceSets().isEmpty()) {
       return;
