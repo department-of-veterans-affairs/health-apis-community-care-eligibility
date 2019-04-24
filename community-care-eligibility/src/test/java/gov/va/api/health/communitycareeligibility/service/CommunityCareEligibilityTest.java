@@ -71,8 +71,6 @@ public final class CommunityCareEligibilityTest {
     GregorianCalendar gCal = new GregorianCalendar();
     gCal.setTime(date);
 
-
-
     XMLGregorianCalendar xmlGregorianCalendar =
         DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
 
@@ -95,8 +93,6 @@ public final class CommunityCareEligibilityTest {
 
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility("1008679665V880686")).thenReturn(getEESummaryResponse);
-
-
 
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.coordinates(
@@ -123,7 +119,6 @@ public final class CommunityCareEligibilityTest {
                                         .build()))
                             .build()))
                 .build());
-
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities(
             Coordinates.builder().longitude(100.00).latitude(200.00).build(), "primarycare"))

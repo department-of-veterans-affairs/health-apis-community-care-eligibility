@@ -1,5 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
+
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
@@ -33,6 +35,9 @@ public class FacilityTransformer {
             + StringUtils.trimToEmpty(physical.address2())
             + " "
             + StringUtils.trimToEmpty(physical.address3());
+    if (allBlank(street, physical.city(), physical.state(), physical.zip())) {
+      return null;
+    }
     return Address.builder()
         .street(StringUtils.trimToNull(street))
         .city(StringUtils.trimToNull(physical.city()))
@@ -43,6 +48,9 @@ public class FacilityTransformer {
 
   private static Coordinates coordinates(VaFacility vaFacility) {
     if (vaFacility.attributes() == null) {
+      return null;
+    }
+    if (allBlank(vaFacility.attributes().lat(), vaFacility.attributes().longg())) {
       return null;
     }
     return Coordinates.builder()
