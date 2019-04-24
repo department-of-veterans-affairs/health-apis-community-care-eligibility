@@ -27,12 +27,4 @@ public final class Transformers {
     }
     return value == null;
   }
-
-  /** Base exception for controller errors. */
-  static class TransformationException extends RuntimeException {
-    @SuppressWarnings("SameParameterValue")
-    TransformationException(String message) {
-      super(message);
-    }
-  }
 }
