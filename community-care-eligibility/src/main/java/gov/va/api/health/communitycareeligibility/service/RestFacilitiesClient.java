@@ -27,7 +27,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
   /** Autowired constructor. */
   public RestFacilitiesClient(
       @Value("${va-facilities.api-key}") String vaFacilitiesApiKey,
-      @Value("${facilities.endpoint.url}") String baseUrl,
+      @Value("${va-facilities.url}") String baseUrl,
       @Autowired RestTemplate restTemplate) {
     this.vaFacilitiesApiKey = vaFacilitiesApiKey;
     this.restTemplate = restTemplate;

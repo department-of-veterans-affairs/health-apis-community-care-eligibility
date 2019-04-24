@@ -18,10 +18,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public final class VaFacilitiesResponse {
-  private List<VaFacility> data;
+  private List<Facility> data;
 
   /** Lazy Getter. */
-  public List<VaFacility> data() {
+  public List<Facility> data() {
     if (data == null) {
       data = new ArrayList<>();
     }
@@ -34,10 +34,10 @@ public final class VaFacilitiesResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class VaFacility {
+  public static final class Facility {
     private String id;
 
-    private VaFacilityAttributes attributes;
+    private Attributes attributes;
   }
 
   @Data
@@ -46,7 +46,7 @@ public final class VaFacilitiesResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class VaFacilityAttributes {
+  public static final class Attributes {
     private String name;
 
     private Double lat;
@@ -60,81 +60,81 @@ public final class VaFacilitiesResponse {
 
     @JsonProperty("wait_times")
     private WaitTimes waitTimes;
+  }
 
-    @Data
-    @Builder
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static final class Address {
-      private PhysicalAddress physical;
-    }
+  @Data
+  @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class Address {
+    private PhysicalAddress physical;
+  }
 
-    @Data
-    @Builder
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static final class Phone {
-      private String main;
-    }
+  @Data
+  @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class Phone {
+    private String main;
+  }
 
-    @Data
-    @Builder
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static final class PhysicalAddress {
-      private String zip;
+  @Data
+  @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class PhysicalAddress {
+    private String zip;
 
-      private String city;
+    private String city;
 
-      private String state;
+    private String state;
 
-      @JsonProperty("address_1")
-      private String address1;
+    @JsonProperty("address_1")
+    private String address1;
 
-      @JsonProperty("address_2")
-      private String address2;
+    @JsonProperty("address_2")
+    private String address2;
 
-      @JsonProperty("address_3")
-      private String address3;
-    }
+    @JsonProperty("address_3")
+    private String address3;
+  }
 
-    @Data
-    @Builder
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static final class WaitTime {
-      private String service;
+  @Data
+  @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class WaitTime {
+    private String service;
 
-      @JsonProperty("new")
-      private Integer neww;
+    @JsonProperty("new")
+    private Integer neww;
 
-      private Integer established;
-    }
+    private Integer established;
+  }
 
-    @Data
-    @Builder
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static final class WaitTimes {
-      private List<WaitTime> health;
+  @Data
+  @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class WaitTimes {
+    private List<WaitTime> health;
 
-      /** Health wait time. */
-      public List<WaitTime> health() {
-        if (health == null) {
-          health = new ArrayList<>();
-        }
-        return health;
+    /** Health wait time. */
+    public List<WaitTime> health() {
+      if (health == null) {
+        health = new ArrayList<>();
       }
+      return health;
     }
   }
 }

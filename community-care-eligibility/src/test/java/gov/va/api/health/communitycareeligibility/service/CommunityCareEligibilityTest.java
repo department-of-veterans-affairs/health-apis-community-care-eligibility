@@ -87,6 +87,7 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
+    Coordinates testCoordinates = Coordinates.builder().latitude(200.00).longitude(100.00).build();
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.coordinates(
             Address.builder()
@@ -95,10 +96,8 @@ public final class CommunityCareEligibilityTest {
                 .zip("12345")
                 .street("66 Main St")
                 .build()))
-        .thenReturn(Coordinates.builder().latitude(200.00).longitude(100.00).build());
-    when(bingMaps.routes(
-            eq(Coordinates.builder().longitude(100.00).latitude(200.00).build()),
-            any(Facility.class)))
+        .thenReturn(testCoordinates);
+    when(bingMaps.routes(eq(testCoordinates), any(Facility.class)))
         .thenReturn(
             BingResponse.builder()
                 .resourceSets(
@@ -113,40 +112,36 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(
-            Coordinates.builder().longitude(100.00).latitude(200.00).build(), "primarycare"))
+    when(facilitiesClient.facilities(testCoordinates, "primarycare"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
                     singletonList(
-                        VaFacilitiesResponse.VaFacility.builder()
+                        VaFacilitiesResponse.Facility.builder()
                             .id(" FAC123 ")
                             .attributes(
-                                VaFacilitiesResponse.VaFacilityAttributes.builder()
+                                VaFacilitiesResponse.Attributes.builder()
                                     .lat(200.00)
                                     .longg(100.00)
                                     .name(" some facility ")
                                     .phone(
-                                        VaFacilitiesResponse.VaFacilityAttributes.Phone.builder()
+                                        VaFacilitiesResponse.Phone.builder()
                                             .main(" 867-5309 ")
                                             .build())
                                     .waitTimes(
-                                        VaFacilitiesResponse.VaFacilityAttributes.WaitTimes
-                                            .builder()
+                                        VaFacilitiesResponse.WaitTimes.builder()
                                             .health(
                                                 singletonList(
-                                                    VaFacilitiesResponse.VaFacilityAttributes
-                                                        .WaitTime.builder()
+                                                    VaFacilitiesResponse.WaitTime.builder()
                                                         .established(10)
                                                         .neww(1)
                                                         .service("primarycare")
                                                         .build()))
                                             .build())
                                     .address(
-                                        VaFacilitiesResponse.VaFacilityAttributes.Address.builder()
+                                        VaFacilitiesResponse.Address.builder()
                                             .physical(
-                                                VaFacilitiesResponse.VaFacilityAttributes
-                                                    .PhysicalAddress.builder()
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
                                                     .address1(" 911 derp st ")
                                                     .city(" Palm Bay ")
                                                     .state(" FL ")
@@ -183,8 +178,7 @@ public final class CommunityCareEligibilityTest {
                                     .state("FL")
                                     .zip("75319")
                                     .build())
-                            .coordinates(
-                                Coordinates.builder().latitude(200.0).longitude(100.0).build())
+                            .coordinates(testCoordinates)
                             .phoneNumber("867-5309")
                             .waitDays(
                                 WaitDays.builder().newPatient(1).establishedPatient(10).build())

@@ -1,10 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibilities;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -63,7 +59,7 @@ public class CommunityCareEligibilityV1ApiController {
   }
 
   private static boolean hasServiceType(
-      VaFacilitiesResponse.VaFacility vaFacility, String serviceType) {
+      VaFacilitiesResponse.Facility vaFacility, String serviceType) {
     return vaFacility != null
         && vaFacility.attributes() != null
         && vaFacility.attributes().waitTimes() != null
@@ -81,7 +77,9 @@ public class CommunityCareEligibilityV1ApiController {
 
   @SneakyThrows
   private boolean computeEligibility(
-      Address patientAddress, boolean establishedPatient, List<Facility> facilities) {
+      CommunityCareEligibilityResponse.Address patientAddress,
+      boolean establishedPatient,
+      List<CommunityCareEligibilityResponse.Facility> facilities) {
     if (Arrays.asList("AK", "AZ", "IA", "NM", "MN", "ND", "OK", "SD", "UT")
         .stream()
         .anyMatch(patientAddress.state()::equalsIgnoreCase)) {
@@ -89,7 +87,7 @@ public class CommunityCareEligibilityV1ApiController {
       return true;
     }
     // Filter facilities in same state, within a certain drive time and wait time
-    List<Facility> filtered =
+    List<CommunityCareEligibilityResponse.Facility> filtered =
         facilities
             .stream()
             .filter(
@@ -115,9 +113,9 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
-    Coordinates patientCoordinates =
+    CommunityCareEligibilityResponse.Coordinates patientCoordinates =
         bingMaps.coordinates(
-            Address.builder()
+            CommunityCareEligibilityResponse.Address.builder()
                 .street(street.trim())
                 .city(city.trim())
                 .state(state.trim())
@@ -132,7 +130,7 @@ public class CommunityCareEligibilityV1ApiController {
                 .getCommunityCareEligibilityInfo()
                 .getEligibilities()
                 .getEligibility();
-    List<CommunityCareEligibilities> communityCareEligibilities =
+    List<CommunityCareEligibilityResponse.CommunityCareEligibilities> communityCareEligibilities =
         vceEligibilityCollection
             .stream()
             .filter(Objects::nonNull)
@@ -146,7 +144,7 @@ public class CommunityCareEligibilityV1ApiController {
             .collect(Collectors.toList());
     VaFacilitiesResponse vaFacilitiesResponse =
         facilitiesClient.facilities(patientCoordinates, serviceType);
-    List<VaFacilitiesResponse.VaFacility> filteredByServiceType =
+    List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
             : vaFacilitiesResponse
@@ -155,7 +153,7 @@ public class CommunityCareEligibilityV1ApiController {
                 .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
                 .collect(Collectors.toList());
     log.info("va facilities filtered by service type {}: {}", serviceType, vaFacilitiesResponse);
-    List<Facility> facilities =
+    List<CommunityCareEligibilityResponse.Facility> facilities =
         filteredByServiceType
             .stream()
             .map(
@@ -172,7 +170,9 @@ public class CommunityCareEligibilityV1ApiController {
         .build();
   }
 
-  private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
+  private void setDriveMinutes(
+      CommunityCareEligibilityResponse.Coordinates patientCoordinates,
+      CommunityCareEligibilityResponse.Facility facility) {
     BingResponse routes = bingMaps.routes(patientCoordinates, facility);
     if (routes.resourceSets().isEmpty()) {
       return;

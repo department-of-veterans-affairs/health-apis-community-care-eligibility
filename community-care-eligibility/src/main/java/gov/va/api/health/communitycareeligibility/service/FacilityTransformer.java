@@ -2,11 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
-import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.VaFacility;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
@@ -16,16 +12,17 @@ import org.apache.commons.lang3.StringUtils;
 public class FacilityTransformer {
   @NonNull private final String serviceType;
 
-  private static Address address(VaFacility vaFacility) {
-    VaFacilitiesResponse.VaFacilityAttributes attributes = vaFacility.attributes();
+  private static CommunityCareEligibilityResponse.Address address(
+      VaFacilitiesResponse.Facility vaFacility) {
+    VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
     if (attributes == null) {
       return null;
     }
-    VaFacilitiesResponse.VaFacilityAttributes.Address address = attributes.address();
+    VaFacilitiesResponse.Address address = attributes.address();
     if (address == null) {
       return null;
     }
-    VaFacilitiesResponse.VaFacilityAttributes.PhysicalAddress physical = address.physical();
+    VaFacilitiesResponse.PhysicalAddress physical = address.physical();
     if (physical == null) {
       return null;
     }
@@ -38,7 +35,7 @@ public class FacilityTransformer {
     if (allBlank(street, physical.city(), physical.state(), physical.zip())) {
       return null;
     }
-    return Address.builder()
+    return CommunityCareEligibilityResponse.Address.builder()
         .street(StringUtils.trimToNull(street))
         .city(StringUtils.trimToNull(physical.city()))
         .state(StringUtils.trimToNull(physical.state()))
@@ -46,27 +43,28 @@ public class FacilityTransformer {
         .build();
   }
 
-  private static Coordinates coordinates(VaFacility vaFacility) {
+  private static CommunityCareEligibilityResponse.Coordinates coordinates(
+      VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }
     if (allBlank(vaFacility.attributes().lat(), vaFacility.attributes().longg())) {
       return null;
     }
-    return Coordinates.builder()
+    return CommunityCareEligibilityResponse.Coordinates.builder()
         .latitude(vaFacility.attributes().lat())
         .longitude(vaFacility.attributes().longg())
         .build();
   }
 
-  private static String name(VaFacility vaFacility) {
+  private static String name(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }
     return StringUtils.trimToNull(vaFacility.attributes().name());
   }
 
-  private static String phoneNumber(VaFacility vaFacility) {
+  private static String phoneNumber(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }
@@ -77,11 +75,12 @@ public class FacilityTransformer {
   }
 
   /** Check for Facility. */
-  public Facility toFacility(VaFacility vaFacility) {
+  public CommunityCareEligibilityResponse.Facility toFacility(
+      VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility == null) {
       return null;
     }
-    return Facility.builder()
+    return CommunityCareEligibilityResponse.Facility.builder()
         .id(StringUtils.trimToNull(vaFacility.id()))
         .name(name(vaFacility))
         .address(address(vaFacility))
@@ -91,14 +90,15 @@ public class FacilityTransformer {
         .build();
   }
 
-  private WaitDays waitDays(VaFacility vaFacility) {
+  private CommunityCareEligibilityResponse.WaitDays waitDays(
+      VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }
     if (vaFacility.attributes().waitTimes() == null) {
       return null;
     }
-    Optional<VaFacilitiesResponse.VaFacilityAttributes.WaitTime> optWaitTime =
+    Optional<VaFacilitiesResponse.WaitTime> optWaitTime =
         vaFacility
             .attributes()
             .waitTimes()
@@ -112,7 +112,7 @@ public class FacilityTransformer {
     if (!optWaitTime.isPresent()) {
       return null;
     }
-    return WaitDays.builder()
+    return CommunityCareEligibilityResponse.WaitDays.builder()
         .newPatient(optWaitTime.get().neww())
         .establishedPatient(optWaitTime.get().established())
         .build();
