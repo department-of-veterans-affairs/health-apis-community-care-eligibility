@@ -19,13 +19,11 @@ import gov.va.med.esr.webservices.jaxws.schemas.EeSummary;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.SneakyThrows;
 import org.junit.Test;
 
@@ -64,36 +62,31 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void happyPath() {
-    SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    Date date = isoFormat.parse("2019-03-27T14:37:48");
-
     GregorianCalendar gCal = new GregorianCalendar();
-    gCal.setTime(date);
-
-    XMLGregorianCalendar xmlGregorianCalendar =
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
-
-    VceEligibilityInfo info = new VceEligibilityInfo();
-    info.setVceCode("H");
-    info.setVceDescription("Hardship");
-    info.setVceEffectiveDate(xmlGregorianCalendar);
-
-    VceEligibilityCollection vceEligibilityCollection = new VceEligibilityCollection();
-    vceEligibilityCollection.getEligibility().add(info);
-
-    CommunityCareEligibilityInfo communityCareEligibilityInfo = new CommunityCareEligibilityInfo();
-    communityCareEligibilityInfo.setEligibilities(vceEligibilityCollection);
-
-    EeSummary summary = new EeSummary();
-    summary.setCommunityCareEligibilityInfo(communityCareEligibilityInfo);
-
-    GetEESummaryResponse getEESummaryResponse = new GetEESummaryResponse();
-    getEESummaryResponse.setSummary(summary);
-
+    gCal.setTime(Date.from(Instant.parse("2019-03-27T14:37:48Z")));
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    when(eeClient.requestEligibility("1008679665V880686")).thenReturn(getEESummaryResponse);
-
+    when(eeClient.requestEligibility("1008679665V880686"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .eligibilities(
+                                    VceEligibilityCollection.builder()
+                                        .eligibility(
+                                            singletonList(
+                                                VceEligibilityInfo.builder()
+                                                    .vceCode("H")
+                                                    .vceDescription("Hardship")
+                                                    .vceEffectiveDate(
+                                                        DatatypeFactory.newInstance()
+                                                            .newXMLGregorianCalendar(gCal))
+                                                    .build()))
+                                        .build())
+                                .build())
+                        .build())
+                .build());
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.coordinates(
             Address.builder()
