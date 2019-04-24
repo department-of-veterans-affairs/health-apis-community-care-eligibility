@@ -25,6 +25,7 @@ public final class LombokTest {
   public void exerciseLombok() {
     for (Class<?> pojoClass :
         Arrays.asList(
+            VaFacilitiesResponse.Facility.class,
             BingResponse.class,
             BingResponse.Point.class,
             BingResponse.Resource.class,

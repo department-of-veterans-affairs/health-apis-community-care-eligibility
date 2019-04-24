@@ -21,6 +21,7 @@ Secrets Configuration
  - EE_TRUSTSTORE_PASSWORD
  - KEYSTORE_PASSWORD
  - VA_FACILITIES_API_KEY
+ - VA_FACILITIES_URL
 
 $1
 EOF
@@ -59,6 +60,7 @@ MISSING_SECRETS=false
 [ -z "$EE_TRUSTSTORE_PASSWORD" ] && echo "Missing configuration: EE_TRUSTSTORE_PASSWORD" && MISSING_SECRETS=true
 [ -z "$KEYSTORE_PASSWORD" ] && echo "Missing configuration: KEYSTORE_PASSWORD" && MISSING_SECRETS=true
 [ -z "$VA_FACILITIES_API_KEY" ] && echo "Missing configuration: VA_FACILITIES_API_KEY" && MISSING_SECRETS=true
+[ -z "$VA_FACILITIES_URL" ] && echo "Missing configuration: VA_FACILITIES_URL" && MISSING_SECRETS=true
 [ $MISSING_SECRETS == true ] && usage "Missing configuration secrets, please update $SECRETS"
 
 makeConfig() {
@@ -128,5 +130,6 @@ configValue community-care-eligibility $PROFILE ee.header.username "$EE_HEADER_U
 configValue community-care-eligibility $PROFILE ee.truststore.password "$EE_TRUSTSTORE_PASSWORD"
 configValue community-care-eligibility $PROFILE ee.truststore.path "eligibilityandenrollment-nonprod-truststore.jks"
 configValue community-care-eligibility $PROFILE va-facilities.api-key "$VA_FACILITIES_API_KEY"
+configValue community-care-eligibility $PROFILE va-facilities.url "$VA_FACILITIES_URL"
 
 checkForUnsetValues community-care-eligibility $PROFILE

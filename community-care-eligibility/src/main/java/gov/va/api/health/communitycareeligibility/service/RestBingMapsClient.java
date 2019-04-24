@@ -68,8 +68,7 @@ public class RestBingMapsClient implements BingMapsClient {
   }
 
   @Override
-  public BingResponse routes(Address patientAddress, Facility facility) {
-    Coordinates patientCoordinates = coordinates(patientAddress);
+  public BingResponse routes(Coordinates patientCoordinates, Facility facility) {
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/V1/Routes")
             .queryParam("wp.0", coordinateParam(patientCoordinates))
