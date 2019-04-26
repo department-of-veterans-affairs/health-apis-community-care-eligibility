@@ -24,27 +24,10 @@ import lombok.NoArgsConstructor;
 //      example = "SWAGGER_EXAMPLE_ALLERGY_INTOLERANCE"
 //    )
 public final class CommunityCareEligibilityResponse {
-  Boolean communityCareEligible;
-
-  List<CommunityCareEligibilities> communityCareEligibilities;
+  CommunityCareEligibility communityCareEligibility;
 
   List<Facility> facilities;
 
-  /** Lazy getter. */
-  public List<CommunityCareEligibilities> communityCareEligibilities() {
-    if (communityCareEligibilities == null) {
-      communityCareEligibilities = new ArrayList<>();
-    }
-    return communityCareEligibilities;
-  }
-
-  /** Lazy getter. */
-  public List<Facility> facilities() {
-    if (facilities == null) {
-      facilities = new ArrayList<>();
-    }
-    return facilities;
-  }
 
   @Data
   @Builder
@@ -72,17 +55,16 @@ public final class CommunityCareEligibilityResponse {
     Double longitude;
   }
 
+
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class CommunityCareEligibilities {
+  public static final class CommunityCareEligibility {
+    Boolean eligible;
+
     String description;
-
-    String effectiveDate;
-
-    String code;
   }
 
   @Data
