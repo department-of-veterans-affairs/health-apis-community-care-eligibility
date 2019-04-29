@@ -171,33 +171,33 @@ public final class CommunityCareEligibilityTest {
             .maxWait(1)
             .eeClient(eeClient)
             .build();
-    CommunityCareEligibilityResponse result =
+    CommunityCareEligibilityResponse actual =
         controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", true);
-    assertThat(result)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .facilities(
-                    singletonList(
-                        Facility.builder()
-                            .id("FAC123")
-                            .name("some facility")
-                            .address(
-                                Address.builder()
-                                    .street("911 derp st")
-                                    .city("Palm Bay")
-                                    .state("FL")
-                                    .zip("75319")
-                                    .build())
-                            .coordinates(testCoordinates)
-                            .phoneNumber("867-5309")
-                            .waitDays(
-                                WaitDays.builder().newPatient(1).establishedPatient(10).build())
-                            .driveMinutes(30)
-                            .build()))
-                .communityCareEligibility(
-                    CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                        .description("Hardship")
-                        .eligible(true)
-                        .build()));
+    CommunityCareEligibilityResponse expected =
+        CommunityCareEligibilityResponse.builder()
+            .facilities(
+                singletonList(
+                    Facility.builder()
+                        .id("FAC123")
+                        .name("some facility")
+                        .address(
+                            Address.builder()
+                                .street("911 derp st")
+                                .city("Palm Bay")
+                                .state("FL")
+                                .zip("75319")
+                                .build())
+                        .coordinates(testCoordinates)
+                        .phoneNumber("867-5309")
+                        .waitDays(WaitDays.builder().newPatient(1).establishedPatient(10).build())
+                        .driveMinutes(30)
+                        .build()))
+            .communityCareEligibility(
+                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                    .eligible(true)
+                    .description("Hardship")
+                    .build())
+            .build();
+    assertThat(actual).isEqualTo(expected);
   }
 }
