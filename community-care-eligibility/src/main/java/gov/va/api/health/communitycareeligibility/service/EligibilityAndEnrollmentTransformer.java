@@ -1,20 +1,22 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
+
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibility;
 import lombok.Builder;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
+import lombok.NonNull;
 
 @Builder
 final class EligibilityAndEnrollmentTransformer {
+  @NonNull private final CommunityCareEligibility communityCareEligibility;
 
-    CommunityCareEligibility toCommunityCareEligibilities(@NotNull Boolean eligible,@NotBlank String descript) {
-    Boolean eligibility = eligible;
-    String description = descript;
+  CommunityCareEligibility toCommunityCareEligibilities() {
+    Boolean eligibility = communityCareEligibility.eligible();
+    String description = communityCareEligibility.description();
     if (allBlank(description, eligibility)) {
+      return null;
+    }
+    if (description.length() == 0) {
       return null;
     }
     return CommunityCareEligibility.builder()

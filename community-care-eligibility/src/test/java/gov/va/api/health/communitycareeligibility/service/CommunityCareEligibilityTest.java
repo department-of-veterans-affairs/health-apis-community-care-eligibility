@@ -2,8 +2,8 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +20,7 @@ import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
@@ -54,9 +55,17 @@ public final class CommunityCareEligibilityTest {
             .build();
 
     CommunityCareEligibilityResponse result =
-        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
+        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", true);
     assertThat(result)
-        .isEqualTo(CommunityCareEligibilityResponse.builder().communityCareEligible(null).build());
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .communityCareEligibility(
+                    CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                        .eligible(true)
+                        .description("Wait-Time, Drive-Time")
+                        .build())
+                .facilities(Collections.emptyList())
+                .build());
   }
 
   @Test
@@ -87,6 +96,7 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
+
     Coordinates testCoordinates = Coordinates.builder().latitude(200.00).longitude(100.00).build();
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.coordinates(
@@ -111,6 +121,7 @@ public final class CommunityCareEligibilityTest {
                                         .build()))
                             .build()))
                 .build());
+
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities(testCoordinates, "primarycare"))
         .thenReturn(
@@ -160,9 +171,8 @@ public final class CommunityCareEligibilityTest {
             .maxWait(1)
             .eeClient(eeClient)
             .build();
-
     CommunityCareEligibilityResponse result =
-        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
+        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", true);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -184,13 +194,10 @@ public final class CommunityCareEligibilityTest {
                                 WaitDays.builder().newPatient(1).establishedPatient(10).build())
                             .driveMinutes(30)
                             .build()))
-                .communityCareEligibilities(
-                    singletonList(
-                        CommunityCareEligibilityResponse.CommunityCareEligibilities.builder()
-                            .description("Hardship")
-                            .code("H")
-                            .effectiveDate("2019-03-27T14:37:48Z")
-                            .build()))
-                .build());
+                .communityCareEligibility(
+                    CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                        .description("Hardship")
+                        .eligible(true)
+                        .build()));
   }
 }

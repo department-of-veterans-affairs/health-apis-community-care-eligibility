@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,7 +27,6 @@ public final class CommunityCareEligibilityResponse {
 
   List<Facility> facilities;
 
-
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -54,7 +52,6 @@ public final class CommunityCareEligibilityResponse {
 
     Double longitude;
   }
-
 
   @Data
   @Builder
