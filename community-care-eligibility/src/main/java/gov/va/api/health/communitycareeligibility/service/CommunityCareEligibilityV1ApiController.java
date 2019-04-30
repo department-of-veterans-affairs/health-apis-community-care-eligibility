@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
@@ -12,10 +13,12 @@ import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
+import javax.xml.datatype.DatatypeFactory;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -89,12 +92,12 @@ public class CommunityCareEligibilityV1ApiController {
       boolean establishedPatient, List<Facility> facilities, String serviceType) {
     int waitTime =
         ((equalsIgnoreCase(serviceType, "primarycare"))
-                || (equalsIgnoreCase(serviceType, "mentalhealthcare"))
+                || (equalsIgnoreCase(serviceType, "mentalhealth"))
             ? maxWait
             : maxWaitSpecialty);
     int driveTime =
         ((equalsIgnoreCase(serviceType, "primarycare"))
-                || (equalsIgnoreCase(serviceType, "mentalhealthcare"))
+                || (equalsIgnoreCase(serviceType, "mentalhealth"))
             ? maxDriveTime
             : maxDriveTimeSpecialty);
 
@@ -120,6 +123,8 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @NotBlank @RequestParam(value = "patientICN") String patientIcn,
       @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
+    final String serviceRequestType =
+        equalsIgnoreCase(serviceType, "MentalHealthCare") ? "MentalHealth" : serviceType;
     Address patientAddress =
         Address.builder()
             .street(street.trim())
@@ -139,35 +144,44 @@ public class CommunityCareEligibilityV1ApiController {
                 .getEligibility();
     List<String> eligibilityDescriptions = new ArrayList<String>();
     List<String> eligibilityCodes = new ArrayList<String>();
+    GregorianCalendar todaysDate = new GregorianCalendar();
     for (int i = 0; i < vceEligibilityCollection.size(); i++) {
-      eligibilityDescriptions.add(vceEligibilityCollection.get(i).getVceDescription());
-      eligibilityCodes.add(vceEligibilityCollection.get(i).getVceCode());
+      int dateComparision =
+          vceEligibilityCollection
+              .get(i)
+              .getVceEffectiveDate()
+              .compare(DatatypeFactory.newInstance().newXMLGregorianCalendar(todaysDate));
+      if (dateComparision == 0 || dateComparision == -1) {
+        eligibilityDescriptions.add(vceEligibilityCollection.get(i).getVceDescription());
+        eligibilityCodes.add(vceEligibilityCollection.get(i).getVceCode());
+      }
     }
     VaFacilitiesResponse vaFacilitiesResponse =
-        serviceType.equalsIgnoreCase("urgentcare")
+        serviceRequestType.equalsIgnoreCase("urgentcare")
             ? null
-            : facilitiesClient.facilities(patientCoordinates, serviceType);
+            : facilitiesClient.facilities(patientCoordinates, serviceRequestType);
     List<VaFacilitiesResponse.Facility> filteredByServiceTypeAndState =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
             : vaFacilitiesResponse
                 .data()
                 .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
+                .filter(vaFacility -> hasServiceType(vaFacility, serviceRequestType))
                 .filter(
                     vaFacility ->
                         equalsIgnoreCase(
                             vaFacility.attributes().address().physical().state().trim(),
                             patientAddress.state()))
                 .collect(Collectors.toList());
-    log.info("va facilities filtered by service type {}: {}", serviceType, vaFacilitiesResponse);
+    log.info(
+        "va facilities filtered by service type {}: {}", serviceRequestType, vaFacilitiesResponse);
     List<Facility> facilities =
         filteredByServiceTypeAndState
             .stream()
             .map(
                 vaFacility ->
                     FacilityTransformer.builder()
-                        .serviceType(serviceType)
+                        .serviceType(serviceRequestType)
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
@@ -182,13 +196,14 @@ public class CommunityCareEligibilityV1ApiController {
             || eligibilityCodes.contains("WT")
             || eligibilityCodes.contains("MWT")
             || eligibilityCodes.contains("HWT"))
-        && !serviceType.equalsIgnoreCase("urgentcare")) {
+        && !serviceRequestType.equalsIgnoreCase("urgentcare")) {
       communityCareEligible = true;
-    } else if (eligibilityCodes.contains("U") && serviceType.equalsIgnoreCase("urgentcare")) {
+    } else if (eligibilityCodes.contains("U")
+        && serviceRequestType.equalsIgnoreCase("urgentcare")) {
       communityCareEligible = true;
     } else {
       eligibilityDescriptions.add("Access-Standards");
-      if (eligibleByAccessStandards(establishedPatient, facilities, serviceType)) {
+      if (eligibleByAccessStandards(establishedPatient, facilities, serviceRequestType)) {
         communityCareEligible = true;
       }
     }
@@ -203,6 +218,14 @@ public class CommunityCareEligibilityV1ApiController {
             .build()
             .toCommunityCareEligibilities();
     return CommunityCareEligibilityResponse.builder()
+        .patientRequest(
+            CommunityCareEligibilityResponse.PatientRequest.builder()
+                .patientCoordinates(patientCoordinates)
+                .serviceType(capitalize(serviceType))
+                .establishedPatient(establishedPatient)
+                .paitentIcn(patientIcn)
+                .patientAddress(patientAddress)
+                .build())
         .communityCareEligibility(communityCareEligibility)
         .facilities(facilities)
         .build();

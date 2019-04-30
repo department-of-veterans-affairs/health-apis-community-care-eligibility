@@ -25,7 +25,28 @@ import lombok.NoArgsConstructor;
 public final class CommunityCareEligibilityResponse {
   CommunityCareEligibility communityCareEligibility;
 
+  PatientRequest patientRequest;
+
   List<Facility> facilities;
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class PatientRequest {
+    String serviceType;
+
+    String paitentIcn;
+
+    Address patientAddress;
+
+    Coordinates patientCoordinates;
+
+    Boolean establishedPatient;
+
+    String description;
+  }
 
   @Data
   @Builder
