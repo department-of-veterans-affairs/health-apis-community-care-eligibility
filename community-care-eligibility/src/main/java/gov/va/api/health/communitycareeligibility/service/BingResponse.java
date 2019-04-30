@@ -60,7 +60,7 @@ public final class BingResponse {
 
     Integer travelDuration;
 
-    Integer travelDurationTraffic;
+    // Integer travelDurationTraffic;
   }
 
   @Data

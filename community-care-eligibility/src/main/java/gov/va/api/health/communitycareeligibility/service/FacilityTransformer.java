@@ -1,11 +1,13 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
+import java.util.Locale;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
@@ -38,10 +40,10 @@ public class FacilityTransformer {
       return null;
     }
     return Address.builder()
-        .street(StringUtils.trimToNull(street))
-        .city(StringUtils.trimToNull(physical.city()))
-        .state(StringUtils.trimToNull(physical.state()))
-        .zip(StringUtils.trimToNull(physical.zip()))
+        .street(trimToNull(street))
+        .city(trimToNull(physical.city()))
+        .state(trimToNull(StringUtils.upperCase(physical.state(), Locale.US)))
+        .zip(trimToNull(physical.zip()))
         .build();
   }
 
@@ -62,7 +64,7 @@ public class FacilityTransformer {
     if (vaFacility.attributes() == null) {
       return null;
     }
-    return StringUtils.trimToNull(vaFacility.attributes().name());
+    return trimToNull(vaFacility.attributes().name());
   }
 
   private static String phoneNumber(VaFacilitiesResponse.Facility vaFacility) {
@@ -72,7 +74,7 @@ public class FacilityTransformer {
     if (vaFacility.attributes().phone() == null) {
       return null;
     }
-    return StringUtils.trimToNull(vaFacility.attributes().phone().main());
+    return trimToNull(vaFacility.attributes().phone().main());
   }
 
   /** Check for Facility. */
@@ -81,7 +83,7 @@ public class FacilityTransformer {
       return null;
     }
     return Facility.builder()
-        .id(StringUtils.trimToNull(vaFacility.id()))
+        .id(trimToNull(vaFacility.id()))
         .name(name(vaFacility))
         .address(address(vaFacility))
         .coordinates(coordinates(vaFacility))

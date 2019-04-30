@@ -1,5 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
@@ -17,7 +19,6 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -80,37 +81,32 @@ public class CommunityCareEligibilityV1ApiController {
                 waitTime ->
                     waitTime != null
                         && waitTime.service() != null
-                        && StringUtils.equalsIgnoreCase(serviceType, waitTime.service()));
+                        && equalsIgnoreCase(serviceType, waitTime.service()));
   }
 
   @SneakyThrows
-  private boolean computeEligibilityBasedOnDriveTime(List<Facility> facilities, String serviceType) {
-      int driveTime = ((StringUtils.equalsIgnoreCase(serviceType, "primarycare")) || (StringUtils.equalsIgnoreCase(serviceType, "primarycare")) ? maxDriveTime : maxDriveTimeSpecialty);
-      List<Facility> filtered =
-        facilities
-            .stream()
-            .filter(
-                facility ->
-                    (facility.driveMinutes() != null && facility.driveMinutes() < driveTime))
-            .collect(Collectors.toList());
-    return filtered.isEmpty();
-  }
-
-  @SneakyThrows
-  private boolean computeEligibilityBasedOnWaitTime(
+  private boolean eligibleByAccessStandards(
       boolean establishedPatient, List<Facility> facilities, String serviceType) {
+    int waitTime =
+        ((equalsIgnoreCase(serviceType, "primarycare"))
+                || (equalsIgnoreCase(serviceType, "mentalhealthcare"))
+            ? maxWait
+            : maxWaitSpecialty);
+    int driveTime =
+        ((equalsIgnoreCase(serviceType, "primarycare"))
+                || (equalsIgnoreCase(serviceType, "mentalhealthcare"))
+            ? maxDriveTime
+            : maxDriveTimeSpecialty);
 
-      int waitTime = ((StringUtils.equalsIgnoreCase(serviceType, "primarycare")) || (StringUtils.equalsIgnoreCase(serviceType, "primarycare")) ? maxWait : maxWaitSpecialty);
-      List<Facility> filtered =
-        facilities
-            .stream()
-            .filter(
-                facility ->
-                    (establishedPatient
-                        ? (facility.waitDays().establishedPatient() < waitTime)
-                        : (facility.waitDays().newPatient() < waitTime)))
-            .collect(Collectors.toList());
-    return filtered.isEmpty();
+    return facilities
+        .stream()
+        .noneMatch(
+            facility ->
+                (establishedPatient
+                        ? facility.waitDays().establishedPatient() < waitTime
+                        : facility.waitDays().newPatient() < waitTime)
+                    && facility.driveMinutes() != null
+                    && facility.driveMinutes() < driveTime);
   }
 
   /** Search community care eligibility. */
@@ -134,7 +130,7 @@ public class CommunityCareEligibilityV1ApiController {
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     GetEESummaryResponse response = eeClient.requestEligibility(patientIcn);
     List<VceEligibilityInfo> vceEligibilityCollection =
-        response.getSummary() == null
+        response == null || response.getSummary() == null
             ? Collections.emptyList()
             : response
                 .getSummary()
@@ -157,12 +153,12 @@ public class CommunityCareEligibilityV1ApiController {
             : vaFacilitiesResponse
                 .data()
                 .stream()
+                .filter(vaFacility -> hasServiceType(vaFacility, serviceType))
                 .filter(
                     vaFacility ->
-                        hasServiceType(vaFacility, serviceType)
-                            && (StringUtils.equalsIgnoreCase(
-                                vaFacility.attributes().address().physical().state().trim(),
-                                patientAddress.state())))
+                        equalsIgnoreCase(
+                            vaFacility.attributes().address().physical().state().trim(),
+                            patientAddress.state()))
                 .collect(Collectors.toList());
     log.info("va facilities filtered by service type {}: {}", serviceType, vaFacilitiesResponse);
     List<Facility> facilities =
@@ -191,12 +187,8 @@ public class CommunityCareEligibilityV1ApiController {
     } else if (eligibilityCodes.contains("U") && serviceType.equalsIgnoreCase("urgentcare")) {
       communityCareEligible = true;
     } else {
-      if (computeEligibilityBasedOnWaitTime(establishedPatient, facilities, serviceType)) {
-        eligibilityDescriptions.add("Wait-Time");
-        communityCareEligible = true;
-      }
-      if (computeEligibilityBasedOnDriveTime(facilities, serviceType)) {
-        eligibilityDescriptions.add("Drive-Time");
+      eligibilityDescriptions.add("Access-Standards");
+      if (eligibleByAccessStandards(establishedPatient, facilities, serviceType)) {
         communityCareEligible = true;
       }
     }
@@ -217,7 +209,7 @@ public class CommunityCareEligibilityV1ApiController {
   }
 
   private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
-    BingResponse routes = bingMaps.routes(patientCoordinates, facility);
+    BingResponse routes = bingMaps.routes(patientCoordinates, facility.coordinates());
     if (routes.resourceSets().isEmpty()) {
       return;
     }

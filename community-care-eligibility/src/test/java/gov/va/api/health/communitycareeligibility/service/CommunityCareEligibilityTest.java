@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,16 +30,166 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
+  @Test
+  @SneakyThrows
+  public void disjointWaitTimeAndDriveTime() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    // when(eeClient.requestEligibility("1008679665V880686")).thenReturn(new
+    // GetEESummaryResponse());
+
+    Coordinates nearCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
+    Coordinates farCoordinates = Coordinates.builder().latitude(3D).longitude(4D).build();
+
+    Coordinates patientCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
+    BingMapsClient bingMaps = mock(BingMapsClient.class);
+    when(bingMaps.coordinates(
+            Address.builder()
+                .city("Melbourne")
+                .state("fl")
+                .zip("12345")
+                .street("66 Main St")
+                .build()))
+        .thenReturn(patientCoordinates);
+    when(bingMaps.routes(eq(patientCoordinates), eq(nearCoordinates)))
+        .thenReturn(
+            BingResponse.builder()
+                .resourceSets(
+                    singletonList(
+                        Resources.builder()
+                            .resources(
+                                singletonList(
+                                    Resource.builder()
+                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(5))
+                                        .build()))
+                            .build()))
+                .build());
+    when(bingMaps.routes(eq(patientCoordinates), eq(farCoordinates)))
+        .thenReturn(
+            BingResponse.builder()
+                .resourceSets(
+                    singletonList(
+                        Resources.builder()
+                            .resources(
+                                singletonList(
+                                    Resource.builder()
+                                        .travelDuration((int) TimeUnit.HOURS.toSeconds(1))
+                                        .build()))
+                            .build()))
+                .build());
+
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.facilities(patientCoordinates, "primarycare"))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    asList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("nearFac")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(1D)
+                                    .longg(2D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(100)
+                                                        .neww(100)
+                                                        .service("primarycare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("near st")
+                                                    .state("fl")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build(),
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("farFac")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(3D)
+                                    .longg(4D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(0)
+                                                        .neww(0)
+                                                        .service("primarycare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("far st")
+                                                    .state("fl")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
+
+    CommunityCareEligibilityV1ApiController controller =
+        CommunityCareEligibilityV1ApiController.builder()
+            .maxDriveTime(10)
+            .maxWait(5)
+            .facilitiesClient(facilitiesClient)
+            .bingMaps(bingMaps)
+            .eeClient(eeClient)
+            .build();
+    CommunityCareEligibilityResponse actual =
+        controller.search(
+            " 66 Main St",
+            "Melbourne  ",
+            " fl",
+            " 12345 ",
+            "primarycare",
+            "1008679665V880686",
+            false);
+    CommunityCareEligibilityResponse expected =
+        CommunityCareEligibilityResponse.builder()
+            .facilities(
+                asList(
+                    Facility.builder()
+                        .id("nearFac")
+                        .address(Address.builder().street("near st").state("FL").build())
+                        .coordinates(nearCoordinates)
+                        .waitDays(
+                            WaitDays.builder().newPatient(100).establishedPatient(100).build())
+                        .driveMinutes(5)
+                        .build(),
+                    Facility.builder()
+                        .id("farFac")
+                        .address(Address.builder().street("far st").state("FL").build())
+                        .coordinates(farCoordinates)
+                        .waitDays(WaitDays.builder().newPatient(0).establishedPatient(0).build())
+                        .driveMinutes(60)
+                        .build()))
+            .communityCareEligibility(
+                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                    .eligible(true)
+                    .description("Access-Standards")
+                    .build())
+            .build();
+    assertThat(actual).isEqualTo(expected);
+  }
 
   @Test
   @SneakyThrows
   public void empty() {
-
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility(any(String.class))).thenReturn(new GetEESummaryResponse());
 
     BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.routes(any(Coordinates.class), any(Facility.class)))
+    when(bingMaps.routes(any(Coordinates.class), any(Coordinates.class)))
         .thenReturn(BingResponse.builder().build());
 
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
@@ -55,14 +206,15 @@ public final class CommunityCareEligibilityTest {
             .build();
 
     CommunityCareEligibilityResponse result =
-        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
+        controller.search(
+            " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
                 .communityCareEligibility(
                     CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                         .eligible(true)
-                        .description("Wait-Time, Drive-Time")
+                        .description("Access-Standards")
                         .build())
                 .facilities(Collections.emptyList())
                 .build());
@@ -107,7 +259,7 @@ public final class CommunityCareEligibilityTest {
                 .street("66 Main St")
                 .build()))
         .thenReturn(testCoordinates);
-    when(bingMaps.routes(eq(testCoordinates), any(Facility.class)))
+    when(bingMaps.routes(eq(testCoordinates), any(Coordinates.class)))
         .thenReturn(
             BingResponse.builder()
                 .resourceSets(
@@ -117,7 +269,6 @@ public final class CommunityCareEligibilityTest {
                                 singletonList(
                                     Resource.builder()
                                         .travelDuration((int) TimeUnit.MINUTES.toSeconds(30))
-                                        .travelDurationTraffic((int) TimeUnit.MINUTES.toSeconds(45))
                                         .build()))
                             .build()))
                 .build());
@@ -172,7 +323,14 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
+        controller.search(
+            " 66 Main St",
+            "Melbourne  ",
+            " fl",
+            " 12345 ",
+            "primarycare",
+            "1008679665V880686",
+            true);
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .facilities(
