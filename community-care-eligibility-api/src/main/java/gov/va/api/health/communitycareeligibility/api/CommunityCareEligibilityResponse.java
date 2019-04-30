@@ -23,9 +23,9 @@ import lombok.NoArgsConstructor;
 //      example = "SWAGGER_EXAMPLE_ALLERGY_INTOLERANCE"
 //    )
 public final class CommunityCareEligibilityResponse {
-  CommunityCareEligibility communityCareEligibility;
-
   PatientRequest patientRequest;
+
+  CommunityCareEligibility communityCareEligibility;
 
   List<Facility> facilities;
 
@@ -35,17 +35,15 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class PatientRequest {
-    String serviceType;
-
-    String paitentIcn;
+    String patientIcn;
 
     Address patientAddress;
 
     Coordinates patientCoordinates;
 
-    Boolean establishedPatient;
+    String serviceType;
 
-    String description;
+    Boolean establishedPatient;
   }
 
   @Data

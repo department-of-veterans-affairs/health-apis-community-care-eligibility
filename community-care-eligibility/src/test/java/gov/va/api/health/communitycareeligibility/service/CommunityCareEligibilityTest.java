@@ -136,15 +136,15 @@ public final class CommunityCareEligibilityTest {
                 .build());
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
-            .maxDriveTime(10)
-            .maxWait(5)
+            .maxDriveTimePrimary(10)
+            .maxWaitPrimary(5)
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
         controller.search(
-            " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", false);
+            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .facilities(
@@ -179,7 +179,7 @@ public final class CommunityCareEligibilityTest {
                             .zip("12345")
                             .street("66 Main St")
                             .build())
-                    .paitentIcn("123")
+                    .patientIcn("123")
                     .establishedPatient(false)
                     .serviceType("Primarycare")
                     .build()))
@@ -203,12 +203,12 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
-            .maxDriveTime(1)
-            .maxWait(1)
+            .maxDriveTimePrimary(1)
+            .maxDriveTimePrimary(1)
             .build();
     CommunityCareEligibilityResponse result =
         controller.search(
-            " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
+            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -227,8 +227,8 @@ public final class CommunityCareEligibilityTest {
                                 .zip("12345")
                                 .street("66 Main St")
                                 .build())
-                        .paitentIcn("123")
-                        .establishedPatient(true)
+                        .patientIcn("123")
+                        .establishedPatient(false)
                         .serviceType("Primarycare")
                         .build())
                 .build());
@@ -329,13 +329,13 @@ public final class CommunityCareEligibilityTest {
         CommunityCareEligibilityV1ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
-            .maxDriveTime(1)
-            .maxWait(1)
+            .maxDriveTimePrimary(1)
+            .maxWaitPrimary(1)
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
         controller.search(
-            " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
+            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .facilities(
@@ -370,8 +370,8 @@ public final class CommunityCareEligibilityTest {
                             .zip("12345")
                             .street("66 Main St")
                             .build())
-                    .paitentIcn("123")
-                    .establishedPatient(true)
+                    .patientIcn("123")
+                    .establishedPatient(false)
                     .serviceType("Primarycare")
                     .build()))
             .build();
@@ -417,12 +417,12 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
-            .maxDriveTime(1)
-            .maxWait(1)
+            .maxDriveTimePrimary(1)
+            .maxWaitPrimary(1)
             .build();
     CommunityCareEligibilityResponse result =
         controller.search(
-            " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
+            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
     assertThat(!result.communityCareEligibility().description().contains("Hardship"));
   }
 }
