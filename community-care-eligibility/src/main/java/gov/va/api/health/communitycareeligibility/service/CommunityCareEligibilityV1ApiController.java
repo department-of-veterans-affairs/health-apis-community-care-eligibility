@@ -45,11 +45,17 @@ public class CommunityCareEligibilityV1ApiController {
 
   private int maxWait;
 
+  private int maxDriveTimeSpecialty;
+
+  private int maxWaitSpecialty;
+
   /** Autowired constructor. */
   @Builder
   public CommunityCareEligibilityV1ApiController(
       @Value("${community-care.max-drive-time}") int maxDriveTime,
       @Value("${community-care.max-wait}") int maxWait,
+      @Value("${community-care.max-drive-time-specialty}") int maxDriveTimeSpecialty,
+      @Value("${community-care.max-wait-specialty}") int maxWaitSpecialty,
       @Autowired BingMapsClient bingMaps,
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
@@ -78,28 +84,31 @@ public class CommunityCareEligibilityV1ApiController {
   }
 
   @SneakyThrows
-  private boolean computeEligibilityBasedOnDriveTime(List<Facility> facilities) {
-    List<Facility> filtered =
+  private boolean computeEligibilityBasedOnDriveTime(List<Facility> facilities, String serviceType) {
+      int driveTime = ((StringUtils.equalsIgnoreCase(serviceType, "primarycare")) || (StringUtils.equalsIgnoreCase(serviceType, "primarycare")) ? maxDriveTime : maxDriveTimeSpecialty);
+      List<Facility> filtered =
         facilities
             .stream()
             .filter(
                 facility ->
-                    (facility.driveMinutes() != null && facility.driveMinutes() < maxDriveTime))
+                    (facility.driveMinutes() != null && facility.driveMinutes() < driveTime))
             .collect(Collectors.toList());
     return filtered.isEmpty();
   }
 
   @SneakyThrows
   private boolean computeEligibilityBasedOnWaitTime(
-      boolean establishedPatient, List<Facility> facilities) {
-    List<Facility> filtered =
+      boolean establishedPatient, List<Facility> facilities, String serviceType) {
+
+      int waitTime = ((StringUtils.equalsIgnoreCase(serviceType, "primarycare")) || (StringUtils.equalsIgnoreCase(serviceType, "primarycare")) ? maxWait : maxWaitSpecialty);
+      List<Facility> filtered =
         facilities
             .stream()
             .filter(
                 facility ->
                     (establishedPatient
-                        ? (facility.waitDays().establishedPatient() < maxWait)
-                        : (facility.waitDays().newPatient() < maxWait)))
+                        ? (facility.waitDays().establishedPatient() < waitTime)
+                        : (facility.waitDays().newPatient() < waitTime)))
             .collect(Collectors.toList());
     return filtered.isEmpty();
   }
@@ -113,6 +122,7 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
+      @NotBlank @RequestParam(value = "patientICN") String patientIcn,
       @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
     Address patientAddress =
         Address.builder()
@@ -122,7 +132,7 @@ public class CommunityCareEligibilityV1ApiController {
             .zip(zip.trim())
             .build();
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
-    GetEESummaryResponse response = eeClient.requestEligibility("1008679665V880686");
+    GetEESummaryResponse response = eeClient.requestEligibility(patientIcn);
     List<VceEligibilityInfo> vceEligibilityCollection =
         response.getSummary() == null
             ? Collections.emptyList()
@@ -181,11 +191,11 @@ public class CommunityCareEligibilityV1ApiController {
     } else if (eligibilityCodes.contains("U") && serviceType.equalsIgnoreCase("urgentcare")) {
       communityCareEligible = true;
     } else {
-      if (computeEligibilityBasedOnWaitTime(establishedPatient, facilities)) {
+      if (computeEligibilityBasedOnWaitTime(establishedPatient, facilities, serviceType)) {
         eligibilityDescriptions.add("Wait-Time");
         communityCareEligible = true;
       }
-      if (computeEligibilityBasedOnDriveTime(facilities)) {
+      if (computeEligibilityBasedOnDriveTime(facilities, serviceType)) {
         eligibilityDescriptions.add("Drive-Time");
         communityCareEligible = true;
       }

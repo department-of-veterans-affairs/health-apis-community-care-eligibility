@@ -55,7 +55,7 @@ public final class CommunityCareEligibilityTest {
             .build();
 
     CommunityCareEligibilityResponse result =
-        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", true);
+        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -172,7 +172,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", true);
+        controller.search(" 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", "123", true);
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .facilities(
