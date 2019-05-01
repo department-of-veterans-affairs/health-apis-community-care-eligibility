@@ -285,7 +285,7 @@ public class CommunityCareEligibilityV1ApiController {
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
-    if (!communityCareEligible) {
+    if (!communityCareEligible && !eligibilityCodes.contains("X")) {
       communityCareEligible =
           eligibleByAccessStandards(filteringServiceType, establishedPatient, facilities);
       eligibilityDescriptions.add("Access-Standards");
