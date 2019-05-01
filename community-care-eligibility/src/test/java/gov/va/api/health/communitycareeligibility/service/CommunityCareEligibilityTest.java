@@ -30,13 +30,10 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
-
   @Test
   @SneakyThrows
   public void disjointWaitTimeAndDriveTime() {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    // when(eeClient.requestEligibility("1008679665V880686")).thenReturn(new
-    // GetEESummaryResponse());
     Coordinates nearCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates farCoordinates = Coordinates.builder().latitude(3D).longitude(4D).build();
     Coordinates patientCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
@@ -76,7 +73,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(patientCoordinates, "primarycare"))
+    when(facilitiesClient.facilities(patientCoordinates))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -196,7 +193,7 @@ public final class CommunityCareEligibilityTest {
     when(bingMaps.routes(any(Coordinates.class), any(Coordinates.class)))
         .thenReturn(BingResponse.builder().build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(any(Coordinates.class), any(String.class)))
+    when(facilitiesClient.facilities(any(Coordinates.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
@@ -286,7 +283,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(testCoordinates, "primarycare"))
+    when(facilitiesClient.facilities(testCoordinates))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -380,6 +377,111 @@ public final class CommunityCareEligibilityTest {
 
   @Test
   @SneakyThrows
+  public void mentalHealth() {
+    Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
+    Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
+    BingMapsClient bingMaps = mock(BingMapsClient.class);
+    when(bingMaps.coordinates(
+            Address.builder()
+                .city("Melbourne")
+                .state("fl")
+                .zip("12345")
+                .street("66 Main St")
+                .build()))
+        .thenReturn(patientCoordinates);
+    when(bingMaps.routes(eq(patientCoordinates), eq(facilityCoordinates)))
+        .thenReturn(
+            BingResponse.builder()
+                .resourceSets(
+                    singletonList(
+                        Resources.builder()
+                            .resources(
+                                singletonList(
+                                    Resource.builder()
+                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(30))
+                                        .build()))
+                            .build()))
+                .build());
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.facilities(patientCoordinates))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC123")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(200D)
+                                    .longg(100D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(1)
+                                                        .neww(10)
+                                                        .service("MentalHealth")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("911 derp st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
+    CommunityCareEligibilityV1ApiController controller =
+        CommunityCareEligibilityV1ApiController.builder()
+            .facilitiesClient(facilitiesClient)
+            .bingMaps(bingMaps)
+            .eeClient(mock(EligibilityAndEnrollmentClient.class))
+            .maxDriveTimePrimary(60)
+            .maxWaitPrimary(2)
+            .build();
+    CommunityCareEligibilityResponse actual =
+        controller.search(
+            "123", "66 Main St", "Melbourne", "fl", "12345", "MentalHealthCare", true);
+    CommunityCareEligibilityResponse expected =
+        CommunityCareEligibilityResponse.builder()
+            .patientRequest(
+                CommunityCareEligibilityResponse.PatientRequest.builder()
+                    .patientIcn("123")
+                    .patientAddress(
+                        Address.builder()
+                            .state("fl")
+                            .city("Melbourne")
+                            .zip("12345")
+                            .street("66 Main St")
+                            .build())
+                    .patientCoordinates(patientCoordinates)
+                    .serviceType("MentalHealthCare")
+                    .establishedPatient(true)
+                    .build())
+            .communityCareEligibility(
+                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                    .eligible(false)
+                    .description("Access-Standards")
+                    .build())
+            .facilities(
+                singletonList(
+                    Facility.builder()
+                        .id("FAC123")
+                        .address(Address.builder().street("911 derp st").state("FL").build())
+                        .coordinates(facilityCoordinates)
+                        .waitDays(WaitDays.builder().newPatient(10).establishedPatient(1).build())
+                        .driveMinutes(30)
+                        .build()))
+            .build();
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  @SneakyThrows
   public void testNotYetEligibleDate() {
     GregorianCalendar gCal = new GregorianCalendar();
     gCal.setTime(Date.from(Instant.parse("2099-03-27T14:37:48Z")));
@@ -410,7 +512,7 @@ public final class CommunityCareEligibilityTest {
     when(bingMaps.routes(any(Coordinates.class), any(Coordinates.class)))
         .thenReturn(BingResponse.builder().build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(any(Coordinates.class), any(String.class)))
+    when(facilitiesClient.facilities(any(Coordinates.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()

@@ -173,7 +173,7 @@ public class CommunityCareEligibilityV1ApiController {
     VaFacilitiesResponse vaFacilitiesResponse =
         serviceRequestType.equalsIgnoreCase("urgentcare")
             ? null
-            : facilitiesClient.facilities(patientCoordinates, serviceRequestType);
+            : facilitiesClient.facilities(patientCoordinates);
     List<VaFacilitiesResponse.Facility> filteredByServiceTypeAndState =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
