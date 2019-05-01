@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
   produces = "application/json"
 )
 public class CommunityCareEligibilityV1ApiController {
+
   private int maxDriveMinsPrimary;
 
   private int maxWaitDaysPrimary;
@@ -85,6 +86,25 @@ public class CommunityCareEligibilityV1ApiController {
                     waitTime != null
                         && waitTime.service() != null
                         && equalsIgnoreCase(serviceType, waitTime.service()));
+  }
+
+  private Boolean eligbleByEligbilityAndEnrollmentResponse(
+      List<String> eligibilityCodes, String serviceType) {
+    if (eligibilityCodes.contains("X")) {
+      return false;
+    } else if ((eligibilityCodes.contains("G")
+            || eligibilityCodes.contains("N")
+            || eligibilityCodes.contains("H")
+            || eligibilityCodes.contains("M")
+            || eligibilityCodes.contains("WT")
+            || eligibilityCodes.contains("MWT")
+            || eligibilityCodes.contains("HWT"))
+        && !serviceType.equalsIgnoreCase("urgentcare")) {
+      return true;
+    } else if (eligibilityCodes.contains("U") && serviceType.equalsIgnoreCase("urgentcare")) {
+      return true;
+    }
+    return false;
   }
 
   @SneakyThrows
@@ -199,26 +219,12 @@ public class CommunityCareEligibilityV1ApiController {
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
-    Boolean communityCareEligible = false;
-    if (eligibilityCodes.contains("X")) {
-      communityCareEligible = false;
-    } else if ((eligibilityCodes.contains("G")
-            || eligibilityCodes.contains("N")
-            || eligibilityCodes.contains("H")
-            || eligibilityCodes.contains("M")
-            || eligibilityCodes.contains("WT")
-            || eligibilityCodes.contains("MWT")
-            || eligibilityCodes.contains("HWT"))
-        && !serviceRequestType.equalsIgnoreCase("urgentcare")) {
-      communityCareEligible = true;
-    } else if (eligibilityCodes.contains("U")
-        && serviceRequestType.equalsIgnoreCase("urgentcare")) {
-      communityCareEligible = true;
-    } else {
+    Boolean communityCareEligible =
+        eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, serviceRequestType);
+    if (!communityCareEligible) {
+      communityCareEligible =
+          eligibleByAccessStandards(serviceRequestType, establishedPatient, facilities);
       eligibilityDescriptions.add("Access-Standards");
-      if (eligibleByAccessStandards(serviceRequestType, establishedPatient, facilities)) {
-        communityCareEligible = true;
-      }
     }
     String communityCareDescriptions = String.join(", ", eligibilityDescriptions);
     CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility =
