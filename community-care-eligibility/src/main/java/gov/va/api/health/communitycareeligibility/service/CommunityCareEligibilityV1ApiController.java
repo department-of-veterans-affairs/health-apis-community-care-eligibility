@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
@@ -10,18 +9,25 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
+import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.Attributes;
+import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.PhysicalAddress;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +44,6 @@ import org.springframework.web.bind.annotation.RestController;
   produces = "application/json"
 )
 public class CommunityCareEligibilityV1ApiController {
-
   private int maxDriveMinsPrimary;
 
   private int maxWaitDaysPrimary;
@@ -87,6 +92,48 @@ public class CommunityCareEligibilityV1ApiController {
                     waitTime != null
                         && waitTime.service() != null
                         && equalsIgnoreCase(serviceType, waitTime.service()));
+  }
+
+  private static Map<String, String> servicesMap() {
+    Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    for (String service :
+        Arrays.asList(
+            "PrimaryCare",
+            "MentalHealthCare",
+            "UrgentCare",
+            "EmergencyCare",
+            "Audiology",
+            "Cardiology",
+            "Dermatology",
+            "Gastroenterology",
+            "Gynecology",
+            "Ophthalmology",
+            "Optometry",
+            "Orthopedics",
+            "Urology",
+            "WomensHealth")) {
+      map.put(service, service);
+    }
+    return map;
+  }
+
+  private static String state(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility == null) {
+      return null;
+    }
+    Attributes attributes = vaFacility.attributes();
+    if (attributes == null) {
+      return null;
+    }
+    VaFacilitiesResponse.Address address = attributes.address();
+    if (address == null) {
+      return null;
+    }
+    PhysicalAddress physical = address.physical();
+    if (physical == null) {
+      return null;
+    }
+    return StringUtils.trimToNull(physical.state());
   }
 
   private CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility(
@@ -189,36 +236,38 @@ public class CommunityCareEligibilityV1ApiController {
         eligibilityCodes.add(vceEligibilityCollection.get(i).getVceCode());
       }
     }
-    final String serviceRequestType =
-        equalsIgnoreCase(serviceType, "MentalHealthCare") ? "MentalHealth" : serviceType;
+
+    String mappedServiceType = servicesMap().get(serviceType);
+    if (mappedServiceType == null) {
+      throw new IllegalArgumentException("Unknown service type: " + serviceType);
+    }
+    // For 'MentalHealthCare', use 'MentalHealth' for filtering
+    final String filteringServiceType =
+        equalsIgnoreCase(mappedServiceType, "MentalHealthCare")
+            ? "MentalHealth"
+            : mappedServiceType;
     Address patientAddress =
         Address.builder()
             .street(street.trim())
             .city(city.trim())
-            .state(state.trim())
+            .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
-    VaFacilitiesResponse vaFacilitiesResponse =
-        serviceRequestType.equalsIgnoreCase("urgentcare")
-            ? null
-            : facilitiesClient.facilities(patientCoordinates);
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientCoordinates);
     List<VaFacilitiesResponse.Facility> filteredByServiceTypeAndState =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
             : vaFacilitiesResponse
                 .data()
                 .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, serviceRequestType))
-                .filter(
-                    vaFacility ->
-                        equalsIgnoreCase(
-                            vaFacility.attributes().address().physical().state().trim(),
-                            patientAddress.state()))
+                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
+                .filter(vaFacility -> equalsIgnoreCase(state(vaFacility), patientAddress.state()))
                 .collect(Collectors.toList());
     log.info(
-        "va facilities filtered by service type {}: {}",
-        serviceRequestType,
+        "VA facilities filtered by service type '{}' and state {}: {}",
+        filteringServiceType,
+        patientAddress,
         filteredByServiceTypeAndState
             .stream()
             .map(facility -> facility.id())
@@ -229,16 +278,16 @@ public class CommunityCareEligibilityV1ApiController {
             .map(
                 vaFacility ->
                     FacilityTransformer.builder()
-                        .serviceType(serviceRequestType)
+                        .serviceType(filteringServiceType)
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Boolean communityCareEligible =
-        eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, serviceRequestType);
+        eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
     if (!communityCareEligible) {
       communityCareEligible =
-          eligibleByAccessStandards(serviceRequestType, establishedPatient, facilities);
+          eligibleByAccessStandards(filteringServiceType, establishedPatient, facilities);
       eligibilityDescriptions.add("Access-Standards");
     }
     String communityCareDescriptions = String.join(", ", eligibilityDescriptions);
@@ -248,7 +297,7 @@ public class CommunityCareEligibilityV1ApiController {
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
                 .patientCoordinates(patientCoordinates)
-                .serviceType(capitalize(serviceType))
+                .serviceType(mappedServiceType)
                 .establishedPatient(establishedPatient)
                 .patientIcn(patientIcn)
                 .patientAddress(patientAddress)
@@ -260,6 +309,9 @@ public class CommunityCareEligibilityV1ApiController {
 
   private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
     BingResponse routes = bingMaps.routes(patientCoordinates, facility.coordinates());
+    if (routes == null) {
+      return;
+    }
     if (routes.resourceSets().isEmpty()) {
       return;
     }
