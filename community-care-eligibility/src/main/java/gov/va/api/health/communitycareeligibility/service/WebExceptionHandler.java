@@ -1,6 +1,8 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.ErrorResponse;
+import gov.va.api.health.queenelizabeth.ee.Eligibilities.RequestFailed;
+import gov.va.api.health.queenelizabeth.ee.Eligibilities.UnknownIdentityInSearchParameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RequestMapping(produces = "application/json")
 public class WebExceptionHandler {
   @ExceptionHandler({
-    // MissingSearchParameters.class,
+    UnknownIdentityInSearchParameter.class,
     javax.validation.ConstraintViolationException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -25,11 +27,11 @@ public class WebExceptionHandler {
     return responseFor(e);
   }
 
-  //  @ExceptionHandler({UnknownResource.class, UnknownIdentityInSearchParameter.class})
-  //  @ResponseStatus(HttpStatus.NOT_FOUND)
-  //  public ErrorResponse handleNotFound(Exception e) {
-  //    return responseFor(e);
-  //  }
+  @ExceptionHandler({RequestFailed.class})
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ErrorResponse handleNotFound(Exception e) {
+    return responseFor(e);
+  }
 
   @ExceptionHandler({Exception.class})
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
