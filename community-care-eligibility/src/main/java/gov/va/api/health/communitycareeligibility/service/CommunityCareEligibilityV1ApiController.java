@@ -126,7 +126,7 @@ public class CommunityCareEligibilityV1ApiController {
                     && facility.driveMinutes() < driveMins);
   }
 
-  private List<VceEligibilityInfo> processEligibilitAndEnrollmentResponse(
+  private List<VceEligibilityInfo> processEligibilityAndEnrollmentResponse(
       GetEESummaryResponse response) {
     return response == null
             || response.getSummary() == null
@@ -159,7 +159,7 @@ public class CommunityCareEligibilityV1ApiController {
       @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
     GetEESummaryResponse response = eeClient.requestEligibility(patientIcn);
     List<VceEligibilityInfo> vceEligibilityCollection =
-        processEligibilitAndEnrollmentResponse(response);
+        processEligibilityAndEnrollmentResponse(response);
     List<String> eligibilityDescriptions = new ArrayList<>();
     List<String> eligibilityCodes = new ArrayList<>();
     Instant now = Instant.now();
