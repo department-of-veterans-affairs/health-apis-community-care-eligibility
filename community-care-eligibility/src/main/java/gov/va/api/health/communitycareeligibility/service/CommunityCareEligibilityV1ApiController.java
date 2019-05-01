@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
@@ -86,6 +87,20 @@ public class CommunityCareEligibilityV1ApiController {
                     waitTime != null
                         && waitTime.service() != null
                         && equalsIgnoreCase(serviceType, waitTime.service()));
+  }
+
+  private CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility(
+      Boolean communityCareEligible, String communityCareDescription) {
+    if (allBlank(communityCareDescription, communityCareEligible)) {
+      return null;
+    }
+    if (communityCareDescription.length() == 0) {
+      return null;
+    }
+    return CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+        .eligible(communityCareEligible)
+        .description(communityCareDescription)
+        .build();
   }
 
   private Boolean eligbleByEligbilityAndEnrollmentResponse(
@@ -228,14 +243,7 @@ public class CommunityCareEligibilityV1ApiController {
     }
     String communityCareDescriptions = String.join(", ", eligibilityDescriptions);
     CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility =
-        EligibilityAndEnrollmentTransformer.builder()
-            .communityCareEligibility(
-                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                    .eligible(communityCareEligible)
-                    .description(communityCareDescriptions)
-                    .build())
-            .build()
-            .toCommunityCareEligibilities();
+        communityCareEligibility(communityCareEligible, communityCareDescriptions);
     return CommunityCareEligibilityResponse.builder()
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
