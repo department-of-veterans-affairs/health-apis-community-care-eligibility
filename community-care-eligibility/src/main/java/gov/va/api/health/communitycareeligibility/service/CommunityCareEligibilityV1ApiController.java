@@ -37,14 +37,13 @@ import org.springframework.web.bind.annotation.RestController;
   produces = "application/json"
 )
 public class CommunityCareEligibilityV1ApiController {
+  private int maxDriveMinsPrimary;
 
-  private int maxDriveTimePrimary;
+  private int maxWaitDaysPrimary;
 
-  private int maxWaitPrimary;
+  private int maxDriveMinsSpecialty;
 
-  private int maxDriveTimeSpecialty;
-
-  private int maxWaitSpecialty;
+  private int maxWaitDaysSpecialty;
 
   private BingMapsClient bingMaps;
 
@@ -62,10 +61,10 @@ public class CommunityCareEligibilityV1ApiController {
       @Autowired BingMapsClient bingMaps,
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
-    this.maxDriveTimePrimary = maxDriveTimePrimary;
-    this.maxWaitPrimary = maxWaitPrimary;
-    this.maxDriveTimeSpecialty = maxDriveTimeSpecialty;
-    this.maxWaitSpecialty = maxWaitSpecialty;
+    this.maxDriveMinsPrimary = maxDriveTimePrimary;
+    this.maxWaitDaysPrimary = maxWaitPrimary;
+    this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
+    this.maxWaitDaysSpecialty = maxWaitSpecialty;
     this.bingMaps = bingMaps;
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
@@ -90,17 +89,12 @@ public class CommunityCareEligibilityV1ApiController {
 
   @SneakyThrows
   private boolean eligibleByAccessStandards(
-      boolean establishedPatient, List<Facility> facilities, String serviceType) {
-    int waitTime =
-        ((equalsIgnoreCase(serviceType, "primarycare"))
-                || (equalsIgnoreCase(serviceType, "mentalhealth"))
-            ? maxWaitPrimary
-            : maxWaitSpecialty);
-    int driveTime =
-        ((equalsIgnoreCase(serviceType, "primarycare"))
-                || (equalsIgnoreCase(serviceType, "mentalhealth"))
-            ? maxDriveTimePrimary
-            : maxDriveTimeSpecialty);
+      String serviceType, boolean establishedPatient, List<Facility> facilities) {
+    boolean isPrimary =
+        equalsIgnoreCase(serviceType, "primarycare")
+            || equalsIgnoreCase(serviceType, "mentalhealth");
+    int waitTime = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
+    int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
     return facilities
         .stream()
         .noneMatch(
@@ -109,7 +103,7 @@ public class CommunityCareEligibilityV1ApiController {
                         ? facility.waitDays().establishedPatient() < waitTime
                         : facility.waitDays().newPatient() < waitTime)
                     && facility.driveMinutes() != null
-                    && facility.driveMinutes() < driveTime);
+                    && facility.driveMinutes() < driveMins);
   }
 
   private List<VceEligibilityInfo> processEligibilitAndEnrollmentResponse(
@@ -222,7 +216,7 @@ public class CommunityCareEligibilityV1ApiController {
       communityCareEligible = true;
     } else {
       eligibilityDescriptions.add("Access-Standards");
-      if (eligibleByAccessStandards(establishedPatient, facilities, serviceRequestType)) {
+      if (eligibleByAccessStandards(serviceRequestType, establishedPatient, facilities)) {
         communityCareEligible = true;
       }
     }
