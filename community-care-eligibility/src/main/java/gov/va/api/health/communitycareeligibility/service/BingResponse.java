@@ -59,8 +59,6 @@ public final class BingResponse {
     Point point;
 
     Integer travelDuration;
-
-    // Integer travelDurationTraffic;
   }
 
   @Data
