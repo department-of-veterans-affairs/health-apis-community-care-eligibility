@@ -267,7 +267,7 @@ public class CommunityCareEligibilityV1ApiController {
     log.info(
         "VA facilities filtered by service type '{}' and state {}: {}",
         filteringServiceType,
-        patientAddress,
+        patientAddress.state(),
         filteredByServiceTypeAndState
             .stream()
             .map(facility -> facility.id())
