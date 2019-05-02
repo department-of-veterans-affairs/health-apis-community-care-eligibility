@@ -53,7 +53,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .getBody();
     log.info("Va Facilities Response" + responseObject);
     if (responseObject == null) {
-      throw new IllegalStateException();
+      throw new Exceptions.FacilitiesUnavailableException();
     }
     return responseObject;
   }

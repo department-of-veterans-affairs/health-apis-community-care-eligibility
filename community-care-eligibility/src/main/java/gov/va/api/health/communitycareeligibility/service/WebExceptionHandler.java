@@ -34,6 +34,15 @@ public class WebExceptionHandler {
     return responseFor(e);
   }
 
+  @ExceptionHandler({
+    Exceptions.BingMapsUnavailableException.class,
+    Exceptions.FacilitiesUnavailableException.class
+  })
+  @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+  public ErrorResponse handleServiceUnavailable(Exception e) {
+    return responseFor(e);
+  }
+
   @ExceptionHandler({Exception.class})
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ErrorResponse handleSnafu(Exception e) {

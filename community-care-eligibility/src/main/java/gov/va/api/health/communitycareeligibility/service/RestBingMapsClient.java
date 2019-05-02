@@ -57,7 +57,7 @@ public class RestBingMapsClient implements BingMapsClient {
             .getBody();
     log.info("Bing Maps locations: " + responseObject);
     if (responseObject == null) {
-      throw new IllegalStateException();
+      throw new Exceptions.BingMapsUnavailableException();
     }
     Point point = responseObject.resourceSets().get(0).resources().get(0).point();
     return Coordinates.builder()
@@ -80,7 +80,7 @@ public class RestBingMapsClient implements BingMapsClient {
             .getBody();
     log.info("Bing Maps routes: " + responseObject);
     if (responseObject == null) {
-      throw new IllegalStateException();
+      throw new Exceptions.BingMapsUnavailableException();
     }
     return responseObject;
   }
