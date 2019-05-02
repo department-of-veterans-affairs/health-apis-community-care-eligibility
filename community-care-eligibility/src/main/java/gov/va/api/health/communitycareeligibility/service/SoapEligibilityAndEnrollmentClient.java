@@ -49,15 +49,21 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   }
 
   @Override
-  public GetEESummaryResponse requestEligibility(String id) {
-    return unmarshal(
-        eligibilities.request(
-            SoapMessageGenerator.builder()
-                .id(id)
-                .eeUsername(eeUsername)
-                .eePassword(eePassword)
-                .eeRequestName(eeRequestName)
-                .build()),
-        GetEESummaryResponse.class);
+  public GetEESummaryResponse requestEligibility(String patientIcn) {
+    try {
+      return unmarshal(
+          eligibilities.request(
+              SoapMessageGenerator.builder()
+                  .id(patientIcn)
+                  .eeUsername(eeUsername)
+                  .eePassword(eePassword)
+                  .eeRequestName(eeRequestName)
+                  .build()),
+          GetEESummaryResponse.class);
+    } catch (Eligibilities.UnknownIdentityInSearchParameter e) {
+      throw new Exceptions.MalformedPatientIcnException(patientIcn, e);
+    } catch (Eligibilities.RequestFailed e) {
+      throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
+    }
   }
 }

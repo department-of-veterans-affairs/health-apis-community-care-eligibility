@@ -219,7 +219,7 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
-    GetEESummaryResponse response = eeClient.requestEligibility(patientIcn);
+    GetEESummaryResponse response = eeClient.requestEligibility(patientIcn.trim());
     List<VceEligibilityInfo> vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(response);
     List<String> eligibilityDescriptions = new ArrayList<>();

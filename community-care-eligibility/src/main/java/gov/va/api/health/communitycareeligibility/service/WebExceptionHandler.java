@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.ErrorResponse;
-import gov.va.api.health.queenelizabeth.ee.Eligibilities;
 import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class WebExceptionHandler {
   @ExceptionHandler({
     ConstraintViolationException.class,
-    Eligibilities.UnknownIdentityInSearchParameter.class,
+    Exceptions.MalformedPatientIcnException.class,
     Exceptions.UnknownServiceTypeException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -28,7 +27,7 @@ public class WebExceptionHandler {
     return responseFor(e);
   }
 
-  @ExceptionHandler({Eligibilities.RequestFailed.class})
+  @ExceptionHandler({Exceptions.UnknownPatientIcnException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorResponse handleNotFound(Exception e) {
     return responseFor(e);
