@@ -229,6 +229,66 @@ public final class CommunityCareEligibilityTest {
 
   @Test
   @SneakyThrows
+  public void facilityTransformerNullChecks() {
+    assertThat(FacilityTransformer.builder().serviceType("primarycare").build().toFacility(null))
+        .isEqualTo(null);
+
+    VaFacilitiesResponse.Facility facility = VaFacilitiesResponse.Facility.builder().build();
+    Facility mapped =
+        FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+
+    // top level attributes is null
+    assertThat(mapped.address()).isEqualTo(null);
+    assertThat(mapped.driveMinutes()).isEqualTo(null);
+    assertThat(mapped.id()).isEqualTo(null);
+    assertThat(mapped.coordinates()).isEqualTo(null);
+    assertThat(mapped.phoneNumber()).isEqualTo(null);
+    assertThat(mapped.waitDays()).isEqualTo(null);
+
+    facility =
+        VaFacilitiesResponse.Facility.builder()
+            .attributes(VaFacilitiesResponse.Attributes.builder().build())
+            .build();
+    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+
+    // attribute is not null, but everything beyond it is
+    assertThat(mapped.address()).isEqualTo(null);
+    assertThat(mapped.driveMinutes()).isEqualTo(null);
+    assertThat(mapped.id()).isEqualTo(null);
+    assertThat(mapped.coordinates()).isEqualTo(null);
+    assertThat(mapped.phoneNumber()).isEqualTo(null);
+    assertThat(mapped.waitDays()).isEqualTo(null);
+
+    facility =
+        VaFacilitiesResponse.Facility.builder()
+            .attributes(
+                VaFacilitiesResponse.Attributes.builder()
+                    .address(VaFacilitiesResponse.Address.builder().build())
+                    .build())
+            .build();
+    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+
+    // Address is not null, but physical Address is
+    assertThat(mapped.address()).isEqualTo(null);
+
+    facility =
+        VaFacilitiesResponse.Facility.builder()
+            .attributes(
+                VaFacilitiesResponse.Attributes.builder()
+                    .address(
+                        VaFacilitiesResponse.Address.builder()
+                            .physical(VaFacilitiesResponse.PhysicalAddress.builder().build())
+                            .build())
+                    .build())
+            .build();
+    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+
+    // Physical address exists, but all attributes are null
+    assertThat(mapped.address()).isEqualTo(null);
+  }
+
+  @Test
+  @SneakyThrows
   public void happyPath() {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility("123"))
