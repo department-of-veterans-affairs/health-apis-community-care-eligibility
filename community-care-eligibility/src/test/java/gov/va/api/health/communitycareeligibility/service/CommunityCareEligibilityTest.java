@@ -520,6 +520,20 @@ public final class CommunityCareEligibilityTest {
     assertThat(!result.communityCareEligibility().description().contains("Hardship"));
   }
 
+  @SneakyThrows
+  @Test(expected = Exceptions.UnknownServiceTypeException.class)
+  public void unknownServiceType() {
+    CommunityCareEligibilityV1ApiController controller =
+        CommunityCareEligibilityV1ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .bingMaps(mock(BingMapsClient.class))
+            .eeClient(mock(EligibilityAndEnrollmentClient.class))
+            .maxDriveTimePrimary(1)
+            .maxWaitPrimary(1)
+            .build();
+    controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "Dentistry", false);
+  }
+
   @Test
   @SneakyThrows
   public void urgentCare() {
