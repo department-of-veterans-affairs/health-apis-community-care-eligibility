@@ -17,7 +17,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @Component
 public class RestFacilitiesClient implements FacilitiesClient {
-
   private final String vaFacilitiesApiKey;
 
   private final String baseUrl;
@@ -36,7 +35,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse facilities(Coordinates coordinates, String serviceType) {
+  public VaFacilitiesResponse facilities(Coordinates coordinates) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl)
             .queryParam("lat", coordinates.latitude())
@@ -54,7 +53,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .getBody();
     log.info("Va Facilities Response" + responseObject);
     if (responseObject == null) {
-      throw new IllegalStateException();
+      throw new Exceptions.FacilitiesUnavailableException();
     }
     return responseObject;
   }

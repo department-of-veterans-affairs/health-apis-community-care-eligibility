@@ -34,10 +34,8 @@ public final class VaFacilitiesResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class Facility {
-    private String id;
-
-    private Attributes attributes;
+  public static final class Address {
+    private PhysicalAddress physical;
   }
 
   @Data
@@ -68,8 +66,10 @@ public final class VaFacilitiesResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class Address {
-    private PhysicalAddress physical;
+  public static final class Facility {
+    private String id;
+
+    private Attributes attributes;
   }
 
   @Data
