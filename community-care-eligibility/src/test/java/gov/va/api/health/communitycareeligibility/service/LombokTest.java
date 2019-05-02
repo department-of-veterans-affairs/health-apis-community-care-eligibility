@@ -30,7 +30,6 @@ public final class LombokTest {
             BingResponse.Resource.class,
             BingResponse.Resources.class,
             VaFacilitiesResponse.class,
-            VaFacilitiesResponse.Facility.class,
             VaFacilitiesResponse.Address.class,
             VaFacilitiesResponse.Attributes.class,
             VaFacilitiesResponse.Facility.class,
