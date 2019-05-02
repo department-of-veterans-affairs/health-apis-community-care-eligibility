@@ -239,7 +239,7 @@ public class CommunityCareEligibilityV1ApiController {
 
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
-      throw new IllegalArgumentException("Unknown service type: " + serviceType);
+      throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
     // For 'MentalHealthCare', use 'MentalHealth' for filtering
     final String filteringServiceType =

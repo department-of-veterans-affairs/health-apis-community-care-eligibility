@@ -34,23 +34,6 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class PatientRequest {
-    String patientIcn;
-
-    Address patientAddress;
-
-    Coordinates patientCoordinates;
-
-    String serviceType;
-
-    Boolean establishedPatient;
-  }
-
-  @Data
-  @Builder
-  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
     String street;
 
@@ -66,10 +49,10 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class Coordinates {
-    Double latitude;
+  public static final class CommunityCareEligibility {
+    Boolean eligible;
 
-    Double longitude;
+    String description;
   }
 
   @Data
@@ -77,10 +60,10 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class CommunityCareEligibility {
-    Boolean eligible;
+  public static final class Coordinates {
+    Double latitude;
 
-    String description;
+    Double longitude;
   }
 
   @Data
@@ -102,6 +85,23 @@ public final class CommunityCareEligibilityResponse {
     WaitDays waitDays;
 
     Integer driveMinutes;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class PatientRequest {
+    String patientIcn;
+
+    Address patientAddress;
+
+    Coordinates patientCoordinates;
+
+    String serviceType;
+
+    Boolean establishedPatient;
   }
 
   @Data
