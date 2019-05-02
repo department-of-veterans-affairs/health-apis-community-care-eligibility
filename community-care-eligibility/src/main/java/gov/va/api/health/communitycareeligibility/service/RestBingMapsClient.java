@@ -2,7 +2,6 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Point;
 import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,7 @@ public class RestBingMapsClient implements BingMapsClient {
             .getBody();
     log.info("Bing Maps locations: " + responseObject);
     if (responseObject == null) {
-      throw new IllegalStateException();
+      throw new Exceptions.BingMapsUnavailableException();
     }
     Point point = responseObject.resourceSets().get(0).resources().get(0).point();
     return Coordinates.builder()
@@ -68,11 +67,11 @@ public class RestBingMapsClient implements BingMapsClient {
   }
 
   @Override
-  public BingResponse routes(Coordinates patientCoordinates, Facility facility) {
+  public BingResponse routes(Coordinates source, Coordinates destination) {
     String url =
         UriComponentsBuilder.fromHttpUrl("http://dev.virtualearth.net/REST/V1/Routes")
-            .queryParam("wp.0", coordinateParam(patientCoordinates))
-            .queryParam("wp.1", coordinateParam(facility.coordinates()))
+            .queryParam("wp.0", coordinateParam(source))
+            .queryParam("wp.1", coordinateParam(destination))
             .queryParam("key", bingApiKey)
             .toUriString();
     BingResponse responseObject =
@@ -81,7 +80,7 @@ public class RestBingMapsClient implements BingMapsClient {
             .getBody();
     log.info("Bing Maps routes: " + responseObject);
     if (responseObject == null) {
-      throw new IllegalStateException();
+      throw new Exceptions.BingMapsUnavailableException();
     }
     return responseObject;
   }
