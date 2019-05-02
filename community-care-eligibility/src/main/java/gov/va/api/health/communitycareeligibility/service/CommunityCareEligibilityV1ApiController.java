@@ -212,7 +212,7 @@ public class CommunityCareEligibilityV1ApiController {
   @SneakyThrows
   @GetMapping(value = "/search")
   public CommunityCareEligibilityResponse search(
-      @NotBlank @RequestParam(value = "patientIcn") String patientIcn,
+      @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "street") String street,
       @NotBlank @RequestParam(value = "city") String city,
       @NotBlank @RequestParam(value = "state") String state,
