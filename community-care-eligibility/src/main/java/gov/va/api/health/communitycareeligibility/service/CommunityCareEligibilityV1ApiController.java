@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
