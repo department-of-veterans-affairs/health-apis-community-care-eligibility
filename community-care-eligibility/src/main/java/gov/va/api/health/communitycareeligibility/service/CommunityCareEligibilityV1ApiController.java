@@ -149,19 +149,13 @@ public class CommunityCareEligibilityV1ApiController {
   }
 
   private CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility(
-      Boolean communityCareEligible,
+      boolean communityCareEligible,
       List<String> eligibilityDescriptions,
       List<Facility> facilitiesMeetingAccessStandards) {
     String communityCareDescription = String.join(", ", eligibilityDescriptions);
-    if (allBlank(communityCareEligible, communityCareDescription)) {
-      return null;
-    }
-    if (communityCareDescription.length() == 0) {
-      return null;
-    }
     return CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
         .eligible(communityCareEligible)
-        .description(communityCareDescription)
+        .description(StringUtils.trimToNull(communityCareDescription))
         .facilities(
             facilitiesMeetingAccessStandards
                 .stream()
@@ -170,7 +164,7 @@ public class CommunityCareEligibilityV1ApiController {
         .build();
   }
 
-  private Boolean eligbleByEligbilityAndEnrollmentResponse(
+  private boolean eligbleByEligbilityAndEnrollmentResponse(
       List<String> eligibilityCodes, String serviceType) {
     if (eligibilityCodes.contains("X")) {
       return false;
@@ -303,7 +297,7 @@ public class CommunityCareEligibilityV1ApiController {
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
-    Boolean communityCareEligible =
+    boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
         facilitiesMeetingAccessStandards(facilities, filteringServiceType, establishedPatient);
