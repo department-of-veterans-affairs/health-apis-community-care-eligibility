@@ -460,6 +460,7 @@ public final class CommunityCareEligibilityTest {
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(false)
                     .description("Access-Standards")
+                    .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
                 singletonList(
@@ -625,6 +626,8 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .maxWaitPrimary(2)
+            .maxDriveTimeSpecialty(60)
+            .maxWaitSpecialty(2)
             .build();
     CommunityCareEligibilityResponse actual =
         controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "urgentcare", true);
@@ -648,6 +651,7 @@ public final class CommunityCareEligibilityTest {
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
                     .description("Urgent Care")
+                    .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
                 singletonList(
