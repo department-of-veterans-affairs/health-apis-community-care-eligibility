@@ -31,11 +31,42 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
+
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
     gCal.setTime(Date.from(Instant.parse(timestamp)));
     return DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
+  }
+
+  @Test
+  @SneakyThrows
+  public void controllerNullChecks() {
+    assertThat(CommunityCareEligibilityV1ApiController.state(null)).isEqualTo(null);
+    assertThat(
+            CommunityCareEligibilityV1ApiController.state(
+                VaFacilitiesResponse.Facility.builder().build()))
+        .isEqualTo(null);
+    assertThat(
+            CommunityCareEligibilityV1ApiController.state(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
+                    .build()))
+        .isEqualTo(null);
+    assertThat(
+            CommunityCareEligibilityV1ApiController.state(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(
+                        VaFacilitiesResponse.Attributes.builder()
+                            .address(VaFacilitiesResponse.Address.builder().build())
+                            .build())
+                    .build()))
+        .isEqualTo(null);
+    assertThat(CommunityCareEligibilityV1ApiController.waitDays(null, true)).isEqualTo(null);
+    assertThat(
+            CommunityCareEligibilityV1ApiController.waitDays(
+                CommunityCareEligibilityResponse.Facility.builder().build(), true))
+        .isEqualTo(null);
   }
 
   @Test
@@ -232,11 +263,9 @@ public final class CommunityCareEligibilityTest {
   public void facilityTransformerNullChecks() {
     assertThat(FacilityTransformer.builder().serviceType("primarycare").build().toFacility(null))
         .isEqualTo(null);
-
     VaFacilitiesResponse.Facility facility = VaFacilitiesResponse.Facility.builder().build();
     Facility mapped =
         FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-
     // top level attributes is null
     assertThat(mapped.address()).isEqualTo(null);
     assertThat(mapped.driveMinutes()).isEqualTo(null);
@@ -244,13 +273,11 @@ public final class CommunityCareEligibilityTest {
     assertThat(mapped.coordinates()).isEqualTo(null);
     assertThat(mapped.phoneNumber()).isEqualTo(null);
     assertThat(mapped.waitDays()).isEqualTo(null);
-
     facility =
         VaFacilitiesResponse.Facility.builder()
             .attributes(VaFacilitiesResponse.Attributes.builder().build())
             .build();
     mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-
     // attribute is not null, but everything beyond it is
     assertThat(mapped.address()).isEqualTo(null);
     assertThat(mapped.driveMinutes()).isEqualTo(null);
@@ -258,7 +285,6 @@ public final class CommunityCareEligibilityTest {
     assertThat(mapped.coordinates()).isEqualTo(null);
     assertThat(mapped.phoneNumber()).isEqualTo(null);
     assertThat(mapped.waitDays()).isEqualTo(null);
-
     facility =
         VaFacilitiesResponse.Facility.builder()
             .attributes(
@@ -267,10 +293,8 @@ public final class CommunityCareEligibilityTest {
                     .build())
             .build();
     mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-
     // Address is not null, but physical Address is
     assertThat(mapped.address()).isEqualTo(null);
-
     facility =
         VaFacilitiesResponse.Facility.builder()
             .attributes(
@@ -282,7 +306,6 @@ public final class CommunityCareEligibilityTest {
                     .build())
             .build();
     mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-
     // Physical address exists, but all attributes are null
     assertThat(mapped.address()).isEqualTo(null);
   }
@@ -520,6 +543,7 @@ public final class CommunityCareEligibilityTest {
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(false)
                     .description("Access-Standards")
+                    .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
                 singletonList(
@@ -620,7 +644,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     BingMapsClient bingMaps = mock(BingMapsClient.class);
@@ -685,6 +708,8 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .maxWaitPrimary(2)
+            .maxDriveTimeSpecialty(60)
+            .maxWaitSpecialty(2)
             .build();
     CommunityCareEligibilityResponse actual =
         controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "urgentcare", true);
@@ -708,6 +733,7 @@ public final class CommunityCareEligibilityTest {
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
                     .description("Urgent Care")
+                    .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
                 singletonList(
@@ -748,7 +774,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     BingMapsClient bingMaps = mock(BingMapsClient.class);
