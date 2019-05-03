@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,18 +17,20 @@ import lombok.NoArgsConstructor;
   fieldVisibility = JsonAutoDetect.Visibility.ANY,
   isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
-// @Schema(
-//      description =
-//
-// "http://www.fhir.org/guides/argonaut/r2/StructureDefinition-argo-allergyintolerance.html",
-//      example = "SWAGGER_EXAMPLE_ALLERGY_INTOLERANCE"
-//    )
 public final class CommunityCareEligibilityResponse {
   PatientRequest patientRequest;
 
   CommunityCareEligibility communityCareEligibility;
 
   List<Facility> facilities;
+
+  /** Lazy getter. */
+  public List<Facility> facilities() {
+    if (facilities == null) {
+      facilities = new ArrayList<>();
+    }
+    return facilities;
+  }
 
   @Data
   @Builder
@@ -53,6 +56,16 @@ public final class CommunityCareEligibilityResponse {
     Boolean eligible;
 
     String description;
+
+    List<String> facilities;
+
+    /** Lazy getter. */
+    public List<String> facilities() {
+      if (facilities == null) {
+        facilities = new ArrayList<>();
+      }
+      return facilities;
+    }
   }
 
   @Data
