@@ -202,9 +202,9 @@ public class CommunityCareEligibilityV1ApiController {
         .filter(
             facility ->
                 waitDays(facility, establishedPatient) != null
-                    && waitDays(facility, establishedPatient) < waitDays
+                    && waitDays(facility, establishedPatient) <= waitDays
                     && facility.driveMinutes() != null
-                    && facility.driveMinutes() < driveMins)
+                    && facility.driveMinutes() <= driveMins)
         .collect(Collectors.toList());
   }
 
