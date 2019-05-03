@@ -136,6 +136,18 @@ public class CommunityCareEligibilityV1ApiController {
     return StringUtils.trimToNull(physical.state());
   }
 
+  private static Integer waitDays(Facility facility, boolean establishedPatient) {
+    if (facility == null) {
+      return null;
+    }
+    if (facility.waitDays() == null) {
+      return null;
+    }
+    return establishedPatient
+        ? facility.waitDays().establishedPatient()
+        : facility.waitDays().newPatient();
+  }
+
   private CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility(
       Boolean communityCareEligible,
       List<String> eligibilityDescriptions,
@@ -189,9 +201,8 @@ public class CommunityCareEligibilityV1ApiController {
         .stream()
         .filter(
             facility ->
-                (establishedPatient
-                        ? facility.waitDays().establishedPatient() < waitDays
-                        : facility.waitDays().newPatient() < waitDays)
+                waitDays(facility, establishedPatient) != null
+                    && waitDays(facility, establishedPatient) < waitDays
                     && facility.driveMinutes() != null
                     && facility.driveMinutes() < driveMins)
         .collect(Collectors.toList());
