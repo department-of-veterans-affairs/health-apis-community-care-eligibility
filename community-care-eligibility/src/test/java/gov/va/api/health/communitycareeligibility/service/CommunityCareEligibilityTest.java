@@ -111,7 +111,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(patientCoordinates))
+    when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -354,7 +354,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(testCoordinates))
+    when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -474,7 +474,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(patientCoordinates))
+    when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -582,7 +582,7 @@ public final class CommunityCareEligibilityTest {
     when(bingMaps.routes(any(Coordinates.class), any(Coordinates.class)))
         .thenReturn(BingResponse.builder().build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(any(Coordinates.class)))
+    when(facilitiesClient.facilities(any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
     CommunityCareEligibilityV1ApiController controller =
         CommunityCareEligibilityV1ApiController.builder()
@@ -663,7 +663,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(patientCoordinates))
+    when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -793,7 +793,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(patientCoordinates))
+    when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(

@@ -266,27 +266,22 @@ public class CommunityCareEligibilityV1ApiController {
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
-    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
-    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientCoordinates);
-    List<VaFacilitiesResponse.Facility> filteredByServiceTypeAndState =
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+    List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
             : vaFacilitiesResponse
                 .data()
                 .stream()
                 .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
-                .filter(vaFacility -> equalsIgnoreCase(state(vaFacility), patientAddress.state()))
                 .collect(Collectors.toList());
     log.info(
         "VA facilities filtered by service type '{}' and state {}: {}",
         filteringServiceType,
         patientAddress.state(),
-        filteredByServiceTypeAndState
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList()));
+        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
     List<Facility> facilities =
-        filteredByServiceTypeAndState
+        filteredByServiceType
             .stream()
             .map(
                 vaFacility ->
@@ -295,6 +290,8 @@ public class CommunityCareEligibilityV1ApiController {
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
+
+    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
