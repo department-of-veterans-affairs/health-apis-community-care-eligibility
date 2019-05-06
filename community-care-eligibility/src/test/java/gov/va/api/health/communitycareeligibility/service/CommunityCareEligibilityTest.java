@@ -31,11 +31,42 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
+
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
     gCal.setTime(Date.from(Instant.parse(timestamp)));
     return DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
+  }
+
+  @Test
+  @SneakyThrows
+  public void controllerNullChecks() {
+    assertThat(CommunityCareEligibilityV1ApiController.state(null)).isNull();
+    assertThat(
+            CommunityCareEligibilityV1ApiController.state(
+                VaFacilitiesResponse.Facility.builder().build()))
+        .isNull();
+    assertThat(
+            CommunityCareEligibilityV1ApiController.state(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
+                    .build()))
+        .isNull();
+    assertThat(
+            CommunityCareEligibilityV1ApiController.state(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(
+                        VaFacilitiesResponse.Attributes.builder()
+                            .address(VaFacilitiesResponse.Address.builder().build())
+                            .build())
+                    .build()))
+        .isNull();
+    assertThat(CommunityCareEligibilityV1ApiController.waitDays(null, true)).isNull();
+    assertThat(
+            CommunityCareEligibilityV1ApiController.waitDays(
+                CommunityCareEligibilityResponse.Facility.builder().build(), true))
+        .isNull();
   }
 
   @Test
@@ -225,6 +256,52 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .facilities(Collections.emptyList())
                 .build());
+  }
+
+  @Test
+  @SneakyThrows
+  public void facilityTransformerNullChecks() {
+    assertThat(FacilityTransformer.builder().serviceType("primarycare").build().toFacility(null))
+        .isNull();
+    VaFacilitiesResponse.Facility facility = VaFacilitiesResponse.Facility.builder().build();
+    Facility mapped =
+        FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+    // top level attributes is null
+    assertThat(mapped).isEqualTo(Facility.builder().build());
+
+    facility =
+        VaFacilitiesResponse.Facility.builder()
+            .attributes(VaFacilitiesResponse.Attributes.builder().build())
+            .build();
+    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+    // attribute is not null, but everything beyond it is
+
+    assertThat(mapped).isEqualTo(Facility.builder().build());
+    facility =
+        VaFacilitiesResponse.Facility.builder()
+            .attributes(
+                VaFacilitiesResponse.Attributes.builder()
+                    .address(VaFacilitiesResponse.Address.builder().build())
+                    .build())
+            .build();
+    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+    // Address is not null, but physical Address is
+
+    assertThat(mapped).isEqualTo(Facility.builder().build());
+    facility =
+        VaFacilitiesResponse.Facility.builder()
+            .attributes(
+                VaFacilitiesResponse.Attributes.builder()
+                    .address(
+                        VaFacilitiesResponse.Address.builder()
+                            .physical(VaFacilitiesResponse.PhysicalAddress.builder().build())
+                            .build())
+                    .build())
+            .build();
+    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+    // Physical address exists, but all attributes are null
+
+    assertThat(mapped).isEqualTo(Facility.builder().build());
   }
 
   @Test
@@ -561,7 +638,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     BingMapsClient bingMaps = mock(BingMapsClient.class);
@@ -692,7 +768,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     BingMapsClient bingMaps = mock(BingMapsClient.class);
