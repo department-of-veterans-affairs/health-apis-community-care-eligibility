@@ -116,7 +116,7 @@ public class CommunityCareEligibilityV1ApiController {
     return map;
   }
 
-  protected static String state(VaFacilitiesResponse.Facility vaFacility) {
+  static String state(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility == null) {
       return null;
     }
@@ -135,7 +135,7 @@ public class CommunityCareEligibilityV1ApiController {
     return StringUtils.trimToNull(physical.state());
   }
 
-  protected static Integer waitDays(Facility facility, boolean establishedPatient) {
+  static Integer waitDays(Facility facility, boolean establishedPatient) {
     if (facility == null) {
       return null;
     }

@@ -2,7 +2,6 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
@@ -43,31 +42,31 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void controllerNullChecks() {
-    assertThat(isNull(CommunityCareEligibilityV1ApiController.state(null)));
+    assertThat(CommunityCareEligibilityV1ApiController.state(null)).isNull();
     assertThat(
-        isNull(
             CommunityCareEligibilityV1ApiController.state(
-                VaFacilitiesResponse.Facility.builder().build())));
+                VaFacilitiesResponse.Facility.builder().build()))
+        .isNull();
     assertThat(
-        isNull(
             CommunityCareEligibilityV1ApiController.state(
                 VaFacilitiesResponse.Facility.builder()
                     .attributes(VaFacilitiesResponse.Attributes.builder().build())
-                    .build())));
+                    .build()))
+        .isNull();
     assertThat(
-        isNull(
             CommunityCareEligibilityV1ApiController.state(
                 VaFacilitiesResponse.Facility.builder()
                     .attributes(
                         VaFacilitiesResponse.Attributes.builder()
                             .address(VaFacilitiesResponse.Address.builder().build())
                             .build())
-                    .build())));
-    assertThat(isNull(CommunityCareEligibilityV1ApiController.waitDays(null, true)));
+                    .build()))
+        .isNull();
+    assertThat(CommunityCareEligibilityV1ApiController.waitDays(null, true)).isNull();
     assertThat(
-        isNull(
             CommunityCareEligibilityV1ApiController.waitDays(
-                CommunityCareEligibilityResponse.Facility.builder().build(), true)));
+                CommunityCareEligibilityResponse.Facility.builder().build(), true))
+        .isNull();
   }
 
   @Test
@@ -263,7 +262,7 @@ public final class CommunityCareEligibilityTest {
   @SneakyThrows
   public void facilityTransformerNullChecks() {
     assertThat(FacilityTransformer.builder().serviceType("primarycare").build().toFacility(null))
-        .isEqualTo(null);
+        .isNull();
     VaFacilitiesResponse.Facility facility = VaFacilitiesResponse.Facility.builder().build();
     Facility mapped =
         FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
