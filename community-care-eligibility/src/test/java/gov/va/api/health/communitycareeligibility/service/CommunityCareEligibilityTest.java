@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.isNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
@@ -42,31 +43,31 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void controllerNullChecks() {
-    assertThat(CommunityCareEligibilityV1ApiController.state(null)).isEqualTo(null);
+    assertThat(isNull(CommunityCareEligibilityV1ApiController.state(null)));
     assertThat(
+        isNull(
             CommunityCareEligibilityV1ApiController.state(
-                VaFacilitiesResponse.Facility.builder().build()))
-        .isEqualTo(null);
+                VaFacilitiesResponse.Facility.builder().build())));
     assertThat(
+        isNull(
             CommunityCareEligibilityV1ApiController.state(
                 VaFacilitiesResponse.Facility.builder()
                     .attributes(VaFacilitiesResponse.Attributes.builder().build())
-                    .build()))
-        .isEqualTo(null);
+                    .build())));
     assertThat(
+        isNull(
             CommunityCareEligibilityV1ApiController.state(
                 VaFacilitiesResponse.Facility.builder()
                     .attributes(
                         VaFacilitiesResponse.Attributes.builder()
                             .address(VaFacilitiesResponse.Address.builder().build())
                             .build())
-                    .build()))
-        .isEqualTo(null);
-    assertThat(CommunityCareEligibilityV1ApiController.waitDays(null, true)).isEqualTo(null);
+                    .build())));
+    assertThat(isNull(CommunityCareEligibilityV1ApiController.waitDays(null, true)));
     assertThat(
+        isNull(
             CommunityCareEligibilityV1ApiController.waitDays(
-                CommunityCareEligibilityResponse.Facility.builder().build(), true))
-        .isEqualTo(null);
+                CommunityCareEligibilityResponse.Facility.builder().build(), true)));
   }
 
   @Test
@@ -267,24 +268,16 @@ public final class CommunityCareEligibilityTest {
     Facility mapped =
         FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
     // top level attributes is null
-    assertThat(mapped.address()).isEqualTo(null);
-    assertThat(mapped.driveMinutes()).isEqualTo(null);
-    assertThat(mapped.id()).isEqualTo(null);
-    assertThat(mapped.coordinates()).isEqualTo(null);
-    assertThat(mapped.phoneNumber()).isEqualTo(null);
-    assertThat(mapped.waitDays()).isEqualTo(null);
+    assertThat(mapped).isEqualTo(Facility.builder().build());
+
     facility =
         VaFacilitiesResponse.Facility.builder()
             .attributes(VaFacilitiesResponse.Attributes.builder().build())
             .build();
     mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
     // attribute is not null, but everything beyond it is
-    assertThat(mapped.address()).isEqualTo(null);
-    assertThat(mapped.driveMinutes()).isEqualTo(null);
-    assertThat(mapped.id()).isEqualTo(null);
-    assertThat(mapped.coordinates()).isEqualTo(null);
-    assertThat(mapped.phoneNumber()).isEqualTo(null);
-    assertThat(mapped.waitDays()).isEqualTo(null);
+
+    assertThat(mapped).isEqualTo(Facility.builder().build());
     facility =
         VaFacilitiesResponse.Facility.builder()
             .attributes(
@@ -294,7 +287,8 @@ public final class CommunityCareEligibilityTest {
             .build();
     mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
     // Address is not null, but physical Address is
-    assertThat(mapped.address()).isEqualTo(null);
+
+    assertThat(mapped).isEqualTo(Facility.builder().build());
     facility =
         VaFacilitiesResponse.Facility.builder()
             .attributes(
@@ -307,7 +301,8 @@ public final class CommunityCareEligibilityTest {
             .build();
     mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
     // Physical address exists, but all attributes are null
-    assertThat(mapped.address()).isEqualTo(null);
+
+    assertThat(mapped).isEqualTo(Facility.builder().build());
   }
 
   @Test
