@@ -50,6 +50,9 @@ production-like environments, configuration is stored in AWS S3 buckets. In loca
 environments, configuration can be `config/` directories that are not maintained in Git. See
 a teammate for connection details to developr resources.
 
+
+See the [configuration guide](configuration.md) for configuring applications in AWS.
+
 ----
 
 ## Tools
