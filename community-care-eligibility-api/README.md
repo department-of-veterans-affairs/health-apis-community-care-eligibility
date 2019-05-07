@@ -1,1 +1,0 @@
-# community-care-eligibility-api
