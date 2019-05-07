@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import java.util.Collections;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -35,14 +34,13 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse facilities(Coordinates coordinates) {
+  public VaFacilitiesResponse facilities(String state) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl)
-            .queryParam("lat", coordinates.latitude())
-            .queryParam("long", coordinates.longitude())
+            .queryParam("state", state)
             .queryParam("type", "health")
             .queryParam("page", 1)
-            .queryParam("per_page", 30)
+            .queryParam("per_page", 500)
             .toUriString();
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
