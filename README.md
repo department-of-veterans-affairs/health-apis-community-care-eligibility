@@ -6,6 +6,8 @@ from the Eligibility and Enrollment System (E&E) with wait- and drive-time acces
 standards. Average wait times are provided by Facilities API, while average drive 
 times are computed by Bing Maps.
 
+![applications](src/plantuml/apps.png)
+
 ----
 
 ## Building
