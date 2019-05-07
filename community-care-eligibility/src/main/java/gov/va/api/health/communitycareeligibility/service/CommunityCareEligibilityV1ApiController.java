@@ -12,6 +12,8 @@ import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.A
 import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.PhysicalAddress;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -296,6 +298,7 @@ public class CommunityCareEligibilityV1ApiController {
                 .establishedPatient(establishedPatient)
                 .patientIcn(patientIcn)
                 .patientAddress(patientAddress)
+                .timeStamp(Instant.now())
                 .build())
         .communityCareEligibilities(
             CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
