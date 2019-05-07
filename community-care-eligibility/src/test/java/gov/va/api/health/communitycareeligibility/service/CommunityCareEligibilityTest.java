@@ -196,10 +196,9 @@ public final class CommunityCareEligibilityTest {
                     .establishedPatient(false)
                     .serviceType("PrimaryCare")
                     .build()))
-            .communityCareEligibility(
+            .communityCareEligibilities(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
-                    .description("Access-Standards")
                     .build())
             .facilities(
                 asList(
@@ -249,10 +248,9 @@ public final class CommunityCareEligibilityTest {
                         .establishedPatient(false)
                         .serviceType("PrimaryCare")
                         .build())
-                .communityCareEligibility(
+                .communityCareEligibilities(
                     CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                         .eligible(true)
-                        .description("Access-Standards")
                         .build())
                 .facilities(Collections.emptyList())
                 .build());
@@ -420,10 +418,15 @@ public final class CommunityCareEligibilityTest {
                     .establishedPatient(false)
                     .serviceType("PrimaryCare")
                     .build()))
-            .communityCareEligibility(
+            .communityCareEligibilities(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
-                    .description("Hardship")
+                    .eligibilityCodes(
+                        Collections.singletonList(
+                            CommunityCareEligibilityResponse.EligibilityCodes.builder()
+                                .description("Hardship")
+                                .code("H")
+                                .build()))
                     .build())
             .facilities(
                 singletonList(
@@ -533,10 +536,9 @@ public final class CommunityCareEligibilityTest {
                     .serviceType("MentalHealthCare")
                     .establishedPatient(true)
                     .build())
-            .communityCareEligibility(
+            .communityCareEligibilities(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(false)
-                    .description("Access-Standards")
                     .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
@@ -595,7 +597,7 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityResponse result =
         controller.search(
             "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
-    assertThat(!result.communityCareEligibility().description().contains("Hardship"));
+    assertThat(result.facilities().isEmpty());
   }
 
   @SneakyThrows
@@ -723,10 +725,15 @@ public final class CommunityCareEligibilityTest {
                     .serviceType("UrgentCare")
                     .establishedPatient(true)
                     .build())
-            .communityCareEligibility(
+            .communityCareEligibilities(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
-                    .description("Urgent Care")
+                    .eligibilityCodes(
+                        Collections.singletonList(
+                            CommunityCareEligibilityResponse.EligibilityCodes.builder()
+                                .code("U")
+                                .description("Urgent Care")
+                                .build()))
                     .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
@@ -851,10 +858,15 @@ public final class CommunityCareEligibilityTest {
                     .serviceType("Dermatology")
                     .establishedPatient(true)
                     .build())
-            .communityCareEligibility(
+            .communityCareEligibilities(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(false)
-                    .description("Ineligible")
+                    .eligibilityCodes(
+                        Collections.singletonList(
+                            CommunityCareEligibilityResponse.EligibilityCodes.builder()
+                                .code("X")
+                                .description("Ineligible")
+                                .build()))
                     .build())
             .facilities(
                 singletonList(

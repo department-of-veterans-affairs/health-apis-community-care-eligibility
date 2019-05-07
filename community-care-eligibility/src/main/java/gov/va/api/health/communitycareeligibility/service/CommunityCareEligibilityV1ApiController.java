@@ -12,13 +12,13 @@ import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.A
 import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.PhysicalAddress;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
   produces = "application/json"
 )
 public class CommunityCareEligibilityV1ApiController {
+
   private int maxDriveMinsPrimary;
 
   private int maxWaitDaysPrimary;
@@ -147,22 +148,6 @@ public class CommunityCareEligibilityV1ApiController {
         : facility.waitDays().newPatient();
   }
 
-  private CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility(
-      boolean communityCareEligible,
-      List<String> eligibilityDescriptions,
-      List<Facility> facilitiesMeetingAccessStandards) {
-    String communityCareDescription = String.join(", ", eligibilityDescriptions);
-    return CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-        .eligible(communityCareEligible)
-        .description(StringUtils.trimToNull(communityCareDescription))
-        .facilities(
-            facilitiesMeetingAccessStandards
-                .stream()
-                .map(facility -> facility.id())
-                .collect(Collectors.toList()))
-        .build();
-  }
-
   private boolean eligbleByEligbilityAndEnrollmentResponse(
       List<String> eligibilityCodes, String serviceType) {
     if (eligibilityCodes.contains("X")) {
@@ -232,24 +217,6 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
-    GetEESummaryResponse response = eeClient.requestEligibility(patientIcn.trim());
-    List<VceEligibilityInfo> vceEligibilityCollection =
-        processEligibilityAndEnrollmentResponse(response);
-    List<String> eligibilityDescriptions = new ArrayList<>();
-    List<String> eligibilityCodes = new ArrayList<>();
-    Instant now = Instant.now();
-    for (int i = 0; i < vceEligibilityCollection.size(); i++) {
-      if (vceEligibilityCollection
-          .get(i)
-          .getVceEffectiveDate()
-          .toGregorianCalendar()
-          .toInstant()
-          .isBefore(now)) {
-        eligibilityDescriptions.add(vceEligibilityCollection.get(i).getVceDescription());
-        eligibilityCodes.add(vceEligibilityCollection.get(i).getVceCode());
-      }
-    }
-
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
@@ -296,17 +263,31 @@ public class CommunityCareEligibilityV1ApiController {
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
+    List<VceEligibilityInfo> vceEligibilityCollection =
+        processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
+    List<CommunityCareEligibilityResponse.EligibilityCodes> eligibilityCodes =
+        vceEligibilityCollection
+            .stream()
+            .filter(Objects::nonNull)
+            .map(
+                vceEligibilityInfo ->
+                    EligibilityAndEnrollmentTransformer.builder()
+                        .eligibilityInfo(vceEligibilityInfo)
+                        .build()
+                        .toEligibilities())
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    List<String> codes = new ArrayList<>();
+    for (int i = 0; i < eligibilityCodes.size(); i++) {
+      codes.add(eligibilityCodes.get(i).code());
+    }
     boolean communityCareEligible =
-        eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
+        eligbleByEligbilityAndEnrollmentResponse(codes, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
         facilitiesMeetingAccessStandards(facilities, filteringServiceType, establishedPatient);
-    if (!communityCareEligible && !eligibilityCodes.contains("X")) {
+    if (!communityCareEligible && !codes.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
-      eligibilityDescriptions.add("Access-Standards");
     }
-    CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility =
-        communityCareEligibility(
-            communityCareEligible, eligibilityDescriptions, facilitiesMeetingAccessStandards);
     return CommunityCareEligibilityResponse.builder()
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
@@ -316,7 +297,16 @@ public class CommunityCareEligibilityV1ApiController {
                 .patientIcn(patientIcn)
                 .patientAddress(patientAddress)
                 .build())
-        .communityCareEligibility(communityCareEligibility)
+        .communityCareEligibilities(
+            CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                .eligible(communityCareEligible)
+                .eligibilityCodes(eligibilityCodes)
+                .facilities(
+                    facilitiesMeetingAccessStandards
+                        .stream()
+                        .map(facility -> facility.id())
+                        .collect(Collectors.toList()))
+                .build())
         .facilities(facilities)
         .build();
   }
