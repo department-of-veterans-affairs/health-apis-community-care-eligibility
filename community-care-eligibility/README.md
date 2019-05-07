@@ -1,15 +1,8 @@
 # community-care-eligibility
 
-Health APIs Data Query application. The system consists of
-[Spring Boot](https://spring.io/projects/spring-boot) microservices that provide
-[Argonaut Data Query](http://www.fhir.org/guides/argonaut/r2/profiles.html) compliant resources
-backed by information from the Corporate Data Warehouse.
+Health APIs Data Query application. 
 
-###### Applications
-![applications](src/plantuml/apps.png)
-- [data-query](data-query/README.md) - Argonaut Data Query compliant experience API
-- [mr-anderson](mr-anderson/README.md) - Corporate Data Warehouse access system API
-- [data-query-tests](data-query-tests/README.md) - Integration tests
+This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice that computes overall community-care eligibility by combining eligibility information from the Eligibility and Enrollment System (E&E) with wait- and drive-time access standards. Average wait times are provided by Facilities API, while average drive times are computed by Bing Maps.
 
 ----
 
@@ -55,12 +48,10 @@ The [init-git-secrets.sh](src/scripts/init-git-secrets.sh) script can be used to
 ###### Configuration
 The spring application requires an
 [external configuration](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html)
-for environment specific information, such as database connection URLs. In production or
+for environment specific information, such as other service URLs. In production or
 production-like environments, configuration is stored in AWS S3 buckets. In local developer
 environments, configuration can be `config/` directories that are not maintained in Git. See
-a teammate for connection details to shared databases, etc.
-
-See the [configuration guide](configuration.md) for configuring applications in AWS.
+a teammate for connection details to developr resources.
 
 ----
 
@@ -71,5 +62,3 @@ See the [configuration guide](configuration.md) for configuring applications in 
 
 - `init-git-secrets.sh`
   Initializes your clone of this repository to work with git secrets.
-- `trust-dev-certs.sh`
-  Configures the `cacerts` in your Java home to trust the development certs.
