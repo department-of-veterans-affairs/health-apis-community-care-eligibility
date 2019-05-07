@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -293,6 +294,7 @@ public class CommunityCareEligibilityV1ApiController {
 
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
+    Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
