@@ -1,7 +1,5 @@
 # community-care-eligibility
 
-Health APIs Data Query application. 
-
 This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice that computes overall community-care eligibility by combining eligibility information from the Eligibility and Enrollment System (E&E) with wait- and drive-time access standards. Average wait times are provided by Facilities API, while average drive times are computed by Bing Maps.
 
 ----
@@ -39,7 +37,6 @@ The [init-git-secrets.sh](src/scripts/init-git-secrets.sh) script can be used to
 > If using [Homebrew](https://brew.sh/), use `brew install --HEAD git-secrets` as decribed
 > by [this post](https://github.com/awslabs/git-secrets/issues/65#issuecomment-416382565) to
 > avoid issues committing multiple files.
-
 
 ----
 
