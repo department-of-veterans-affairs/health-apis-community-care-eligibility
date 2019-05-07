@@ -117,25 +117,6 @@ public class CommunityCareEligibilityV1ApiController {
     return map;
   }
 
-  static String state(VaFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility == null) {
-      return null;
-    }
-    Attributes attributes = vaFacility.attributes();
-    if (attributes == null) {
-      return null;
-    }
-    VaFacilitiesResponse.Address address = attributes.address();
-    if (address == null) {
-      return null;
-    }
-    PhysicalAddress physical = address.physical();
-    if (physical == null) {
-      return null;
-    }
-    return StringUtils.trimToNull(physical.state());
-  }
-
   static Integer waitDays(Facility facility, boolean establishedPatient) {
     if (facility == null) {
       return null;

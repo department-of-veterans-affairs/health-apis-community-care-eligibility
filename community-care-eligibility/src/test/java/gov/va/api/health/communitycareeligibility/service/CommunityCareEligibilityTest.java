@@ -42,26 +42,6 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void controllerNullChecks() {
-    assertThat(CommunityCareEligibilityV1ApiController.state(null)).isNull();
-    assertThat(
-            CommunityCareEligibilityV1ApiController.state(
-                VaFacilitiesResponse.Facility.builder().build()))
-        .isNull();
-    assertThat(
-            CommunityCareEligibilityV1ApiController.state(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
-                    .build()))
-        .isNull();
-    assertThat(
-            CommunityCareEligibilityV1ApiController.state(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(
-                        VaFacilitiesResponse.Attributes.builder()
-                            .address(VaFacilitiesResponse.Address.builder().build())
-                            .build())
-                    .build()))
-        .isNull();
     assertThat(CommunityCareEligibilityV1ApiController.waitDays(null, true)).isNull();
     assertThat(CommunityCareEligibilityV1ApiController.waitDays(Facility.builder().build(), true))
         .isNull();
