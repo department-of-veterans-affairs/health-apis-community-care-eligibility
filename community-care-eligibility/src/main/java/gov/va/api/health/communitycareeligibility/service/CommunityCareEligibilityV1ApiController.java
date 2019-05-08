@@ -10,7 +10,6 @@ import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -243,7 +241,7 @@ public class CommunityCareEligibilityV1ApiController {
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
-    
+
     List<VceEligibilityInfo> vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCodes> eligibilityCodes =
@@ -262,7 +260,7 @@ public class CommunityCareEligibilityV1ApiController {
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codes.add(eligibilityCodes.get(i).code());
     }
-    
+
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(codes, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
