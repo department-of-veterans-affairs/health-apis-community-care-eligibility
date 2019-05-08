@@ -54,11 +54,13 @@ Applications _must_ define the following properties.
 
 ### Community Care Eligibility
 ```
-bing-maps.api-key .......................Bing Maps API     
-va-facilities.api-key ...................VA Facilities API
-va-facilities.url .......................VA Facilities API URL
-community-care.max-drive-time ...........Max drive time (minutes) criteria for eligibility
-community-care.max-wait .................Max wait time (days) for eligibility
+bing-maps.api-key ...........................Bing Maps API     
+va-facilities.api-key .......................VA Facilities API
+va-facilities.url ...........................VA Facilities API URL
+community-care.max-drive-time-min-primary....Max drive time (minutes) criteria for primary care eligibility
+community-care.max-wait-days-primary.........Max wait time (days) for primary care eligibility
+community-care.max-drive-time-min-specialty..Max drive time (minutes) criteria for specialty care eligibility
+community-care.max-wait-days-specialty.......Max wait time (days) for specialty care eligibility
 
 # Server SSL
 server.ssl.key-store ....................Path to keystore, e.g. /opt/va/certs/<any>.jks
