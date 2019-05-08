@@ -101,7 +101,7 @@ facilities that satisfy the access standards.
 Sample request:
 
 ```
-https://foo.com/community-care/v0/eligibility/api/search?patient=0123456789V012345&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=12345&serviceType=primarycare&establishedPatient=false
+https://foo.com/community-care/v0/eligibility/api/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare&establishedPatient=false
 ```
 
 Sample response:
@@ -109,16 +109,16 @@ Sample response:
 ```
 {
   "patientRequest": {
-    "patientIcn": "0123456789V012345",
+    "patientIcn": "011235813V213455",
     "patientAddress": {
       "street": "742 Evergeen Terrace",
       "city": "Springfield",
       "state": "KY",
-      "zip": "12345"
+      "zip": "89144"
     },
     "patientCoordinates": {
-      "latitude": 12.34,
-      "longitude": 56.78
+      "latitude": 233.377,
+      "longitude": 610.987
     },
     "serviceType": "PrimaryCare",
     "establishedPatient": false
@@ -127,42 +127,42 @@ Sample response:
     "eligible": false,
     "description": "Urgent Care, Access-Standards",
     "facilities": [
-      "vha_12345XY"
+      "vha_1597XY"
     ]
   },
   "facilities": [{
-      "id": "vha_12345XY",
+      "id": "vha_1597XY",
       "name": "Springfield VA Clinic",
       "address": {
-        "street": "2900 South Street",
+        "street": "2584 South Street",
         "city": "Springfield",
         "state": "KY",
-        "zip": "12345"
+        "zip": "10946"
       },
       "coordinates": {
-        "latitude": 90.12,
-        "longitude": 34.56
+        "latitude": 41.81,
+        "longitude": 67.65
       },
-      "phoneNumber": "000-555-0321",
+      "phoneNumber": "177-112-8657 x",
       "waitDays": {
         "newPatient": 19,
         "establishedPatient": 2
       },
       "driveMinutes": 25
     }, {
-      "id": "vha_67890ZZ",
+      "id": "vha_46368ZZ",
       "name": "Shelbyville VA Clinic",
       "address": {
-        "street": "372 Main Street",
+        "street": "121393 Main Street",
         "city": "Shelbyville",
         "state": "KY",
-        "zip": "54321"
+        "zip": "75025"
       },
       "coordinates": {
-        "latitude": 78.90,
-        "longitude": 12.34
+        "latitude": 196.418,
+        "longitude": 317.811
       },
-      "phoneNumber": "000-555-0123",
+      "phoneNumber": "1-422-983-2040",
       "waitDays": {
         "newPatient": 14,
         "establishedPatient": 1
