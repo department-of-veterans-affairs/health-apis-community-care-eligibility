@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -143,7 +142,7 @@ public final class CommunityCareEligibilityResponse {
 
     Boolean establishedPatient;
 
-    Instant timeStamp;
+    String timeStamp;
   }
 
   @Data

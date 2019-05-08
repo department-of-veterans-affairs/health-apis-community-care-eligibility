@@ -276,7 +276,7 @@ public class CommunityCareEligibilityV1ApiController {
                 .establishedPatient(establishedPatient)
                 .patientIcn(patientIcn)
                 .patientAddress(patientAddress)
-                .timeStamp(Instant.now())
+                .timeStamp(Instant.now().toString())
                 .build())
         .communityCareEligibilities(
             CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
