@@ -8,8 +8,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
-import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.Attributes;
-import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.PhysicalAddress;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.time.Instant;

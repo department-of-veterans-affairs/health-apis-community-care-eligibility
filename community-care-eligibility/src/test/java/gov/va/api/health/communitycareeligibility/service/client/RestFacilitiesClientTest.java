@@ -24,7 +24,7 @@ public final class RestFacilitiesClientTest {
 
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
-            eq("https://foo/bar?state=fl&type=health&page=1&per_page=30"),
+            eq("https://foo/bar?state=FL&type=health&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaFacilitiesResponse.class)))
@@ -32,6 +32,6 @@ public final class RestFacilitiesClientTest {
 
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "https://foo/bar", restTemplate);
-    assertThat(client.facilities("fl")).isEqualTo(VaFacilitiesResponse.builder().build());
+    assertThat(client.facilities("FL")).isEqualTo(VaFacilitiesResponse.builder().build());
   }
 }
