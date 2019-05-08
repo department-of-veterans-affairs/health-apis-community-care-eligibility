@@ -1,10 +1,11 @@
 # health-apis-community-care-eligibility
 
-This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice 
-that computes overall community-care eligibility by combining eligibility information 
-from the Eligibility and Enrollment System (E&E) with wait- and drive-time access 
-standards. Average wait times are provided by Facilities API, while average drive 
-times are computed by Bing Maps.
+This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
+that computes *objective* overall community-care eligibility by combining eligibility codes
+from the Eligibility and Enrollment System (E&E) with wait- and drive-time access
+standards described [here](https://www.va.gov/opa/pressrel/pressrelease.cfm?id=5187).
+Average wait times are provided by Facilities API.
+Average drive times are computed by Bing Maps.
 
 ![applications](src/plantuml/apps.png)
 
@@ -66,22 +67,13 @@ environments, configuration can be `config/` directories that are not maintained
 a teammate for connection details to developr resources.
 
 See the [configuration guide](configuration.md) for configuring applications in AWS.
+The configuration also includes properties for the wait- and drive-time access standards,
+which default to the values described [here](https://www.va.gov/opa/pressrel/pressrelease.cfm?id=5187).
 
-The following properties control the wait- and drive-time limits for primary vs. 
-specialty care. By default, the configuration is 30-minute drive and 28-day wait for 
-primary care, and 60-minute drive with a 20-day wait for specialty care.
+This API supports a search query that accepts a patient ICN, the patient's home address,
+a medical service type, and whether or not the patient is established.
 
-```
-community-care.max-drive-time-min-primary=30
-community-care.max-wait-days-primary=28
-community-care.max-drive-time-min-specialty=60
-community-care.max-wait-days-specialty=20
-```
-
-This API supports a single search query that accepts a patient ICN, the patient's home address, 
-their desired medical service type, and whether or not they are an established patient.
-
-The medical service type must be one of:
+The medical service type is one of:
 * Audiology
 * Cardiology
 * Dermatology
@@ -97,13 +89,13 @@ The medical service type must be one of:
 * Urology
 * WomensHealth
 
-For the search, the API combines data from three sources:
-1. Patient eligibility information from E&E
-2. All medical facilities in the state, from Facilities API
-3. Drive times from the patient address to the medical facilities, from Bing Maps
+The API combines data from three sources:
+1. Patient eligibility information from E&E.
+2. All medical facilities in the state, from Facilities API.
+3. Drive times from the patient address to the medical facilities, from Bing Maps.
 
-The above data is combined to make an *objective* determination of community-care-eligibility. 
-The response includes a description of the E&E eligibility codes and the IDs of any VA health 
+This data is used to compute an *objective* determination of community-care-eligibility.
+The response includes a description of the E&E eligibility codes and the IDs of any VA health
 facilities that satisfy the access standards.
 
 Sample request:
