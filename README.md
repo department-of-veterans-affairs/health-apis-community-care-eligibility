@@ -128,11 +128,11 @@ Sample response:
     "eligible": true,
     "eligibilityCodes":[
       {
-         "description": "Hardship"
+         "description": "Hardship",
          "code": "H"
-      }
+      },
       {
-         "description": "Urgent Care"
+         "description": "Urgent Care",
          "code": "U"
       }
     ],
