@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.service.RestFacilitiesClient;
 import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse;
 import org.junit.Test;
@@ -25,7 +24,7 @@ public final class RestFacilitiesClientTest {
 
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
-            eq("https://foo/bar?lat=1.3&long=1.23&type=health&page=1&per_page=30"),
+            eq("https://foo/bar?state=FL&type=health&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaFacilitiesResponse.class)))
@@ -33,12 +32,6 @@ public final class RestFacilitiesClientTest {
 
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "https://foo/bar", restTemplate);
-    assertThat(
-            client.facilities(
-                CommunityCareEligibilityResponse.Coordinates.builder()
-                    .longitude(1.23)
-                    .latitude(1.3)
-                    .build()))
-        .isEqualTo(VaFacilitiesResponse.builder().build());
+    assertThat(client.facilities("FL")).isEqualTo(VaFacilitiesResponse.builder().build());
   }
 }

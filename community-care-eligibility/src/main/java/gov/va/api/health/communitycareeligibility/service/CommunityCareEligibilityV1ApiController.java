@@ -8,14 +8,13 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
-import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.Attributes;
-import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse.PhysicalAddress;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -114,25 +113,6 @@ public class CommunityCareEligibilityV1ApiController {
       map.put(service, service);
     }
     return map;
-  }
-
-  static String state(VaFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility == null) {
-      return null;
-    }
-    Attributes attributes = vaFacility.attributes();
-    if (attributes == null) {
-      return null;
-    }
-    VaFacilitiesResponse.Address address = attributes.address();
-    if (address == null) {
-      return null;
-    }
-    PhysicalAddress physical = address.physical();
-    if (physical == null) {
-      return null;
-    }
-    return StringUtils.trimToNull(physical.state());
   }
 
   static Integer waitDays(Facility facility, boolean establishedPatient) {
@@ -266,27 +246,22 @@ public class CommunityCareEligibilityV1ApiController {
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
-    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
-    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientCoordinates);
-    List<VaFacilitiesResponse.Facility> filteredByServiceTypeAndState =
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+    List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
             : vaFacilitiesResponse
                 .data()
                 .stream()
                 .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
-                .filter(vaFacility -> equalsIgnoreCase(state(vaFacility), patientAddress.state()))
                 .collect(Collectors.toList());
     log.info(
         "VA facilities filtered by service type '{}' and state {}: {}",
         filteringServiceType,
         patientAddress.state(),
-        filteredByServiceTypeAndState
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList()));
+        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
     List<Facility> facilities =
-        filteredByServiceTypeAndState
+        filteredByServiceType
             .stream()
             .map(
                 vaFacility ->
@@ -295,7 +270,10 @@ public class CommunityCareEligibilityV1ApiController {
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
+
+    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
+    Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =

@@ -15,7 +15,7 @@ import javax.ws.rs.Path;
   info =
       @Info(
         title = "Community Care Eligibility",
-        version = "v1",
+        version = "v0",
         description = "Community care eligibility under the MISSION Act."
       )
 )

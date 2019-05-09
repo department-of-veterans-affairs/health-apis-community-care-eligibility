@@ -1,0 +1,18 @@
+@startuml
+
+skinparam handwritten true
+skinparam monochrome true
+left to right direction
+
+actor consumer
+rectangle "community-care-eligibility" as cce
+rectangle "E&E" as ee
+rectangle "Facilities" as fac
+rectangle "Bing Maps" as bing
+
+consumer -(0- cce
+cce -(0- ee
+cce -(0- fac
+cce -(0- bing
+
+@enduml
