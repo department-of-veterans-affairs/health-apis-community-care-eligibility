@@ -64,20 +64,11 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     } catch (Eligibilities.UnknownIdentityInSearchParameter e) {
       throw new Exceptions.MalformedPatientIcnException(patientIcn, e);
     } catch (Eligibilities.RequestFailed e) {
-      System.out.println(e.getMessage());
       if (StringUtils.containsIgnoreCase(e.getMessage(), "getEESummaryResponse is Missing")) {
         throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
       } else {
         throw new Exceptions.EeUnavailableException(e);
       }
     }
-
-    // StringUtils.containsIgnoreCase(e.getMessage(), "Failed to send/receive from EE")
-
-    // "Failed to generate SOAPMessage for getEESummaryRequest"
-    // "Don't Understand XML."
-    // "Unknown Host"
-    // "E&E Url received is a local address."
-    // "E&E Url received is not https."
   }
 }
