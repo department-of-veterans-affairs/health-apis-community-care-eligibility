@@ -122,11 +122,11 @@ Sample response:
     },
     "serviceType": "PrimaryCare",
     "establishedPatient": false,
-    "timeStamp": "2019-05-09T13:17:58.250Z"
+    "timestamp": "2019-05-09T13:17:58.250Z"
   },
   "communityCareEligibility": {
     "eligible": true,
-    "eligibilityCodes":[
+    "eligibilityCode":[
       {
          "description": "Hardship",
          "code": "H"

@@ -21,7 +21,7 @@ public final class CommunityCareEligibilityResponse {
 
   PatientRequest patientRequest;
 
-  CommunityCareEligibility communityCareEligibilities;
+  CommunityCareEligibility communityCareEligibility;
 
   List<Facility> facilities;
 
@@ -58,16 +58,16 @@ public final class CommunityCareEligibilityResponse {
 
     Boolean eligible;
 
-    List<EligibilityCodes> eligibilityCodes;
+    List<EligibilityCode> eligibilityCode;
 
     List<String> facilities;
 
     /** Lazy getter. */
-    public List<EligibilityCodes> eligibilityCodes() {
-      if (eligibilityCodes == null) {
-        eligibilityCodes = new ArrayList<>();
+    public List<EligibilityCode> eligibilityCode() {
+      if (eligibilityCode == null) {
+        eligibilityCode = new ArrayList<>();
       }
-      return eligibilityCodes;
+      return eligibilityCode;
     }
 
     /** Lazy getter. */
@@ -84,11 +84,11 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class EligibilityCodes {
+  public static final class Coordinates {
 
-    String description;
+    Double latitude;
 
-    String code;
+    Double longitude;
   }
 
   @Data
@@ -96,11 +96,11 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class Coordinates {
+  public static final class EligibilityCode {
 
-    Double latitude;
+    String description;
 
-    Double longitude;
+    String code;
   }
 
   @Data
@@ -142,7 +142,7 @@ public final class CommunityCareEligibilityResponse {
 
     Boolean establishedPatient;
 
-    String timeStamp;
+    String timestamp;
   }
 
   @Data
