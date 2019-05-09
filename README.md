@@ -108,66 +108,78 @@ Sample response:
 
 ```
 {
-  "patientRequest": {
-    "patientIcn": "011235813V213455",
-    "patientAddress": {
-      "street": "742 Evergeen Terrace",
-      "city": "Springfield",
-      "state": "KY",
-      "zip": "89144"
+  "patientRequest" : {
+    "patientIcn" : "011235813V213455",
+    "patientAddress" : {
+      "street" : "742 Evergeen Terrace",
+      "city" : "Springfield",
+      "state" : "KY",
+      "zip" : "89144"
     },
-    "patientCoordinates": {
-      "latitude": 233.377,
-      "longitude": 610.987
+    "patientCoordinates" : {
+      "latitude" : 233.377,
+      "longitude" : 610.987
     },
-    "serviceType": "PrimaryCare",
-    "establishedPatient": false
+    "serviceType" : "PrimaryCare",
+    "establishedPatient" : false,
+    "timestamp" : "2019-05-09T13:17:58.250Z"
   },
-  "communityCareEligibility": {
-    "eligible": false,
-    "description": "Urgent Care, Access-Standards",
-    "facilities": [
+  "communityCareEligibility" : {
+    "eligible" : true,
+    "eligibilityCode" : [
+      {
+        "description" : "Hardship",
+        "code" : "H"
+      },
+      {
+        "description" : "Urgent Care",
+        "code" : "U"
+      }
+    ],
+    "facilities" : [
       "vha_1597XY"
     ]
   },
-  "facilities": [{
-      "id": "vha_1597XY",
-      "name": "Springfield VA Clinic",
-      "address": {
-        "street": "2584 South Street",
-        "city": "Springfield",
-        "state": "KY",
-        "zip": "10946"
+  "facilities" : [
+    {
+      "id" : "vha_1597XY",
+      "name" : "Springfield VA Clinic",
+      "address" : {
+        "street" : "2584 South Street",
+        "city" : "Springfield",
+        "state" : "KY",
+        "zip" : "10946"
       },
-      "coordinates": {
-        "latitude": 41.81,
-        "longitude": 67.65
+      "coordinates" : {
+        "latitude" : 41.81,
+        "longitude" : 67.65
       },
-      "phoneNumber": "177-112-8657 x",
-      "waitDays": {
-        "newPatient": 19,
-        "establishedPatient": 2
+      "phoneNumber" : "177-112-8657 x",
+      "waitDays" : {
+        "newPatient" : 19,
+        "establishedPatient" : 2
       },
-      "driveMinutes": 25
-    }, {
-      "id": "vha_46368ZZ",
-      "name": "Shelbyville VA Clinic",
-      "address": {
-        "street": "121393 Main Street",
-        "city": "Shelbyville",
-        "state": "KY",
-        "zip": "75025"
+      "driveMinutes" : 25
+    },
+    {
+      "id" : "vha_46368ZZ",
+      "name" : "Shelbyville VA Clinic",
+      "address" : {
+        "street" : "121393 Main Street",
+        "city" : "Shelbyville",
+        "state" : "KY",
+        "zip" : "75025"
       },
-      "coordinates": {
-        "latitude": 196.418,
-        "longitude": 317.811
+      "coordinates" : {
+        "latitude" : 196.418,
+        "longitude" : 317.811
       },
-      "phoneNumber": "1-422-983-2040",
-      "waitDays": {
-        "newPatient": 14,
-        "establishedPatient": 1
+      "phoneNumber" : "1-422-983-2040",
+      "waitDays" : {
+        "newPatient" : 14,
+        "establishedPatient" : 1
       },
-      "driveMinutes": 90
+      "driveMinutes" : 90
     }
   ]
 }

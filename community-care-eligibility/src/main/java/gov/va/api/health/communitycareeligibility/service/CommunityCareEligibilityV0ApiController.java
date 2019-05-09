@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -25,7 +26,6 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -41,7 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
   value = {"/api"},
   produces = "application/json"
 )
-public class CommunityCareEligibilityV1ApiController {
+public class CommunityCareEligibilityV0ApiController {
+
   private int maxDriveMinsPrimary;
 
   private int maxWaitDaysPrimary;
@@ -58,7 +59,7 @@ public class CommunityCareEligibilityV1ApiController {
 
   /** Autowired constructor. */
   @Builder
-  public CommunityCareEligibilityV1ApiController(
+  public CommunityCareEligibilityV0ApiController(
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
       @Value("${community-care.max-wait-days-primary}") int maxWaitPrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
@@ -125,22 +126,6 @@ public class CommunityCareEligibilityV1ApiController {
     return establishedPatient
         ? facility.waitDays().establishedPatient()
         : facility.waitDays().newPatient();
-  }
-
-  private CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility(
-      boolean communityCareEligible,
-      List<String> eligibilityDescriptions,
-      List<Facility> facilitiesMeetingAccessStandards) {
-    String communityCareDescription = String.join(", ", eligibilityDescriptions);
-    return CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-        .eligible(communityCareEligible)
-        .description(StringUtils.trimToNull(communityCareDescription))
-        .facilities(
-            facilitiesMeetingAccessStandards
-                .stream()
-                .map(facility -> facility.id())
-                .collect(Collectors.toList()))
-        .build();
   }
 
   private boolean eligbleByEligbilityAndEnrollmentResponse(
@@ -212,24 +197,6 @@ public class CommunityCareEligibilityV1ApiController {
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
-    GetEESummaryResponse response = eeClient.requestEligibility(patientIcn.trim());
-    List<VceEligibilityInfo> vceEligibilityCollection =
-        processEligibilityAndEnrollmentResponse(response);
-    List<String> eligibilityDescriptions = new ArrayList<>();
-    List<String> eligibilityCodes = new ArrayList<>();
-    Instant now = Instant.now();
-    for (int i = 0; i < vceEligibilityCollection.size(); i++) {
-      if (vceEligibilityCollection
-          .get(i)
-          .getVceEffectiveDate()
-          .toGregorianCalendar()
-          .toInstant()
-          .isBefore(now)) {
-        eligibilityDescriptions.add(vceEligibilityCollection.get(i).getVceDescription());
-        eligibilityCodes.add(vceEligibilityCollection.get(i).getVceCode());
-      }
-    }
-
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
@@ -274,17 +241,36 @@ public class CommunityCareEligibilityV1ApiController {
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
+
+    Instant timestamp = Instant.now();
+    List<VceEligibilityInfo> vceEligibilityCollection =
+        processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
+    List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
+        vceEligibilityCollection
+            .stream()
+            .filter(Objects::nonNull)
+            .map(
+                vceEligibilityInfo ->
+                    EligibilityAndEnrollmentTransformer.builder()
+                        .eligibilityInfo(vceEligibilityInfo)
+                        .timestamp(timestamp)
+                        .build()
+                        .toEligibility())
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    List<String> codeString = new ArrayList<>();
+    for (int i = 0; i < eligibilityCodes.size(); i++) {
+      codeString.add(eligibilityCodes.get(i).code());
+    }
+
     boolean communityCareEligible =
-        eligbleByEligbilityAndEnrollmentResponse(eligibilityCodes, filteringServiceType);
+        eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
         facilitiesMeetingAccessStandards(facilities, filteringServiceType, establishedPatient);
-    if (!communityCareEligible && !eligibilityCodes.contains("X")) {
+    if (!communityCareEligible && !codeString.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
-      eligibilityDescriptions.add("Access-Standards");
     }
-    CommunityCareEligibilityResponse.CommunityCareEligibility communityCareEligibility =
-        communityCareEligibility(
-            communityCareEligible, eligibilityDescriptions, facilitiesMeetingAccessStandards);
+
     return CommunityCareEligibilityResponse.builder()
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
@@ -293,8 +279,18 @@ public class CommunityCareEligibilityV1ApiController {
                 .establishedPatient(establishedPatient)
                 .patientIcn(patientIcn)
                 .patientAddress(patientAddress)
+                .timestamp(timestamp.toString())
                 .build())
-        .communityCareEligibility(communityCareEligibility)
+        .communityCareEligibility(
+            CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+                .eligible(communityCareEligible)
+                .eligibilityCode(eligibilityCodes)
+                .facilities(
+                    facilitiesMeetingAccessStandards
+                        .stream()
+                        .map(facility -> facility.id())
+                        .collect(Collectors.toList()))
+                .build())
         .facilities(facilities)
         .build();
   }

@@ -42,8 +42,8 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void controllerNullChecks() {
-    assertThat(CommunityCareEligibilityV1ApiController.waitDays(null, true)).isNull();
-    assertThat(CommunityCareEligibilityV1ApiController.waitDays(Facility.builder().build(), true))
+    assertThat(CommunityCareEligibilityV0ApiController.waitDays(null, true)).isNull();
+    assertThat(CommunityCareEligibilityV0ApiController.waitDays(Facility.builder().build(), true))
         .isNull();
   }
 
@@ -147,8 +147,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .maxDriveTimePrimary(10)
             .maxWaitPrimary(5)
             .facilitiesClient(facilitiesClient)
@@ -170,6 +170,7 @@ public final class CommunityCareEligibilityTest {
                             .zip("12345")
                             .street("66 Main St")
                             .build())
+                    .timestamp(actual.patientRequest().timestamp())
                     .patientIcn("123")
                     .establishedPatient(false)
                     .serviceType("PrimaryCare")
@@ -177,7 +178,6 @@ public final class CommunityCareEligibilityTest {
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
-                    .description("Access-Standards")
                     .build())
             .facilities(
                 asList(
@@ -203,8 +203,8 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void empty() {
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
             .bingMaps(mock(BingMapsClient.class))
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
@@ -224,13 +224,13 @@ public final class CommunityCareEligibilityTest {
                                 .street("66 Main St")
                                 .build())
                         .patientIcn("123")
+                        .timestamp(result.patientRequest().timestamp())
                         .establishedPatient(false)
                         .serviceType("PrimaryCare")
                         .build())
                 .communityCareEligibility(
                     CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                         .eligible(true)
-                        .description("Access-Standards")
                         .build())
                 .facilities(Collections.emptyList())
                 .build());
@@ -367,8 +367,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .maxDriveTimePrimary(1)
@@ -390,6 +390,7 @@ public final class CommunityCareEligibilityTest {
                             .zip("12345")
                             .street("66 Main St")
                             .build())
+                    .timestamp(actual.patientRequest().timestamp())
                     .patientIcn("123")
                     .establishedPatient(false)
                     .serviceType("PrimaryCare")
@@ -397,7 +398,12 @@ public final class CommunityCareEligibilityTest {
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
-                    .description("Hardship")
+                    .eligibilityCode(
+                        Collections.singletonList(
+                            CommunityCareEligibilityResponse.EligibilityCode.builder()
+                                .description("Hardship")
+                                .code("H")
+                                .build()))
                     .build())
             .facilities(
                 singletonList(
@@ -480,8 +486,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
@@ -503,6 +509,7 @@ public final class CommunityCareEligibilityTest {
                             .zip("12345")
                             .street("66 Main St")
                             .build())
+                    .timestamp(actual.patientRequest().timestamp())
                     .patientCoordinates(patientCoordinates)
                     .serviceType("MentalHealthCare")
                     .establishedPatient(true)
@@ -510,7 +517,6 @@ public final class CommunityCareEligibilityTest {
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(false)
-                    .description("Access-Standards")
                     .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
@@ -628,8 +634,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .maxDriveTimePrimary(1)
@@ -719,8 +725,8 @@ public final class CommunityCareEligibilityTest {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities(any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
@@ -730,14 +736,14 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityResponse result =
         controller.search(
             "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
-    assertThat(!result.communityCareEligibility().description().contains("Hardship"));
+    assertThat(result.facilities().isEmpty());
   }
 
   @SneakyThrows
   @Test(expected = Exceptions.UnknownServiceTypeException.class)
   public void unknownServiceType() {
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
             .bingMaps(mock(BingMapsClient.class))
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
@@ -830,8 +836,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
@@ -854,6 +860,7 @@ public final class CommunityCareEligibilityTest {
                             .zip("12345")
                             .street("66 Main St")
                             .build())
+                    .timestamp(actual.patientRequest().timestamp())
                     .patientCoordinates(patientCoordinates)
                     .serviceType("UrgentCare")
                     .establishedPatient(true)
@@ -861,7 +868,12 @@ public final class CommunityCareEligibilityTest {
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(true)
-                    .description("Urgent Care")
+                    .eligibilityCode(
+                        Collections.singletonList(
+                            CommunityCareEligibilityResponse.EligibilityCode.builder()
+                                .code("U")
+                                .description("Urgent Care")
+                                .build()))
                     .facilities(singletonList("FAC123"))
                     .build())
             .facilities(
@@ -960,8 +972,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    CommunityCareEligibilityV1ApiController controller =
-        CommunityCareEligibilityV1ApiController.builder()
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .bingMaps(bingMaps)
             .eeClient(eeClient)
@@ -983,13 +995,19 @@ public final class CommunityCareEligibilityTest {
                             .street("66 Main St")
                             .build())
                     .patientCoordinates(patientCoordinates)
+                    .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Dermatology")
                     .establishedPatient(true)
                     .build())
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                     .eligible(false)
-                    .description("Ineligible")
+                    .eligibilityCode(
+                        Collections.singletonList(
+                            CommunityCareEligibilityResponse.EligibilityCode.builder()
+                                .code("X")
+                                .description("Ineligible")
+                                .build()))
                     .build())
             .facilities(
                 singletonList(
