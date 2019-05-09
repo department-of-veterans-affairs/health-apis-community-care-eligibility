@@ -10,7 +10,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import lombok.SneakyThrows;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,12 +67,12 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
       System.out.println(e.getMessage());
       if (StringUtils.containsIgnoreCase(e.getMessage(), "getEESummaryResponse is Missing")) {
         throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
-      } else if (StringUtils.containsIgnoreCase(e.getMessage(), "Failed to send/receive from EE")) {
-        throw new Exceptions.EeUnavailableException(e);
       } else {
-        throw e;
+        throw new Exceptions.EeUnavailableException(e);
       }
     }
+
+    // StringUtils.containsIgnoreCase(e.getMessage(), "Failed to send/receive from EE")
 
     // "Failed to generate SOAPMessage for getEESummaryRequest"
     // "Don't Understand XML."
