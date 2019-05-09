@@ -121,11 +121,21 @@ Sample response:
       "longitude": 610.987
     },
     "serviceType": "PrimaryCare",
-    "establishedPatient": false
+    "establishedPatient": false,
+    "timeStamp": "2019-05-09T13:17:58.250Z"
   },
   "communityCareEligibility": {
-    "eligible": false,
-    "description": "Urgent Care, Access-Standards",
+    "eligible": true,
+    "eligibilityCodes":[
+      {
+         "description": "Hardship"
+         "code": "H"
+      }
+      {
+         "description": "Urgent Care"
+         "code": "U"
+      }
+    ],
     "facilities": [
       "vha_1597XY"
     ]
