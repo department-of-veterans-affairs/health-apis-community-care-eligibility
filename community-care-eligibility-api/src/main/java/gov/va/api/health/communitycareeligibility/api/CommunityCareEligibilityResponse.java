@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
   isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
 public final class CommunityCareEligibilityResponse {
+
   PatientRequest patientRequest;
 
   CommunityCareEligibility communityCareEligibility;
@@ -38,6 +39,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
+
     String street;
 
     String city;
@@ -53,11 +55,20 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class CommunityCareEligibility {
+
     Boolean eligible;
 
-    String description;
+    List<EligibilityCode> eligibilityCode;
 
     List<String> facilities;
+
+    /** Lazy getter. */
+    public List<EligibilityCode> eligibilityCode() {
+      if (eligibilityCode == null) {
+        eligibilityCode = new ArrayList<>();
+      }
+      return eligibilityCode;
+    }
 
     /** Lazy getter. */
     public List<String> facilities() {
@@ -74,6 +85,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Coordinates {
+
     Double latitude;
 
     Double longitude;
@@ -84,7 +96,20 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class EligibilityCode {
+
+    String description;
+
+    String code;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Facility {
+
     String id;
 
     String name;
@@ -106,6 +131,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class PatientRequest {
+
     String patientIcn;
 
     Address patientAddress;
@@ -115,6 +141,8 @@ public final class CommunityCareEligibilityResponse {
     String serviceType;
 
     Boolean establishedPatient;
+
+    String timestamp;
   }
 
   @Data
@@ -123,6 +151,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class WaitDays {
+
     Integer newPatient;
 
     Integer establishedPatient;
