@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -63,7 +64,11 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     } catch (Eligibilities.UnknownIdentityInSearchParameter e) {
       throw new Exceptions.MalformedPatientIcnException(patientIcn, e);
     } catch (Eligibilities.RequestFailed e) {
-      throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
+      if (StringUtils.containsIgnoreCase(e.getMessage(), "getEESummaryResponse is Missing")) {
+        throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
+      } else {
+        throw new Exceptions.EeUnavailableException(e);
+      }
     }
   }
 }

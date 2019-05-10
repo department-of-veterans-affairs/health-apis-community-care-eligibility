@@ -10,6 +10,12 @@ final class Exceptions {
     }
   }
 
+  static final class EeUnavailableException extends RuntimeException {
+    EeUnavailableException(Throwable cause) {
+      super("E&E is not available", cause);
+    }
+  }
+
   static final class FacilitiesUnavailableException extends RuntimeException {
     FacilitiesUnavailableException() {
       super("Facilities API is not available");
