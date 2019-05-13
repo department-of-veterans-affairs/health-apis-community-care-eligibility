@@ -3,14 +3,13 @@
 This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
 that computes *objective* overall community-care eligibility by combining eligibility codes
 from the Eligibility and Enrollment System (E&E) with wait- and drive-time access
-standards described [here](https://www.va.gov/opa/pressrel/pressrelease.cfm?id=5187).
-Average wait times are provided by Facilities API.
-Average drive times are computed by Bing Maps.
+standards.
+(Average historical wait times are provided by Facilities API. Average drive times are computed by Bing Maps. )
 
 ![applications](src/plantuml/apps.png)
 
-Bing Maps is expected to be removed in the near future, when average drive times become
-available in the Facilities API.
+Bing Maps is expected to be removed in the near future, when average drive times are supplied
+by the Facilities API.
 
 For details about building and running this application, see the [developer guide](developer.md).
 
@@ -36,11 +35,22 @@ The medical service type is one of:
 * WomensHealth
 
 The API combines data from three sources:
-1. Patient eligibility information from E&E.
-2. All medical facilities in the state, from Facilities API.
-3. Drive times from the patient address to the medical facilities, from Bing Maps.
+1. Patient eligibility information, from E&E.
+2. Medical facilities in the state, from Facilities API.
+3. Average drive times from the patient address to the medical facilities, from Bing Maps.
 
-This data is used to compute an *objective* determination of community-care-eligibility.
+This data is used to compute an overall determination of community-care-eligibility 
+based on the *objective* criteria of the MISSION Act. The six criteria are described
+[here](https://www.va.gov/COMMUNITYCARE/docs/pubfiles/factsheets/VA-FS_CC-Eligibility.pdf).
+The objective criteria of the MISSION Act are the first four:
+1. Service unavailable
+2. Residence in a state without a full-service VA medical facility
+3. 40-mile legacy/grandfathered from the Choice program
+4. Access standards
+   
+(The other two criteria, *best medical interest* and *quality standards*, are subjective
+criteria outside the scope of this API.)
+
 The response includes a description of the E&E eligibility codes and the IDs of any VA health
 facilities that satisfy the access standards.
 
