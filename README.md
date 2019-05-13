@@ -9,7 +9,8 @@ standards.
 ![applications](src/plantuml/apps.png)
 
 Bing Maps is expected to be removed in the near future, when average drive times are supplied
-by the Facilities API.
+by the Facilities API. Historical wait times from the Facilities API are expected to be replaced
+with live wait times from the VA Online Scheduling System.
 
 For details about building and running this application, see the [developer guide](developer.md).
 
