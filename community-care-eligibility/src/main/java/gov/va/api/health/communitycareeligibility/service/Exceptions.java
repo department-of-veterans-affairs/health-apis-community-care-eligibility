@@ -22,12 +22,6 @@ final class Exceptions {
     }
   }
 
-  static final class MalformedPatientIcnException extends RuntimeException {
-    MalformedPatientIcnException(String patientIcn, Throwable cause) {
-      super("Malformed patient ICN: " + patientIcn, cause);
-    }
-  }
-
   static final class UnknownPatientIcnException extends RuntimeException {
     UnknownPatientIcnException(String patientIcn, Throwable cause) {
       super("Unknown patient ICN: " + patientIcn, cause);
