@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class WebExceptionHandler {
   @ExceptionHandler({
     ConstraintViolationException.class,
-    Exceptions.MalformedPatientIcnException.class,
     Exceptions.UnknownServiceTypeException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
