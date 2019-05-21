@@ -213,12 +213,8 @@ public class CommunityCareEligibilityV0ApiController {
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
-    VaFacilitiesResponse vaFacilitiesResponse;
-    try {
-      vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
-    } catch (Exception e) {
-      throw new Exceptions.FacilitiesUnavailableException(e.getMessage());
-    }
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+
     List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
@@ -243,12 +239,7 @@ public class CommunityCareEligibilityV0ApiController {
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
 
-    Coordinates patientCoordinates;
-    try {
-      patientCoordinates = bingMaps.coordinates(patientAddress);
-    } catch (Exception e) {
-      throw new Exceptions.BingMapsUnavailableException(e.getMessage());
-    }
+    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
 
@@ -316,7 +307,7 @@ public class CommunityCareEligibilityV0ApiController {
     try {
       routes = bingMaps.routes(patientCoordinates, facility.coordinates());
     } catch (Exception e) {
-      throw new Exceptions.BingMapsUnavailableException(e.getMessage());
+      throw new Exceptions.BingMapsUnavailableException(e);
     }
     if (routes == null) {
       return;

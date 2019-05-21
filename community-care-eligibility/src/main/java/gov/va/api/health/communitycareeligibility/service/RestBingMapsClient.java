@@ -51,13 +51,18 @@ public class RestBingMapsClient implements BingMapsClient {
             .queryParam("key", bingApiKey)
             .build()
             .toUriString();
-    BingResponse responseObject =
-        restTemplate
-            .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
-            .getBody();
+    BingResponse responseObject;
+    try {
+      responseObject =
+          restTemplate
+              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
+              .getBody();
+    } catch (Exception e) {
+      throw new Exceptions.BingMapsUnavailableException(e);
+    }
     log.info("Bing Maps locations: " + responseObject);
     if (responseObject == null) {
-      throw new Exceptions.BingMapsUnavailableException("empty coordinates");
+      throw new Exceptions.BingMapsUnavailableException(new Throwable("Empty Response Object"));
     }
     Point point = responseObject.resourceSets().get(0).resources().get(0).point();
     return Coordinates.builder()
