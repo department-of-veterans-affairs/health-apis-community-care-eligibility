@@ -236,6 +236,48 @@ public final class CommunityCareEligibilityTest {
                 .build());
   }
 
+  @Test(expected = Exceptions.BingMapsUnavailableException.class)
+  @SneakyThrows
+  public void expectBingResponseFailure() {
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.facilities("FL")).thenReturn(VaFacilitiesResponse.builder().build());
+    CommunityCareEligibilityV0ApiController.builder()
+        .facilitiesClient(facilitiesClient)
+        .build()
+        .search("123", " 66 Main St", "Melbourne  ", "FL", " 12345 ", "primarycare", false);
+  }
+
+  @Test(expected = Exceptions.EeUnavailableException.class)
+  @SneakyThrows
+  public void expectEEResponseFailure() {
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    BingMapsClient bingMapsClient = mock(BingMapsClient.class);
+    when(facilitiesClient.facilities("FL")).thenReturn(VaFacilitiesResponse.builder().build());
+    when(bingMapsClient.coordinates(
+            Address.builder()
+                .zip("12345")
+                .city("Melbourne")
+                .state("FL")
+                .street("66 Main St")
+                .build()))
+        .thenReturn(Coordinates.builder().longitude(100D).latitude(100D).build());
+    when(bingMapsClient.routes(any(Coordinates.class), any(Coordinates.class)))
+        .thenReturn(BingResponse.builder().build());
+    CommunityCareEligibilityV0ApiController.builder()
+        .facilitiesClient(facilitiesClient)
+        .bingMaps(bingMapsClient)
+        .build()
+        .search("123", " 66 Main St", "Melbourne  ", "FL", " 12345 ", "primarycare", false);
+  }
+
+  @Test(expected = Exceptions.FacilitiesUnavailableException.class)
+  @SneakyThrows
+  public void expectFacilitiesResponseFailure() {
+    CommunityCareEligibilityV0ApiController.builder()
+        .build()
+        .search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
+  }
+
   @Test
   @SneakyThrows
   public void facilityTransformerNullChecks() {
