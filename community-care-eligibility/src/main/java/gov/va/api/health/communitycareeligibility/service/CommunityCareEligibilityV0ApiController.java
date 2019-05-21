@@ -37,10 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping(
-  value = {"/api"},
-  produces = "application/json"
-)
+@RequestMapping(produces = "application/json")
 public class CommunityCareEligibilityV0ApiController {
 
   private int maxDriveMinsPrimary;
