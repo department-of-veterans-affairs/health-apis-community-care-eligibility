@@ -57,7 +57,7 @@ public class RestBingMapsClient implements BingMapsClient {
             .getBody();
     log.info("Bing Maps locations: " + responseObject);
     if (responseObject == null) {
-      throw new Exceptions.BingMapsUnavailableException();
+      throw new Exceptions.BingMapsUnavailableException("empty coordinates");
     }
     Point point = responseObject.resourceSets().get(0).resources().get(0).point();
     return Coordinates.builder()
@@ -79,9 +79,7 @@ public class RestBingMapsClient implements BingMapsClient {
             .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
             .getBody();
     log.info("Bing Maps routes: " + responseObject);
-    if (responseObject == null) {
-      throw new Exceptions.BingMapsUnavailableException();
-    }
+
     return responseObject;
   }
 }

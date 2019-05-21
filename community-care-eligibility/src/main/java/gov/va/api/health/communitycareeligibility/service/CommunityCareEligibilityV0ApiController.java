@@ -213,7 +213,12 @@ public class CommunityCareEligibilityV0ApiController {
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
-    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+    VaFacilitiesResponse vaFacilitiesResponse;
+    try {
+      vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+    } catch (Exception e) {
+      throw new Exceptions.FacilitiesUnavailableException(e.getMessage());
+    }
     List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
@@ -238,13 +243,23 @@ public class CommunityCareEligibilityV0ApiController {
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
 
-    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
+    Coordinates patientCoordinates;
+    try {
+      patientCoordinates = bingMaps.coordinates(patientAddress);
+    } catch (Exception e) {
+      throw new Exceptions.BingMapsUnavailableException(e.getMessage());
+    }
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
 
     Instant timestamp = Instant.now();
-    List<VceEligibilityInfo> vceEligibilityCollection =
-        processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
+    List<VceEligibilityInfo> vceEligibilityCollection;
+
+    try {
+      vceEligibilityCollection = processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
+    }catch (Exception e){
+      throw new Exceptions.EeUnavailableException(e);
+    }
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
         vceEligibilityCollection
             .stream()
@@ -296,7 +311,12 @@ public class CommunityCareEligibilityV0ApiController {
   }
 
   private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
-    BingResponse routes = bingMaps.routes(patientCoordinates, facility.coordinates());
+    BingResponse routes;
+    try {
+      routes = bingMaps.routes(patientCoordinates, facility.coordinates());
+    } catch (Exception e) {
+      throw new Exceptions.BingMapsUnavailableException(e.getMessage());
+    }
     if (routes == null) {
       return;
     }

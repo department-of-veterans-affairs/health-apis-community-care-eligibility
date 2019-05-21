@@ -5,8 +5,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 final class Exceptions {
   static final class BingMapsUnavailableException extends RuntimeException {
-    BingMapsUnavailableException() {
-      super("Bing Maps API is not available");
+    BingMapsUnavailableException(String message) {
+      super("Bing Maps API is not available and is returning " + message);
     }
   }
 
@@ -17,8 +17,8 @@ final class Exceptions {
   }
 
   static final class FacilitiesUnavailableException extends RuntimeException {
-    FacilitiesUnavailableException() {
-      super("Facilities API is not available");
+    FacilitiesUnavailableException(String message) {
+      super("Facilities API is not available and is returning " + message);
     }
   }
 
