@@ -6,19 +6,19 @@ import lombok.experimental.UtilityClass;
 final class Exceptions {
   static final class BingMapsUnavailableException extends RuntimeException {
     BingMapsUnavailableException(Throwable cause) {
-      super("Bing Maps API is not available", cause);
+      super("Bing Maps API is not available: " + cause.getMessage(), cause);
     }
   }
 
   static final class EeUnavailableException extends RuntimeException {
     EeUnavailableException(Throwable cause) {
-      super("E&E is not available", cause);
+      super("E&E is not available: " + cause.getMessage(), cause);
     }
   }
 
   static final class FacilitiesUnavailableException extends RuntimeException {
     FacilitiesUnavailableException(Throwable cause) {
-      super("Facilities API is not available", cause);
+      super("Facilities API is not available: " + cause.getMessage(), cause);
     }
   }
 
