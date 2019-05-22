@@ -51,19 +51,24 @@ public class RestBingMapsClient implements BingMapsClient {
             .queryParam("key", bingApiKey)
             .build()
             .toUriString();
-    BingResponse responseObject =
-        restTemplate
-            .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
-            .getBody();
-    log.info("Bing Maps locations: " + responseObject);
-    if (responseObject == null) {
-      throw new Exceptions.BingMapsUnavailableException();
+    BingResponse responseObject;
+    try {
+      responseObject =
+          restTemplate
+              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
+              .getBody();
+      log.info("Bing Maps locations: " + responseObject);
+      if (responseObject == null) {
+        throw new Exceptions.BingMapsUnavailableException(new Throwable("Empty Response Object"));
+      }
+      Point point = responseObject.resourceSets().get(0).resources().get(0).point();
+      return Coordinates.builder()
+          .latitude(point.coordinates().get(0))
+          .longitude(point.coordinates().get(1))
+          .build();
+    } catch (Exception e) {
+      throw new Exceptions.BingMapsUnavailableException(e);
     }
-    Point point = responseObject.resourceSets().get(0).resources().get(0).point();
-    return Coordinates.builder()
-        .latitude(point.coordinates().get(0))
-        .longitude(point.coordinates().get(1))
-        .build();
   }
 
   @Override
@@ -74,14 +79,16 @@ public class RestBingMapsClient implements BingMapsClient {
             .queryParam("wp.1", coordinateParam(destination))
             .queryParam("key", bingApiKey)
             .toUriString();
-    BingResponse responseObject =
-        restTemplate
-            .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
-            .getBody();
-    log.info("Bing Maps routes: " + responseObject);
-    if (responseObject == null) {
-      throw new Exceptions.BingMapsUnavailableException();
+    BingResponse responseObject;
+    try {
+      responseObject =
+          restTemplate
+              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), BingResponse.class)
+              .getBody();
+      log.info("Bing Maps routes: " + responseObject);
+      return responseObject;
+    } catch (Exception e) {
+      throw new Exceptions.BingMapsUnavailableException(e);
     }
-    return responseObject;
   }
 }

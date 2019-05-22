@@ -45,14 +45,16 @@ public class RestFacilitiesClient implements FacilitiesClient {
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    VaFacilitiesResponse responseObject =
-        restTemplate
-            .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
-            .getBody();
-    log.info("Va Facilities Response" + responseObject);
-    if (responseObject == null) {
-      throw new Exceptions.FacilitiesUnavailableException();
+    VaFacilitiesResponse responseObject;
+    try {
+      responseObject =
+          restTemplate
+              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+              .getBody();
+      log.info("Va Facilities Response" + responseObject);
+      return responseObject;
+    } catch (Exception e) {
+      throw new Exceptions.FacilitiesUnavailableException(e);
     }
-    return responseObject;
   }
 }

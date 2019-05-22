@@ -211,6 +211,7 @@ public class CommunityCareEligibilityV0ApiController {
             .zip(zip.trim())
             .build();
     VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+
     List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
@@ -240,7 +241,9 @@ public class CommunityCareEligibilityV0ApiController {
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
 
     Instant timestamp = Instant.now();
-    List<VceEligibilityInfo> vceEligibilityCollection =
+    List<VceEligibilityInfo> vceEligibilityCollection;
+
+    vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
         vceEligibilityCollection
