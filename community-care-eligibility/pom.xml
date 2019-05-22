@@ -8,7 +8,7 @@
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility</artifactId>
-  <version>1.0.15-SNAPSHOT</version>
+  <version>1.0.15</version>
   <packaging>jar</packaging>
   <properties>
     <ee-artifacts.version>1.1.39</ee-artifacts.version>
