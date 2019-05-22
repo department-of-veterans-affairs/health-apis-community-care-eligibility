@@ -6,7 +6,7 @@ import lombok.experimental.UtilityClass;
 final class Exceptions {
   static final class BingMapsUnavailableException extends RuntimeException {
     BingMapsUnavailableException(Throwable cause) {
-      super("Bing Maps API is not available" + cause);
+      super("Bing Maps API is not available", cause);
     }
   }
 
@@ -18,7 +18,7 @@ final class Exceptions {
 
   static final class FacilitiesUnavailableException extends RuntimeException {
     FacilitiesUnavailableException(Throwable cause) {
-      super("Facilities API is not available" + cause);
+      super("Facilities API is not available", cause);
     }
   }
 

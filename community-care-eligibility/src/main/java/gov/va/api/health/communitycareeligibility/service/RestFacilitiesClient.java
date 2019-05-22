@@ -51,10 +51,10 @@ public class RestFacilitiesClient implements FacilitiesClient {
           restTemplate
               .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
               .getBody();
+      log.info("Va Facilities Response" + responseObject);
+      return responseObject;
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
     }
-    log.info("Va Facilities Response" + responseObject);
-    return responseObject;
   }
 }

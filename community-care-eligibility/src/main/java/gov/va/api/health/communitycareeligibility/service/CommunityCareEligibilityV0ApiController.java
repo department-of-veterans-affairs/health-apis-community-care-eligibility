@@ -246,12 +246,8 @@ public class CommunityCareEligibilityV0ApiController {
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection;
 
-    try {
-      vceEligibilityCollection =
-          processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
-    } catch (Exception e) {
-      throw new Exceptions.EeUnavailableException(e);
-    }
+    vceEligibilityCollection =
+        processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
         vceEligibilityCollection
             .stream()
@@ -303,12 +299,7 @@ public class CommunityCareEligibilityV0ApiController {
   }
 
   private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
-    BingResponse routes;
-    try {
-      routes = bingMaps.routes(patientCoordinates, facility.coordinates());
-    } catch (Exception e) {
-      throw new Exceptions.BingMapsUnavailableException(e);
-    }
+    BingResponse routes = bingMaps.routes(patientCoordinates, facility.coordinates());
     if (routes == null) {
       return;
     }
