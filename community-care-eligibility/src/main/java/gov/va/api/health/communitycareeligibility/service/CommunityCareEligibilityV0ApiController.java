@@ -4,28 +4,24 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
-import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -113,6 +109,25 @@ public class CommunityCareEligibilityV0ApiController {
     return map;
   }
 
+  static String state(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility == null) {
+      return null;
+    }
+    VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
+    if (attributes == null) {
+      return null;
+    }
+    VaFacilitiesResponse.Address address = attributes.address();
+    if (address == null) {
+      return null;
+    }
+    VaFacilitiesResponse.PhysicalAddress physical = address.physical();
+    if (physical == null) {
+      return null;
+    }
+    return StringUtils.trimToNull(physical.state());
+  }
+
   static Integer waitDays(Facility facility, boolean establishedPatient) {
     if (facility == null) {
       return null;
@@ -144,22 +159,81 @@ public class CommunityCareEligibilityV0ApiController {
     return false;
   }
 
-  @SneakyThrows
-  private List<Facility> facilitiesMeetingAccessStandards(
-      List<Facility> facilities, String serviceType, boolean establishedPatient) {
+  private List<Facility> filterNearbyFacilities(
+      String filteringServiceType, Address patientAddress, boolean establishedPatient) {
     boolean isPrimary =
-        equalsIgnoreCase(serviceType, "primarycare")
-            || equalsIgnoreCase(serviceType, "mentalhealth");
+        equalsIgnoreCase(filteringServiceType, "primarycare")
+            || equalsIgnoreCase(filteringServiceType, "mentalhealth");
+    VaFacilitiesResponse nearbyFacilities =
+        facilitiesClient.nearby(
+            patientAddress, isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty);
+    List<VaFacilitiesResponse.Facility> nearbyFilteredByStateAndServiceType =
+        nearbyFacilities == null
+            ? Collections.emptyList()
+            : nearbyFacilities
+                .data()
+                .stream()
+                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
+                .filter(vaFacility -> equalsIgnoreCase(state(vaFacility), patientAddress.state()))
+                .collect(Collectors.toList());
+    log.info(
+        "VA facilities filtered by service type '{}' and state {}: {}",
+        filteringServiceType,
+        patientAddress.state(),
+        nearbyFilteredByStateAndServiceType
+            .stream()
+            .map(facility -> facility.id())
+            .collect(Collectors.toList()));
     int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
-    int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    return facilities
+    List<Facility> nearbyFacilitiesToCheck =
+        nearbyFilteredByStateAndServiceType
+            .stream()
+            .map(
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(filteringServiceType)
+                        .build()
+                        .toFacility(vaFacility))
+            .collect(Collectors.toList())
+            .stream()
+            .filter(
+                facility ->
+                    waitDays(facility, establishedPatient) != null
+                        && waitDays(facility, establishedPatient) <= waitDays)
+            .collect(Collectors.toList());
+    return nearbyFacilitiesToCheck
         .stream()
         .filter(
             facility ->
                 waitDays(facility, establishedPatient) != null
-                    && waitDays(facility, establishedPatient) <= waitDays
-                    && facility.driveMinutes() != null
-                    && facility.driveMinutes() <= driveMins)
+                    && waitDays(facility, establishedPatient) <= waitDays)
+        .collect(Collectors.toList());
+  }
+
+  private List<Facility> filteredStateFacilities(
+      String filteringServiceType, Address patientAddress) {
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+    List<VaFacilitiesResponse.Facility> filteredByServiceType =
+        vaFacilitiesResponse == null
+            ? Collections.emptyList()
+            : vaFacilitiesResponse
+                .data()
+                .stream()
+                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
+                .collect(Collectors.toList());
+    log.info(
+        "VA facilities filtered by service type '{}': {}",
+        filteringServiceType,
+        patientAddress.state(),
+        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
+    return filteredByServiceType
+        .stream()
+        .map(
+            vaFacility ->
+                FacilityTransformer.builder()
+                    .serviceType(filteringServiceType)
+                    .build()
+                    .toFacility(vaFacility))
         .collect(Collectors.toList());
   }
 
@@ -210,39 +284,9 @@ public class CommunityCareEligibilityV0ApiController {
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
-    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
-
-    List<VaFacilitiesResponse.Facility> filteredByServiceType =
-        vaFacilitiesResponse == null
-            ? Collections.emptyList()
-            : vaFacilitiesResponse
-                .data()
-                .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
-                .collect(Collectors.toList());
-    log.info(
-        "VA facilities filtered by service type '{}' and state {}: {}",
-        filteringServiceType,
-        patientAddress.state(),
-        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
-    List<Facility> facilities =
-        filteredByServiceType
-            .stream()
-            .map(
-                vaFacility ->
-                    FacilityTransformer.builder()
-                        .serviceType(filteringServiceType)
-                        .build()
-                        .toFacility(vaFacility))
-            .collect(Collectors.toList());
-
-    Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
-    facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
-    Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
 
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection;
-
     vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
@@ -262,19 +306,17 @@ public class CommunityCareEligibilityV0ApiController {
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
-
+    List<Facility> facilitiesMeetingAccessStandards =
+        filterNearbyFacilities(filteringServiceType, patientAddress, establishedPatient);
+    List<Facility> facilities = filteredStateFacilities(filteringServiceType, patientAddress);
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
-    List<Facility> facilitiesMeetingAccessStandards =
-        facilitiesMeetingAccessStandards(facilities, filteringServiceType, establishedPatient);
     if (!communityCareEligible && !codeString.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
     }
-
     return CommunityCareEligibilityResponse.builder()
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
-                .patientCoordinates(patientCoordinates)
                 .serviceType(mappedServiceType)
                 .establishedPatient(establishedPatient)
                 .patientIcn(patientIcn)
@@ -293,24 +335,5 @@ public class CommunityCareEligibilityV0ApiController {
                 .build())
         .facilities(facilities)
         .build();
-  }
-
-  private void setDriveMinutes(Coordinates patientCoordinates, Facility facility) {
-    BingResponse routes = bingMaps.routes(patientCoordinates, facility.coordinates());
-    if (routes == null) {
-      return;
-    }
-    if (routes.resourceSets().isEmpty()) {
-      return;
-    }
-    Resources resources = routes.resourceSets().get(0);
-    if (resources.resources().isEmpty()) {
-      return;
-    }
-    Resource resource = resources.resources().get(0);
-    if (resource.travelDuration() == null) {
-      return;
-    }
-    facility.driveMinutes((int) TimeUnit.SECONDS.toMinutes(resource.travelDuration()));
   }
 }
