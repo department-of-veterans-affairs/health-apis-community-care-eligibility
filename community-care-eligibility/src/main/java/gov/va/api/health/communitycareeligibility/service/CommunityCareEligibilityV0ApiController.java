@@ -44,8 +44,6 @@ public class CommunityCareEligibilityV0ApiController {
 
   private int maxWaitDaysSpecialty;
 
-  private BingMapsClient bingMaps;
-
   private EligibilityAndEnrollmentClient eeClient;
 
   private FacilitiesClient facilitiesClient;
@@ -57,14 +55,12 @@ public class CommunityCareEligibilityV0ApiController {
       @Value("${community-care.max-wait-days-primary}") int maxWaitPrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
       @Value("${community-care.max-wait-days-specialty}") int maxWaitSpecialty,
-      @Autowired BingMapsClient bingMaps,
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
     this.maxWaitDaysPrimary = maxWaitPrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
     this.maxWaitDaysSpecialty = maxWaitSpecialty;
-    this.bingMaps = bingMaps;
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
   }
