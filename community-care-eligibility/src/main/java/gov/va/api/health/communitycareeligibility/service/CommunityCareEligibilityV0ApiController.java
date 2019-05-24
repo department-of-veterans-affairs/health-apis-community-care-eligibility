@@ -159,49 +159,11 @@ public class CommunityCareEligibilityV0ApiController {
     return false;
   }
 
-  private List<Facility> filterNearbyFacilities(
-      String filteringServiceType, Address patientAddress, boolean establishedPatient) {
-    boolean isPrimary =
-        equalsIgnoreCase(filteringServiceType, "primarycare")
-            || equalsIgnoreCase(filteringServiceType, "mentalhealth");
-    VaFacilitiesResponse nearbyFacilities =
-        facilitiesClient.nearby(
-            patientAddress, isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty);
-    List<VaFacilitiesResponse.Facility> nearbyFilteredByStateAndServiceType =
-        nearbyFacilities == null
-            ? Collections.emptyList()
-            : nearbyFacilities
-                .data()
-                .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
-                .filter(vaFacility -> equalsIgnoreCase(state(vaFacility), patientAddress.state()))
-                .collect(Collectors.toList());
-    log.info(
-        "VA facilities filtered by service type '{}' and state {}: {}",
-        filteringServiceType,
-        patientAddress.state(),
-        nearbyFilteredByStateAndServiceType
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList()));
+  @SneakyThrows
+  private List<Facility> facilitiesMeetingAccessStandards(
+      List<Facility> facilities, boolean isPrimary, boolean establishedPatient) {
     int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
-    List<Facility> nearbyFacilitiesToCheck =
-        nearbyFilteredByStateAndServiceType
-            .stream()
-            .map(
-                vaFacility ->
-                    FacilityTransformer.builder()
-                        .serviceType(filteringServiceType)
-                        .build()
-                        .toFacility(vaFacility))
-            .collect(Collectors.toList())
-            .stream()
-            .filter(
-                facility ->
-                    waitDays(facility, establishedPatient) != null
-                        && waitDays(facility, establishedPatient) <= waitDays)
-            .collect(Collectors.toList());
-    return nearbyFacilitiesToCheck
+    return facilities
         .stream()
         .filter(
             facility ->
@@ -210,31 +172,18 @@ public class CommunityCareEligibilityV0ApiController {
         .collect(Collectors.toList());
   }
 
-  private List<Facility> filteredStateFacilities(
-      String filteringServiceType, Address patientAddress) {
-    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
-    List<VaFacilitiesResponse.Facility> filteredByServiceType =
-        vaFacilitiesResponse == null
-            ? Collections.emptyList()
-            : vaFacilitiesResponse
-                .data()
-                .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
-                .collect(Collectors.toList());
-    log.info(
-        "VA facilities filtered by service type '{}': {}",
-        filteringServiceType,
-        patientAddress.state(),
-        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
-    return filteredByServiceType
-        .stream()
-        .map(
-            vaFacility ->
-                FacilityTransformer.builder()
-                    .serviceType(filteringServiceType)
-                    .build()
-                    .toFacility(vaFacility))
-        .collect(Collectors.toList());
+  @SneakyThrows
+  private List<String> getNearbyFacilityIds(boolean isPrimary, Address patientAddress) {
+    VaNearbyFacilitiesResponse nearbyFacilities =
+        facilitiesClient.nearby(
+            patientAddress, isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty);
+    return nearbyFacilities == null
+        ? Collections.emptyList()
+        : nearbyFacilities
+            .data()
+            .stream()
+            .map(facility -> facility.id())
+            .collect(Collectors.toList());
   }
 
   private List<VceEligibilityInfo> processEligibilityAndEnrollmentResponse(
@@ -284,7 +233,6 @@ public class CommunityCareEligibilityV0ApiController {
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
-
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection;
     vceEligibilityCollection =
@@ -306,9 +254,56 @@ public class CommunityCareEligibilityV0ApiController {
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
+    boolean isPrimary =
+        equalsIgnoreCase(filteringServiceType, "primarycare")
+            || equalsIgnoreCase(filteringServiceType, "mentalhealth");
+    List<String> facilityIdsWithinDriveTime = getNearbyFacilityIds(isPrimary, patientAddress);
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+    List<VaFacilitiesResponse.Facility> filteredByServiceType =
+        vaFacilitiesResponse == null
+            ? Collections.emptyList()
+            : vaFacilitiesResponse
+                .data()
+                .stream()
+                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
+                .collect(Collectors.toList());
+    log.info(
+        "VA facilities filtered by service type '{}': {}",
+        filteringServiceType,
+        patientAddress.state(),
+        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
+    List<VaFacilitiesResponse.Facility> filteredByDriveTime =
+        filteredByServiceType
+            .stream()
+            .filter(vaFacility -> facilityIdsWithinDriveTime.contains(vaFacility.id()))
+            .collect(Collectors.toList());
+    log.info(
+        "VA facilities filtered by drivetime '{}': {}",
+        filteringServiceType,
+        patientAddress.state(),
+        filteredByServiceType.stream().map(facility -> facility.id()).collect(Collectors.toList()));
+    List<Facility> filteredNearbyFacilities =
+        filteredByDriveTime
+            .stream()
+            .map(
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(filteringServiceType)
+                        .build()
+                        .toFacility(vaFacility))
+            .collect(Collectors.toList());
     List<Facility> facilitiesMeetingAccessStandards =
-        filterNearbyFacilities(filteringServiceType, patientAddress, establishedPatient);
-    List<Facility> facilities = filteredStateFacilities(filteringServiceType, patientAddress);
+        facilitiesMeetingAccessStandards(filteredNearbyFacilities, isPrimary, establishedPatient);
+    List<Facility> stateFacilities =
+        filteredByServiceType
+            .stream()
+            .map(
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(filteringServiceType)
+                        .build()
+                        .toFacility(vaFacility))
+            .collect(Collectors.toList());
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
     if (!communityCareEligible && !codeString.contains("X")) {
@@ -333,7 +328,7 @@ public class CommunityCareEligibilityV0ApiController {
                         .map(facility -> facility.id())
                         .collect(Collectors.toList()))
                 .build())
-        .facilities(facilities)
+        .facilities(stateFacilities)
         .build();
   }
 }

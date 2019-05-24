@@ -61,7 +61,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse nearby(Address address, int driveTime) {
+  public VaNearbyFacilitiesResponse nearby(Address address, int driveTime) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
             .queryParam("state", address.state())
@@ -76,11 +76,12 @@ public class RestFacilitiesClient implements FacilitiesClient {
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    VaFacilitiesResponse responseObject;
+    VaNearbyFacilitiesResponse responseObject;
     try {
       responseObject =
           restTemplate
-              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+              .exchange(
+                  url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
               .getBody();
       log.info("Va Facilities Response" + responseObject);
       return responseObject;

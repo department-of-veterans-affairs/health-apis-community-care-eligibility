@@ -73,9 +73,9 @@ public final class CommunityCareEligibilityTest {
     Coordinates nearCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates farCoordinates = Coordinates.builder().latitude(3D).longitude(4D).build();
     Coordinates patientCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
-
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
+
     BingMapsClient bingMaps = mock(BingMapsClient.class);
     when(bingMaps.coordinates(patientAddress)).thenReturn(patientCoordinates);
     when(bingMaps.routes(eq(patientCoordinates), eq(nearCoordinates)))
@@ -105,65 +105,70 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    VaFacilitiesResponse mockResponse =
-        VaFacilitiesResponse.builder()
-            .data(
-                asList(
-                    VaFacilitiesResponse.Facility.builder()
-                        .id("nearFac")
-                        .attributes(
-                            VaFacilitiesResponse.Attributes.builder()
-                                .lat(1D)
-                                .longg(2D)
-                                .waitTimes(
-                                    VaFacilitiesResponse.WaitTimes.builder()
-                                        .health(
-                                            singletonList(
-                                                VaFacilitiesResponse.WaitTime.builder()
-                                                    .established(100)
-                                                    .neww(100)
-                                                    .service("primarycare")
-                                                    .build()))
-                                        .build())
-                                .address(
-                                    VaFacilitiesResponse.Address.builder()
-                                        .physical(
-                                            VaFacilitiesResponse.PhysicalAddress.builder()
-                                                .address1("near st")
-                                                .state("fl")
-                                                .build())
-                                        .build())
-                                .build())
-                        .build(),
-                    VaFacilitiesResponse.Facility.builder()
-                        .id("farFac")
-                        .attributes(
-                            VaFacilitiesResponse.Attributes.builder()
-                                .lat(3D)
-                                .longg(4D)
-                                .waitTimes(
-                                    VaFacilitiesResponse.WaitTimes.builder()
-                                        .health(
-                                            singletonList(
-                                                VaFacilitiesResponse.WaitTime.builder()
-                                                    .established(0)
-                                                    .neww(0)
-                                                    .service("primarycare")
-                                                    .build()))
-                                        .build())
-                                .address(
-                                    VaFacilitiesResponse.Address.builder()
-                                        .physical(
-                                            VaFacilitiesResponse.PhysicalAddress.builder()
-                                                .address1("far st")
-                                                .state("fl")
-                                                .build())
-                                        .build())
-                                .build())
-                        .build()))
-            .build();
-    when(facilitiesClient.facilities("FL")).thenReturn(mockResponse);
-    when(facilitiesClient.nearby(patientAddress, 30)).thenReturn(mockResponse);
+
+    when(facilitiesClient.facilities("FL"))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    asList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("nearFac")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(1D)
+                                    .longg(2D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(100)
+                                                        .neww(100)
+                                                        .service("primarycare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("near st")
+                                                    .state("fl")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build(),
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("farFac")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(3D)
+                                    .longg(4D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(0)
+                                                        .neww(0)
+                                                        .service("primarycare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("far st")
+                                                    .state("fl")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
+    when(facilitiesClient.nearby(patientAddress, 10))
+        .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(asList(VaNearbyFacilitiesResponse.Facility.builder().id("nearFac").build()))
+                .build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .maxDriveTimePrimary(10)
@@ -378,7 +383,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     when(facilitiesClient.nearby(patientAddress, 1))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -459,39 +464,46 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    VaFacilitiesResponse mockFacilitiesResponse =
-        VaFacilitiesResponse.builder()
-            .data(
-                singletonList(
-                    VaFacilitiesResponse.Facility.builder()
-                        .id("FAC123")
-                        .attributes(
-                            VaFacilitiesResponse.Attributes.builder()
-                                .lat(200D)
-                                .longg(100D)
-                                .waitTimes(
-                                    VaFacilitiesResponse.WaitTimes.builder()
-                                        .health(
-                                            singletonList(
-                                                VaFacilitiesResponse.WaitTime.builder()
-                                                    .established(1)
-                                                    .neww(10)
-                                                    .service("MentalHealth")
-                                                    .build()))
-                                        .build())
-                                .address(
-                                    VaFacilitiesResponse.Address.builder()
-                                        .physical(
-                                            VaFacilitiesResponse.PhysicalAddress.builder()
-                                                .address1("911 derp st")
-                                                .state("FL")
-                                                .build())
-                                        .build())
-                                .build())
-                        .build()))
-            .build();
-    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(mockFacilitiesResponse);
-    when(facilitiesClient.facilities("FL")).thenReturn(mockFacilitiesResponse);
+
+    when(facilitiesClient.nearby(patientAddress, 60))
+        .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilities("FL"))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC123")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(200D)
+                                    .longg(100D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(1)
+                                                        .neww(10)
+                                                        .service("MentalHealth")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("911 derp st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
 
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
@@ -570,7 +582,7 @@ public final class CommunityCareEligibilityTest {
     when(facilitiesClient.facilities(any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
     when(facilitiesClient.nearby(any(Address.class), any(int.class)))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -644,40 +656,47 @@ public final class CommunityCareEligibilityTest {
                                         .build()))
                             .build()))
                 .build());
-    VaFacilitiesResponse mockFacilitiesResponse =
-        VaFacilitiesResponse.builder()
-            .data(
-                singletonList(
-                    VaFacilitiesResponse.Facility.builder()
-                        .id("FAC123")
-                        .attributes(
-                            VaFacilitiesResponse.Attributes.builder()
-                                .lat(200D)
-                                .longg(100D)
-                                .waitTimes(
-                                    VaFacilitiesResponse.WaitTimes.builder()
-                                        .health(
-                                            singletonList(
-                                                VaFacilitiesResponse.WaitTime.builder()
-                                                    .established(1)
-                                                    .neww(10)
-                                                    .service("UrgentCare")
-                                                    .build()))
-                                        .build())
-                                .address(
-                                    VaFacilitiesResponse.Address.builder()
-                                        .physical(
-                                            VaFacilitiesResponse.PhysicalAddress.builder()
-                                                .address1("911 derp st")
-                                                .state("FL")
-                                                .build())
-                                        .build())
-                                .build())
-                        .build()))
-            .build();
+
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(mockFacilitiesResponse);
-    when(facilitiesClient.facilities("FL")).thenReturn(mockFacilitiesResponse);
+    when(facilitiesClient.nearby(patientAddress, 60))
+        .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilities("FL"))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC123")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .lat(200D)
+                                    .longg(100D)
+                                    .waitTimes(
+                                        VaFacilitiesResponse.WaitTimes.builder()
+                                            .health(
+                                                singletonList(
+                                                    VaFacilitiesResponse.WaitTime.builder()
+                                                        .established(1)
+                                                        .neww(10)
+                                                        .service("UrgentCare")
+                                                        .build()))
+                                            .build())
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("911 derp st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -808,7 +827,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
     when(facilitiesClient.nearby(patientAddress, 60))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)

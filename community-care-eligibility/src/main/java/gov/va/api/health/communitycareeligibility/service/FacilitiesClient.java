@@ -5,5 +5,5 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 public interface FacilitiesClient {
   VaFacilitiesResponse facilities(String state);
 
-  VaFacilitiesResponse nearby(Address address, int driveTime);
+  VaNearbyFacilitiesResponse nearby(Address address, int driveTime);
 }
