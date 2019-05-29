@@ -1,9 +1,9 @@
 # Architecture
 
-Development Environment
+## Development Environment
 
 ![development](development.png)
 
-Production Environment
+## Production Environment
 
 ![production](production.png)
