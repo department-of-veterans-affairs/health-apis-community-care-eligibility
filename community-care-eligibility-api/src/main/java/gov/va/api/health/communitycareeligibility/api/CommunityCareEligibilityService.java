@@ -64,12 +64,72 @@ public interface CommunityCareEligibilityService {
         )
   )
   CommunityCareEligibilityResponse search(
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "patient") String patientIcn,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "street") String street,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "city") String city,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "state") String state,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "zip") String zip,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "serviceType") String serviceType,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "establishedPatient")
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "patient",
+            description = "The patient ICN"
+          )
+          String patientIcn,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "street",
+            description = "Street of patient's home address"
+          )
+          String street,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "city",
+            description = "City of patient's home address"
+          )
+          String city,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "state",
+            description = "State of patient's home address"
+          )
+          String state,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "zip",
+            description = "ZIP code of patient's home address"
+          )
+          String zip,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "serviceType",
+            description = "The patient's desired medical service type",
+            schema =
+                @Schema(
+                  allowableValues = {
+                    "Audiology",
+                    "Cardiology",
+                    "Dermatology",
+                    "EmergencyCare",
+                    "Gastroenterology",
+                    "Gynecology",
+                    "MentalHealthCare",
+                    "Ophthalmology",
+                    "Optometry",
+                    "Orthopedics",
+                    "PrimaryCare",
+                    "UrgentCare",
+                    "Urology",
+                    "WomensHealth"
+                  }
+                )
+          )
+          String serviceType,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            required = true,
+            name = "establishedPatient",
+            description = "Whether or not this is an established patient"
+          )
           Boolean establishedPatient);
 }
