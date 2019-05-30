@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(produces = "application/json")
 public class CommunityCareEligibilityV0ApiController {
-
   private int maxDriveMinsPrimary;
 
   private int maxWaitDaysPrimary;
@@ -168,20 +167,6 @@ public class CommunityCareEligibilityV0ApiController {
         .collect(Collectors.toList());
   }
 
-  @SneakyThrows
-  private List<String> getNearbyFacilityIds(boolean isPrimary, Address patientAddress) {
-    VaNearbyFacilitiesResponse nearbyFacilities =
-        facilitiesClient.nearby(
-            patientAddress, isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty);
-    return nearbyFacilities == null
-        ? Collections.emptyList()
-        : nearbyFacilities
-            .data()
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList());
-  }
-
   private List<VceEligibilityInfo> processEligibilityAndEnrollmentResponse(
       GetEESummaryResponse response) {
     return response == null
@@ -222,16 +207,9 @@ public class CommunityCareEligibilityV0ApiController {
         equalsIgnoreCase(mappedServiceType, "MentalHealthCare")
             ? "MentalHealth"
             : mappedServiceType;
-    Address patientAddress =
-        Address.builder()
-            .street(street.trim())
-            .city(city.trim())
-            .state(state.toUpperCase(Locale.US).trim())
-            .zip(zip.trim())
-            .build();
+
     Instant timestamp = Instant.now();
-    List<VceEligibilityInfo> vceEligibilityCollection;
-    vceEligibilityCollection =
+    List<VceEligibilityInfo> vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
         vceEligibilityCollection
@@ -250,10 +228,20 @@ public class CommunityCareEligibilityV0ApiController {
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
+
     boolean isPrimary =
         equalsIgnoreCase(filteringServiceType, "primarycare")
             || equalsIgnoreCase(filteringServiceType, "mentalhealth");
-    List<String> facilityIdsWithinDriveTime = getNearbyFacilityIds(isPrimary, patientAddress);
+    Address patientAddress =
+        Address.builder()
+            .street(street.trim())
+            .city(city.trim())
+            .state(state.toUpperCase(Locale.US).trim())
+            .zip(zip.trim())
+            .build();
+    List<String> facilityIdsWithinDriveTime =
+        facilitiesClient.nearby(
+            patientAddress, isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty);
     VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
     List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null

@@ -2,6 +2,9 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +63,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaNearbyFacilitiesResponse nearby(Address address, int driveMins) {
+  public List<String> nearby(Address address, int driveMins) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
             .queryParam("state", address.state())
@@ -82,7 +85,11 @@ public class RestFacilitiesClient implements FacilitiesClient {
                   url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
               .getBody();
       log.info("Va Facilities Response" + responseObject);
-      return responseObject;
+      return responseObject
+          .data()
+          .stream()
+          .map(facility -> facility.id())
+          .collect(Collectors.toList());
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
     }
