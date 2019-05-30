@@ -3,9 +3,11 @@ package gov.va.api.health.communitycareeligibility.service;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -53,7 +55,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
           restTemplate
               .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
               .getBody();
-      log.info("Va Facilities Response" + responseObject);
+      log.info("VA facilities for state {}: {}", state, responseObject);
       return responseObject;
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
@@ -83,15 +85,18 @@ public class RestFacilitiesClient implements FacilitiesClient {
               .exchange(
                   url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
               .getBody();
-      log.info("Va Facilities Response" + responseObject);
       if (responseObject == null) {
         return Collections.emptyList();
       }
-      return responseObject
-          .data()
-          .stream()
-          .map(facility -> facility.id())
-          .collect(Collectors.toList());
+      List<String> ids =
+          responseObject
+              .data()
+              .stream()
+              .map(facility -> StringUtils.trimToNull(facility.id()))
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
+      log.info("VA facilities within {} mins drive of {}: {}", driveMins, address, ids);
+      return ids;
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
     }
