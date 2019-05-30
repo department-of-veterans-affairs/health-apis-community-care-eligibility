@@ -41,26 +41,6 @@ public final class CommunityCareEligibilityTest {
     assertThat(CommunityCareEligibilityV0ApiController.waitDays(null, true)).isNull();
     assertThat(CommunityCareEligibilityV0ApiController.waitDays(Facility.builder().build(), true))
         .isNull();
-    assertThat(CommunityCareEligibilityV0ApiController.state(null)).isNull();
-    assertThat(
-            CommunityCareEligibilityV0ApiController.state(
-                VaFacilitiesResponse.Facility.builder().build()))
-        .isNull();
-    assertThat(
-            CommunityCareEligibilityV0ApiController.state(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
-                    .build()))
-        .isNull();
-    assertThat(
-            CommunityCareEligibilityV0ApiController.state(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(
-                        VaFacilitiesResponse.Attributes.builder()
-                            .address(VaFacilitiesResponse.Address.builder().build())
-                            .build())
-                    .build()))
-        .isNull();
   }
 
   @Test

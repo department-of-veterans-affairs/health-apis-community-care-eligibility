@@ -22,7 +22,6 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -103,25 +102,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       map.put(service, service);
     }
     return map;
-  }
-
-  static String state(VaFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility == null) {
-      return null;
-    }
-    VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
-    if (attributes == null) {
-      return null;
-    }
-    VaFacilitiesResponse.Address address = attributes.address();
-    if (address == null) {
-      return null;
-    }
-    VaFacilitiesResponse.PhysicalAddress physical = address.physical();
-    if (physical == null) {
-      return null;
-    }
-    return StringUtils.trimToNull(physical.state());
   }
 
   static Integer waitDays(Facility facility, boolean establishedPatient) {
