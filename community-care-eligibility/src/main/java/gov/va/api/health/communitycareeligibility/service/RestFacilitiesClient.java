@@ -29,8 +29,8 @@ public class RestFacilitiesClient implements FacilitiesClient {
       @Value("${va-facilities.url}") String baseUrl,
       @Autowired RestTemplate restTemplate) {
     this.vaFacilitiesApiKey = vaFacilitiesApiKey;
+    this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     this.restTemplate = restTemplate;
-    this.baseUrl = baseUrl;
   }
 
   @Override
@@ -46,9 +46,8 @@ public class RestFacilitiesClient implements FacilitiesClient {
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    VaFacilitiesResponse responseObject;
     try {
-      responseObject =
+      VaFacilitiesResponse responseObject =
           restTemplate
               .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
               .getBody();
@@ -76,9 +75,8 @@ public class RestFacilitiesClient implements FacilitiesClient {
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    VaNearbyFacilitiesResponse responseObject;
     try {
-      responseObject =
+      VaNearbyFacilitiesResponse responseObject =
           restTemplate
               .exchange(
                   url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)

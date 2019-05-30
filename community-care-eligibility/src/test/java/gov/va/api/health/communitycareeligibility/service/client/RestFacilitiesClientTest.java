@@ -33,7 +33,7 @@ public final class RestFacilitiesClientTest {
         .thenReturn(response);
 
     RestFacilitiesClient client =
-        new RestFacilitiesClient("fakeApiKey", "https://foo/bar/", restTemplate);
+        new RestFacilitiesClient("fakeApiKey", "https://foo/bar", restTemplate);
     assertThat(client.facilities("FL")).isEqualTo(VaFacilitiesResponse.builder().build());
   }
 
