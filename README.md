@@ -4,12 +4,11 @@ This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
 that computes *objective* overall community-care eligibility by combining eligibility codes
 from the Eligibility and Enrollment System (E&E) with wait- and drive-time access
 standards.
-(Average historical wait times are provided by Facilities API. Average drive times are computed by Bing Maps. )
+(Average historical wait times are provided by Facilities API. Average drive times are also provided by Facilities API. )
 
 ![applications](src/plantuml/apps.png)
 
-Bing Maps is expected to be removed in the near future, when average drive times are supplied
-by the Facilities API. Historical wait times from the Facilities API are expected to be replaced
+Historical wait times from the Facilities API are expected to be replaced
 with live wait times from the VA Online Scheduling System.
 
 For more information about the deployment architecture in different environments,
@@ -38,10 +37,9 @@ The medical service type is one of:
 * Urology
 * WomensHealth
 
-The API combines data from three sources:
+The API combines data from two sources:
 1. Patient eligibility information, from E&E.
 2. Medical facilities in the state, from Facilities API.
-3. Average drive times from the patient address to the medical facilities, from Bing Maps.
 
 This data is used to compute an overall determination of community-care-eligibility 
 based on the *objective* criteria of the MISSION Act. The six criteria are described
