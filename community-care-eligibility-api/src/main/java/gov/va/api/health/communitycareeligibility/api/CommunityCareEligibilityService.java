@@ -31,7 +31,8 @@ import javax.ws.rs.Path;
 public interface CommunityCareEligibilityService {
   @Operation(
     summary =
-        "Compute community care eligibility by patient ICN, patient home address, desired medical service type, and patient establishment."
+        "Compute community care eligibility by patient ICN, patient home address,"
+            + " desired medical service type, and patient establishment."
   )
   @GET
   @Path("search")
