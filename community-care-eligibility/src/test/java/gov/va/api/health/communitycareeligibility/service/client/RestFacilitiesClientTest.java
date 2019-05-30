@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service.client;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,6 +64,6 @@ public final class RestFacilitiesClientTest {
                     .zip("12345")
                     .build(),
                 30))
-        .isEqualTo(VaNearbyFacilitiesResponse.builder().build());
+        .isEqualTo(emptyList());
   }
 }

@@ -84,6 +84,9 @@ public class RestFacilitiesClient implements FacilitiesClient {
                   url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
               .getBody();
       log.info("Va Facilities Response" + responseObject);
+      if (responseObject == null) {
+        return Collections.emptyList();
+      }
       return responseObject
           .data()
           .stream()
