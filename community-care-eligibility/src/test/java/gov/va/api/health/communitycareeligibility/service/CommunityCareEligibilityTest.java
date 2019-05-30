@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -129,11 +130,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 10))
-        .thenReturn(
-            VaNearbyFacilitiesResponse.builder()
-                .data(asList(VaNearbyFacilitiesResponse.Facility.builder().id("nearFac").build()))
-                .build());
+    when(facilitiesClient.nearby(patientAddress, 10)).thenReturn(asList("nearFac"));
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .maxDriveTimePrimary(10)
@@ -330,8 +327,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 1))
-        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
+    when(facilitiesClient.nearby(patientAddress, 1)).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -396,13 +392,7 @@ public final class CommunityCareEligibilityTest {
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
-    when(facilitiesClient.nearby(patientAddress, 60))
-        .thenReturn(
-            VaNearbyFacilitiesResponse.builder()
-                .data(
-                    singletonList(
-                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
-                .build());
+    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(asList("FAC123"));
     when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
@@ -508,8 +498,7 @@ public final class CommunityCareEligibilityTest {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities(any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
-    when(facilitiesClient.nearby(any(Address.class), any(int.class)))
-        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
+    when(facilitiesClient.nearby(any(Address.class), any(int.class))).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -566,13 +555,7 @@ public final class CommunityCareEligibilityTest {
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.nearby(patientAddress, 60))
-        .thenReturn(
-            VaNearbyFacilitiesResponse.builder()
-                .data(
-                    singletonList(
-                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
-                .build());
+    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(asList("FAC123"));
     when(facilitiesClient.facilities("FL"))
         .thenReturn(
             VaFacilitiesResponse.builder()
@@ -717,8 +700,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 60))
-        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
+    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
