@@ -63,11 +63,13 @@ public interface CommunityCareEligibilityService {
           schema = @Schema(implementation = ErrorResponse.class)
         )
   )
-  CommunityCareEligibilityResponse communityCareEligibilitySearch(
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "serviceType") String serviceType,
+  CommunityCareEligibilityResponse search(
       @Parameter(in = ParameterIn.QUERY, required = true, name = "patient") String patientIcn,
       @Parameter(in = ParameterIn.QUERY, required = true, name = "street") String street,
       @Parameter(in = ParameterIn.QUERY, required = true, name = "city") String city,
       @Parameter(in = ParameterIn.QUERY, required = true, name = "state") String state,
-      @Parameter(in = ParameterIn.QUERY, required = true, name = "zip") String zip);
+      @Parameter(in = ParameterIn.QUERY, required = true, name = "zip") String zip,
+      @Parameter(in = ParameterIn.QUERY, required = true, name = "serviceType") String serviceType,
+      @Parameter(in = ParameterIn.QUERY, required = true, name = "establishedPatient")
+          Boolean establishedPatient);
 }

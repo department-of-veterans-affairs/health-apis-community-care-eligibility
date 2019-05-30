@@ -6,6 +6,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
 import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -38,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping(produces = "application/json")
-public class CommunityCareEligibilityV0ApiController {
+public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
 
   private int maxDriveMinsPrimary;
 
@@ -184,6 +185,7 @@ public class CommunityCareEligibilityV0ApiController {
   }
 
   /** Search community care eligibility. */
+  @Override
   @SneakyThrows
   @GetMapping(value = "/search")
   public CommunityCareEligibilityResponse search(
@@ -211,7 +213,6 @@ public class CommunityCareEligibilityV0ApiController {
             .zip(zip.trim())
             .build();
     VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
-
     List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
@@ -235,14 +236,11 @@ public class CommunityCareEligibilityV0ApiController {
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
-
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
-
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection;
-
     vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
@@ -262,7 +260,6 @@ public class CommunityCareEligibilityV0ApiController {
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
-
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
@@ -270,7 +267,6 @@ public class CommunityCareEligibilityV0ApiController {
     if (!communityCareEligible && !codeString.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
     }
-
     return CommunityCareEligibilityResponse.builder()
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
