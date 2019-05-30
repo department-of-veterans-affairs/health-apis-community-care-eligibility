@@ -184,7 +184,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .getEligibility();
   }
 
-  /** Search community care eligibility. */
+  /** Compute community care eligibility. */
   @Override
   @SneakyThrows
   @GetMapping(value = "/search")
@@ -213,6 +213,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .zip(zip.trim())
             .build();
     VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilities(patientAddress.state());
+
     List<VaFacilitiesResponse.Facility> filteredByServiceType =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
@@ -236,11 +237,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
+
     Coordinates patientCoordinates = bingMaps.coordinates(patientAddress);
     facilities.parallelStream().forEach(facility -> setDriveMinutes(patientCoordinates, facility));
     Collections.sort(facilities, Comparator.comparing(f -> f.driveMinutes()));
+
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection;
+
     vceEligibilityCollection =
         processEligibilityAndEnrollmentResponse(eeClient.requestEligibility(patientIcn.trim()));
     List<CommunityCareEligibilityResponse.EligibilityCode> eligibilityCodes =
@@ -260,6 +264,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
+
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
     List<Facility> facilitiesMeetingAccessStandards =
@@ -267,6 +272,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (!communityCareEligible && !codeString.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
     }
+
     return CommunityCareEligibilityResponse.builder()
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
