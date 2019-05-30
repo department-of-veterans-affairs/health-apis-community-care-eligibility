@@ -4,12 +4,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 final class Exceptions {
-  static final class BingMapsUnavailableException extends RuntimeException {
-    BingMapsUnavailableException(Throwable cause) {
-      super("Bing Maps API is not available: " + cause.getMessage(), cause);
-    }
-  }
-
   static final class EeUnavailableException extends RuntimeException {
     EeUnavailableException(Throwable cause) {
       super("E&E is not available: " + cause.getMessage(), cause);

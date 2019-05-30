@@ -3,7 +3,6 @@ package gov.va.api.health.communitycareeligibility.service;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,8 +12,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
-import gov.va.api.health.communitycareeligibility.service.BingResponse.Resource;
-import gov.va.api.health.communitycareeligibility.service.BingResponse.Resources;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummary;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -24,14 +21,12 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.concurrent.TimeUnit;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
-
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
@@ -72,38 +67,8 @@ public final class CommunityCareEligibilityTest {
   public void disjointWaitTimeAndDriveTime() {
     Coordinates nearCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates farCoordinates = Coordinates.builder().latitude(3D).longitude(4D).build();
-    Coordinates patientCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-
-    BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.coordinates(patientAddress)).thenReturn(patientCoordinates);
-    when(bingMaps.routes(eq(patientCoordinates), eq(nearCoordinates)))
-        .thenReturn(
-            BingResponse.builder()
-                .resourceSets(
-                    singletonList(
-                        Resources.builder()
-                            .resources(
-                                singletonList(
-                                    Resource.builder()
-                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(5))
-                                        .build()))
-                            .build()))
-                .build());
-    when(bingMaps.routes(eq(patientCoordinates), eq(farCoordinates)))
-        .thenReturn(
-            BingResponse.builder()
-                .resourceSets(
-                    singletonList(
-                        Resources.builder()
-                            .resources(
-                                singletonList(
-                                    Resource.builder()
-                                        .travelDuration((int) TimeUnit.HOURS.toSeconds(1))
-                                        .build()))
-                            .build()))
-                .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
     when(facilitiesClient.facilities("FL"))
@@ -174,7 +139,6 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(10)
             .maxWaitPrimary(5)
             .facilitiesClient(facilitiesClient)
-            .bingMaps(bingMaps)
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .build();
     CommunityCareEligibilityResponse actual =
@@ -225,7 +189,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
-            .bingMaps(mock(BingMapsClient.class))
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .build();
     CommunityCareEligibilityResponse result =
@@ -326,21 +289,6 @@ public final class CommunityCareEligibilityTest {
     Coordinates testCoordinates = Coordinates.builder().latitude(200.00).longitude(100.00).build();
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-    BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.coordinates(patientAddress)).thenReturn(testCoordinates);
-    when(bingMaps.routes(eq(testCoordinates), any(Coordinates.class)))
-        .thenReturn(
-            BingResponse.builder()
-                .resourceSets(
-                    singletonList(
-                        Resources.builder()
-                            .resources(
-                                singletonList(
-                                    Resource.builder()
-                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(30))
-                                        .build()))
-                            .build()))
-                .build());
 
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities("FL"))
@@ -387,7 +335,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
-            .bingMaps(bingMaps)
             .maxDriveTimePrimary(1)
             .maxWaitPrimary(1)
             .eeClient(eeClient)
@@ -444,25 +391,9 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void mentalHealth() {
-    Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
-    BingMapsClient bingMaps = mock(BingMapsClient.class);
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-    when(bingMaps.coordinates(patientAddress)).thenReturn(patientCoordinates);
-    when(bingMaps.routes(eq(patientCoordinates), eq(facilityCoordinates)))
-        .thenReturn(
-            BingResponse.builder()
-                .resourceSets(
-                    singletonList(
-                        Resources.builder()
-                            .resources(
-                                singletonList(
-                                    Resource.builder()
-                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(30))
-                                        .build()))
-                            .build()))
-                .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
     when(facilitiesClient.nearby(patientAddress, 60))
@@ -508,7 +439,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
-            .bingMaps(bingMaps)
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .maxDriveTimePrimary(60)
             .maxWaitPrimary(2)
@@ -575,9 +505,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.routes(any(Coordinates.class), any(Coordinates.class)))
-        .thenReturn(BingResponse.builder().build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities(any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
@@ -586,7 +513,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
-            .bingMaps(bingMaps)
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
             .maxWaitPrimary(1)
@@ -603,7 +529,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
-            .bingMaps(mock(BingMapsClient.class))
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .maxDriveTimePrimary(1)
             .maxWaitPrimary(1)
@@ -637,26 +562,9 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-    BingMapsClient bingMaps = mock(BingMapsClient.class);
-    when(bingMaps.coordinates(patientAddress)).thenReturn(patientCoordinates);
-    when(bingMaps.routes(eq(patientCoordinates), eq(facilityCoordinates)))
-        .thenReturn(
-            BingResponse.builder()
-                .resourceSets(
-                    singletonList(
-                        Resources.builder()
-                            .resources(
-                                singletonList(
-                                    Resource.builder()
-                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(60))
-                                        .build()))
-                            .build()))
-                .build());
-
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearby(patientAddress, 60))
         .thenReturn(
@@ -700,7 +608,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
-            .bingMaps(bingMaps)
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .maxWaitPrimary(2)
@@ -774,25 +681,9 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    Coordinates patientCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
     Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
-    BingMapsClient bingMaps = mock(BingMapsClient.class);
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-    when(bingMaps.coordinates(patientAddress)).thenReturn(patientCoordinates);
-    when(bingMaps.routes(eq(patientCoordinates), eq(facilityCoordinates)))
-        .thenReturn(
-            BingResponse.builder()
-                .resourceSets(
-                    singletonList(
-                        Resources.builder()
-                            .resources(
-                                singletonList(
-                                    Resource.builder()
-                                        .travelDuration((int) TimeUnit.MINUTES.toSeconds(30))
-                                        .build()))
-                            .build()))
-                .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilities("FL"))
         .thenReturn(
@@ -831,7 +722,6 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
-            .bingMaps(bingMaps)
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .maxWaitPrimary(2)
