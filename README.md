@@ -74,10 +74,6 @@ Sample response:
       "state" : "KY",
       "zip" : "89144"
     },
-    "patientCoordinates" : {
-      "latitude" : 233.377,
-      "longitude" : 610.987
-    },
     "serviceType" : "PrimaryCare",
     "establishedPatient" : false,
     "timestamp" : "2019-05-09T13:17:58.250Z"
@@ -116,8 +112,7 @@ Sample response:
       "waitDays" : {
         "newPatient" : 19,
         "establishedPatient" : 2
-      },
-      "driveMinutes" : 25
+      }
     },
     {
       "id" : "vha_46368ZZ",
@@ -136,8 +131,7 @@ Sample response:
       "waitDays" : {
         "newPatient" : 14,
         "establishedPatient" : 1
-      },
-      "driveMinutes" : 90
+      }
     }
   ]
 }
