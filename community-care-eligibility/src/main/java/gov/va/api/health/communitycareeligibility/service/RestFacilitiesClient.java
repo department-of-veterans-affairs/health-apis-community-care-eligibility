@@ -60,14 +60,14 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaNearbyFacilitiesResponse nearby(Address address, int driveTime) {
+  public VaNearbyFacilitiesResponse nearby(Address address, int driveMins) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
             .queryParam("state", address.state())
             .queryParam("city", address.city())
             .queryParam("street_address", address.street())
             .queryParam("zip", address.zip())
-            .queryParam("drive_time", driveTime)
+            .queryParam("drive_time", driveMins)
             .queryParam("type", "health")
             .queryParam("page", 1)
             .queryParam("per_page", 500)
