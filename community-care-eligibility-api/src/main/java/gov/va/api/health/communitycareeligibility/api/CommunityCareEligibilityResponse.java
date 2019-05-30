@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -17,8 +18,8 @@ import lombok.NoArgsConstructor;
   fieldVisibility = JsonAutoDetect.Visibility.ANY,
   isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
+@Schema(example = "SWAGGER_EXAMPLE_COMMUNITY_CARE_ELIGIBILITY_RESPONSE")
 public final class CommunityCareEligibilityResponse {
-
   PatientRequest patientRequest;
 
   CommunityCareEligibility communityCareEligibility;
@@ -39,7 +40,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
-
     String street;
 
     String city;
@@ -55,7 +55,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class CommunityCareEligibility {
-
     Boolean eligible;
 
     List<EligibilityCode> eligibilityCode;
@@ -85,7 +84,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Coordinates {
-
     Double latitude;
 
     Double longitude;
@@ -97,7 +95,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class EligibilityCode {
-
     String description;
 
     String code;
@@ -109,7 +106,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Facility {
-
     String id;
 
     String name;
@@ -129,7 +125,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class PatientRequest {
-
     String patientIcn;
 
     Address patientAddress;
@@ -147,7 +142,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class WaitDays {
-
     Integer newPatient;
 
     Integer establishedPatient;
