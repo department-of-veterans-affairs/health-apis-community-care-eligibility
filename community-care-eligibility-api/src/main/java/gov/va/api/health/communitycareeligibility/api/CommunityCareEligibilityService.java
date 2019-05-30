@@ -18,13 +18,13 @@ import javax.ws.rs.Path;
         title = "Community Care Eligibility",
         version = "v0",
         description =
-            "This API computes *objective* overall community-care eligibility by combining eligibility codes from the Eligibility and Enrollment System (E&E)"
-                + " with wait- and drive-time access standards from the Facilities API. "
+            "Compute *objective* community care eligibility under the criteria of the MISSION Act."
       ),
   externalDocs =
       @ExternalDocumentation(
         description = "GitHub",
-        url = "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
+        url =
+            "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
       )
 )
 @Path("/")
