@@ -32,6 +32,10 @@ public class WebExceptionHandler {
     return responseFor(e);
   }
 
+  @ExceptionHandler({
+    Exceptions.EeUnavailableException.class,
+    Exceptions.FacilitiesUnavailableException.class
+  })
   @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
   public ErrorResponse handleServiceUnavailable(Exception e) {
     return responseFor(e);
