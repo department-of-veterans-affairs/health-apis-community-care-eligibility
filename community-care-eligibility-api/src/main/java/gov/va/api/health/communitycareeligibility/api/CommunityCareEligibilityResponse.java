@@ -117,8 +117,6 @@ public final class CommunityCareEligibilityResponse {
     String phoneNumber;
 
     WaitDays waitDays;
-
-    Integer driveMinutes;
   }
 
   @Data
@@ -130,8 +128,6 @@ public final class CommunityCareEligibilityResponse {
     String patientIcn;
 
     Address patientAddress;
-
-    Coordinates patientCoordinates;
 
     String serviceType;
 

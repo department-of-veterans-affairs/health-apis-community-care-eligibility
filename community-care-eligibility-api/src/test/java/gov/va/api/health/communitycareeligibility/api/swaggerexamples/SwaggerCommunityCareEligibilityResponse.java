@@ -27,8 +27,6 @@ class SwaggerCommunityCareEligibilityResponse {
                               .state("KY")
                               .zip("89144")
                               .build())
-                      .patientCoordinates(
-                          Coordinates.builder().latitude(233.377).longitude(610.987).build())
                       .serviceType("PrimaryCare")
                       .establishedPatient(false)
                       .timestamp("2019-05-09T13:17:58.250Z")
@@ -61,7 +59,6 @@ class SwaggerCommunityCareEligibilityResponse {
                               Coordinates.builder().latitude(41.81).longitude(67.65).build())
                           .phoneNumber("177-112-8657 x")
                           .waitDays(WaitDays.builder().newPatient(19).establishedPatient(2).build())
-                          .driveMinutes(25)
                           .build(),
                       Facility.builder()
                           .id("vha_46368ZZ")
@@ -77,7 +74,6 @@ class SwaggerCommunityCareEligibilityResponse {
                               Coordinates.builder().latitude(196.418).longitude(317.811).build())
                           .phoneNumber("1-422-983-2040")
                           .waitDays(WaitDays.builder().newPatient(14).establishedPatient(1).build())
-                          .driveMinutes(90)
                           .build()))
               .build();
 }

@@ -54,7 +54,6 @@ Applications _must_ define the following properties.
 
 ### Community Care Eligibility
 ```
-bing-maps.api-key ...........................Bing Maps API
 va-facilities.api-key .......................VA Facilities API
 va-facilities.url ...........................VA Facilities API URL
 community-care.max-drive-time-min-primary....Max drive time (minutes) criteria for primary care eligibility

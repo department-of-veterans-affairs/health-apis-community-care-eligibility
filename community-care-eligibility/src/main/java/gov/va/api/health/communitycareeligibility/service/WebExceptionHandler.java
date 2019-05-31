@@ -33,7 +33,7 @@ public class WebExceptionHandler {
   }
 
   @ExceptionHandler({
-    Exceptions.BingMapsUnavailableException.class,
+    Exceptions.EeUnavailableException.class,
     Exceptions.FacilitiesUnavailableException.class
   })
   @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
