@@ -97,8 +97,20 @@ regressionTest() {
       doCurl 200
     done
 
-  # Happy Path
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
+  # Happy Path Primary Care Established
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=PrimaryCare&establishedPatient=true&patient=$PATIENT"
+  doCurl 200 $TOKEN
+
+  # Happy Path Primary Care Not-established
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=false&patient=$PATIENT"
+  doCurl 200 $TOKEN
+
+  # Happy Path Specialty Care (Orthopedics) Established
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=Orthopedics&establishedPatient=true&patient=$PATIENT"
+  doCurl 200 $TOKEN
+
+  # Happy Path Specialty Care (Orthopedics) Not-established
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=Orthopedics&establishedPatient=false&patient=$PATIENT"
   doCurl 200 $TOKEN
 
   # Token validation
