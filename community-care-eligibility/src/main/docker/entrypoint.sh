@@ -72,16 +72,18 @@ smokeTest() {
       doCurl 200
     done
 
+  # Happy Path
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 200 $TOKEN
 
+  # Token validation
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
 
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=123NOTME"
   doCurl 403 $TOKEN
 
-  #Single missing parameter check for smoke test
+  # Single missing parameter check for smoke test
   path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
@@ -95,15 +97,18 @@ regressionTest() {
       doCurl 200
     done
 
+  # Happy Path
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 200 $TOKEN
 
+  # Token validation
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
 
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=123NOTME"
   doCurl 403 $TOKEN
 
+  # Missing Parameters
   path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
