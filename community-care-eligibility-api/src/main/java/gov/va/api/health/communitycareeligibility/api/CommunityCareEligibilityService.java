@@ -114,19 +114,10 @@ public interface CommunityCareEligibilityService {
                 @Schema(
                   allowableValues = {
                     "Audiology",
-                    "Cardiology",
-                    "Dermatology",
-                    "EmergencyCare",
-                    "Gastroenterology",
-                    "Gynecology",
-                    "MentalHealthCare",
-                    "Ophthalmology",
+                    "Nutrition",
                     "Optometry",
-                    "Orthopedics",
-                    "PrimaryCare",
-                    "UrgentCare",
-                    "Urology",
-                    "WomensHealth"
+                    "Podiatry",
+                    "PrimaryCare"
                   }
                 )
           )

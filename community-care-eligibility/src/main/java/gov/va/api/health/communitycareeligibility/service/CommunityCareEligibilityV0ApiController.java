@@ -84,23 +84,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   private static Map<String, String> servicesMap() {
     Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (String service :
-        Arrays.asList(
-            "PrimaryCare",
-            "MentalHealthCare",
-            "UrgentCare",
-            "EmergencyCare",
-            "Audiology",
-            "Cardiology",
-            "Dermatology",
-            "Gastroenterology",
-            "Gynecology",
-            "Ophthalmology",
-            "Optometry",
-            "Orthopedics",
-            "Urology",
-            "WomensHealth")) {
+        Arrays.asList("Audiology", "Nutrition", "Optometry", "Podiatry", "PrimaryCare")) {
       map.put(service, service);
     }
+
     return map;
   }
 
