@@ -9,7 +9,7 @@ CITY="$CITY"
 STATE="$STATE"
 ZIP="$ZIP"
 SERVICE_TYPE="$SERVICE_TYPE"
-ESTABLISHED_PATIENT="$ESTABLISHED_PATIENT"
+ESTABLISHED="$ESTABLISHED"
 PATIENT="$PATIENT"
 
 #Put Health endpoints here if you got them
@@ -37,8 +37,8 @@ Example
     --city=Melbourne
     --state=Fl
     --zip=32901
-    --serviceType=PrimaryCare
-    --establishedPatient=false
+    --service-type=PrimaryCare
+    --established=false
     --patient=12345678V90
 
 $1
@@ -47,7 +47,7 @@ exit 1
 }
 
 doCurl () {
-  REQUEST_URL="$ENDPOINT_DOMAIN_NAME$BASE_URL$path"
+  REQUEST_URL="$ENDPOINT_DOMAIN_NAME$BASE_URL${path// /%20}"
   if [[ -n "$2" ]]
   then
     status_code=$(curl -k -H "Authorization: Bearer $2" --write-out %{http_code} --silent --output /dev/null "$REQUEST_URL")
@@ -72,17 +72,17 @@ smokeTest() {
       doCurl 200
     done
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 200 $TOKEN
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=123NOTME"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=123NOTME"
   doCurl 403 $TOKEN
 
   #Single missing parameter check for smoke test
-  path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
   printResults
@@ -95,28 +95,28 @@ regressionTest() {
       doCurl 200
     done
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 200 $TOKEN
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=123NOTME"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=123NOTME"
   doCurl 403 $TOKEN
 
-  path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  path="/search?street=$STREET&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  path="/search?street=$STREET&city=$CITY&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&zip=$ZIP&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&serviceType=$SERVICE_TYPE&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&establishedPatient=$ESTABLISHED_PATIENT&patient=$PATIENT"
+  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&establishedPatient=$ESTABLISHED&patient=$PATIENT"
   doCurl 500 $TOKEN
 
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
@@ -153,7 +153,7 @@ do
     -a|--state) STATE=$2;;
     -z|--zip) ZIP=$2;;
     -v|--service-type) SERVICE_TYPE=$2;;
-    -e|--established) ESTABLISHED_PATIENT=$2;;
+    -e|--established) ESTABLISHED=$2;;
     -p|--patient) PATIENT=$2;;
     -h|--help) usage "I need a hero! I'm holding out for a hero...";;
     --) shift;break;;
@@ -171,10 +171,6 @@ fi
 
 if [[ -z "$TOKEN" || -e "$TOKEN" ]]; then
   usage "Missing variable TOKEN or option --token|-t."
-fi
-
-if [[ -z "$BASE_PATH" || -e "$BASE_PATH" ]]; then
-  usage "Missing variable BASE_PATH or option --base-path|-b."
 fi
 
 if [[ -z "$STREET" || -e "$STREET" ]]; then
@@ -197,8 +193,8 @@ if [[ -z "$SERVICE_TYPE" || -e "$SERVICE_TYPE" ]]; then
   usage "Missing variable SERVICE_TYPE or option --service-type|-v."
 fi
 
-if [[ -z "$ESTABLISHED_PATIENT" || -e "$ESTABLISHED_PATIENT" ]]; then
-  usage "Missing variable ESTABLISHED_PATIENT or option --established|-e."
+if [[ -z "$ESTABLISHED" || -e "$ESTABLISHED" ]]; then
+  usage "Missing variable ESTABLISHED or option --established|-e."
 fi
 
 if [[ -z "$PATIENT" || -e "$PATIENT" ]]; then
