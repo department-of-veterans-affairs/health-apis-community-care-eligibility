@@ -165,7 +165,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
-      @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
+      @RequestParam(value = "establishedPatient", defaultValue = "false")
+          boolean establishedPatient) {
+    log.error("PETERTODO delete me establishedPatient is {}", establishedPatient);
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);

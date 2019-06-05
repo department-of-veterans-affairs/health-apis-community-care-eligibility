@@ -131,10 +131,10 @@ public interface CommunityCareEligibilityService {
           String serviceType,
       @Parameter(
             in = ParameterIn.QUERY,
-            required = true,
+            required = false,
             name = "establishedPatient",
             description =
                 "Whether this patient is established at the VA health facilities in their area"
           )
-          Boolean establishedPatient);
+          boolean establishedPatient);
 }
