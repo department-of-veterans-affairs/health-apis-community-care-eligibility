@@ -38,7 +38,8 @@ public interface CommunityCareEligibilityService {
   @Operation(
     summary =
         "Compute community care eligibility by patient ICN, patient home address,"
-            + " desired medical service type, and patient establishment."
+            + " desired medical service type, and patient establishment.",
+    tags = "Search"
   )
   @GET
   @Path("search")
