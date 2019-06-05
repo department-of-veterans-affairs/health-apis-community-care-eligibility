@@ -53,7 +53,7 @@ facilities that satisfy the access standards.
 Sample request:
 
 ```
-https://foo.com/community-care/v0/eligibility/api/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare&establishedPatient=false
+https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare&establishedPatient=false
 ```
 
 Sample response:

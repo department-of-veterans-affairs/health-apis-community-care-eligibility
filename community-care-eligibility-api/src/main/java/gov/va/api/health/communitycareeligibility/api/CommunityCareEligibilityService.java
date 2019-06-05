@@ -32,7 +32,7 @@ import javax.ws.rs.Path;
 public interface CommunityCareEligibilityService {
   @Operation(
     summary =
-        "Compute community care eligibility by patient ICN, patient home address,"
+        "Compute *objective* community care eligibility by patient ICN, patient home address,"
             + " desired medical service type, and patient establishment."
   )
   @GET
@@ -127,7 +127,8 @@ public interface CommunityCareEligibilityService {
             in = ParameterIn.QUERY,
             required = true,
             name = "establishedPatient",
-            description = "Whether or not this is an established patient"
+            description =
+                "Whether this patient is established at the VA health facilities in their area"
           )
           Boolean establishedPatient);
 }
