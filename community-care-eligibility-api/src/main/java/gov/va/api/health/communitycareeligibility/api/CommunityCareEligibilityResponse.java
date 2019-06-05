@@ -116,7 +116,7 @@ public final class CommunityCareEligibilityResponse {
 
     String phoneNumber;
 
-    WaitDays waitDays;
+    Integer waitDays;
   }
 
   @Data
@@ -134,16 +134,5 @@ public final class CommunityCareEligibilityResponse {
     Boolean establishedPatient;
 
     String timestamp;
-  }
-
-  @Data
-  @Builder
-  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class WaitDays {
-    Integer newPatient;
-
-    Integer establishedPatient;
   }
 }

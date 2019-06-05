@@ -104,10 +104,7 @@ Sample response:
         "longitude" : 67.65
       },
       "phoneNumber" : "177-112-8657 x",
-      "waitDays" : {
-        "newPatient" : 19,
-        "establishedPatient" : 2
-      }
+      "waitDays" : 19
     },
     {
       "id" : "vha_46368ZZ",
@@ -123,10 +120,7 @@ Sample response:
         "longitude" : 317.811
       },
       "phoneNumber" : "1-422-983-2040",
-      "waitDays" : {
-        "newPatient" : 14,
-        "establishedPatient" : 1
-      }
+      "waitDays" : 14
     }
   ]
 }

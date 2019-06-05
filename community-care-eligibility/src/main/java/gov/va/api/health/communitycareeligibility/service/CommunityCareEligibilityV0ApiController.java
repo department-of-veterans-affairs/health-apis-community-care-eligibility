@@ -91,18 +91,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return map;
   }
 
-  static Integer waitDays(Facility facility, boolean establishedPatient) {
-    if (facility == null) {
-      return null;
-    }
-    if (facility.waitDays() == null) {
-      return null;
-    }
-    return establishedPatient
-        ? facility.waitDays().establishedPatient()
-        : facility.waitDays().newPatient();
-  }
-
   private boolean eligbleByEligbilityAndEnrollmentResponse(
       List<String> eligibilityCodes, String serviceType) {
     if (eligibilityCodes.contains("X")) {
@@ -147,10 +135,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
     return facilities
         .stream()
-        .filter(
-            facility ->
-                waitDays(facility, establishedPatient) != null
-                    && waitDays(facility, establishedPatient) <= waitDays)
+        .filter(facility -> facility.waitDays() != null && facility.waitDays() <= waitDays)
         .collect(Collectors.toList());
   }
 
@@ -167,7 +152,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @RequestParam(value = "establishedPatient", defaultValue = "false")
           boolean establishedPatient) {
-    log.error("PETERTODO delete me establishedPatient is {}", establishedPatient);
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
@@ -230,6 +214,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 vaFacility ->
                     FacilityTransformer.builder()
                         .serviceType(mappedServiceType)
+                        .establishedPatient(establishedPatient)
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());

@@ -12,7 +12,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummary;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -115,18 +114,10 @@ public final class CommunityCareEligibilityTest {
                         .id("FAC123")
                         .address(Address.builder().street("911 derp st").state("FL").build())
                         .coordinates(facilityCoordinates)
-                        .waitDays(WaitDays.builder().newPatient(10).establishedPatient(1).build())
+                        .waitDays(1)
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
-  }
-
-  @Test
-  @SneakyThrows
-  public void controllerNullChecks() {
-    assertThat(CommunityCareEligibilityV0ApiController.waitDays(null, true)).isNull();
-    assertThat(CommunityCareEligibilityV0ApiController.waitDays(Facility.builder().build(), true))
-        .isNull();
   }
 
   @Test
@@ -233,14 +224,13 @@ public final class CommunityCareEligibilityTest {
                         .id("nearFac")
                         .address(Address.builder().street("near st").state("FL").build())
                         .coordinates(nearCoordinates)
-                        .waitDays(
-                            WaitDays.builder().newPatient(100).establishedPatient(100).build())
+                        .waitDays(100)
                         .build(),
                     Facility.builder()
                         .id("farFac")
                         .address(Address.builder().street("far st").state("FL").build())
                         .coordinates(farCoordinates)
-                        .waitDays(WaitDays.builder().newPatient(0).establishedPatient(0).build())
+                        .waitDays(0)
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
@@ -284,43 +274,49 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void facilityTransformerNullChecks() {
-    assertThat(FacilityTransformer.builder().serviceType("primarycare").build().toFacility(null))
-        .isNull();
-    VaFacilitiesResponse.Facility facility = VaFacilitiesResponse.Facility.builder().build();
-    Facility mapped =
-        FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
+    FacilityTransformer transformer =
+        FacilityTransformer.builder().serviceType("xyz").establishedPatient(false).build();
+
+    // facility is null
+    assertThat(transformer.toFacility(null)).isNull();
+
     // top level attributes is null
-    assertThat(mapped).isEqualTo(Facility.builder().build());
-    facility =
-        VaFacilitiesResponse.Facility.builder()
-            .attributes(VaFacilitiesResponse.Attributes.builder().build())
-            .build();
-    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-    // attribute is not null, but everything beyond it is
-    assertThat(mapped).isEqualTo(Facility.builder().build());
-    facility =
-        VaFacilitiesResponse.Facility.builder()
-            .attributes(
-                VaFacilitiesResponse.Attributes.builder()
-                    .address(VaFacilitiesResponse.Address.builder().build())
-                    .build())
-            .build();
-    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-    // Address is not null, but physical Address is
-    assertThat(mapped).isEqualTo(Facility.builder().build());
-    facility =
-        VaFacilitiesResponse.Facility.builder()
-            .attributes(
-                VaFacilitiesResponse.Attributes.builder()
-                    .address(
-                        VaFacilitiesResponse.Address.builder()
-                            .physical(VaFacilitiesResponse.PhysicalAddress.builder().build())
+    assertThat(transformer.toFacility(VaFacilitiesResponse.Facility.builder().build()))
+        .isEqualTo(Facility.builder().build());
+
+    // empty attributes
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
+                    .build()))
+        .isEqualTo(Facility.builder().build());
+
+    // empty address
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(
+                        VaFacilitiesResponse.Attributes.builder()
+                            .address(VaFacilitiesResponse.Address.builder().build())
                             .build())
-                    .build())
-            .build();
-    mapped = FacilityTransformer.builder().serviceType("primarycare").build().toFacility(facility);
-    // Physical address exists, but all attributes are null
-    assertThat(mapped).isEqualTo(Facility.builder().build());
+                    .build()))
+        .isEqualTo(Facility.builder().build());
+
+    // empty physical address
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(
+                        VaFacilitiesResponse.Attributes.builder()
+                            .address(
+                                VaFacilitiesResponse.Address.builder()
+                                    .physical(
+                                        VaFacilitiesResponse.PhysicalAddress.builder().build())
+                                    .build())
+                            .build())
+                    .build()))
+        .isEqualTo(Facility.builder().build());
   }
 
   @Test
@@ -444,7 +440,7 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .coordinates(testCoordinates)
                         .phoneNumber("867-5309")
-                        .waitDays(WaitDays.builder().newPatient(1).establishedPatient(10).build())
+                        .waitDays(1)
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
@@ -610,7 +606,7 @@ public final class CommunityCareEligibilityTest {
                         .id("FAC123")
                         .address(Address.builder().street("911 derp st").state("FL").build())
                         .coordinates(facilityCoordinates)
-                        .waitDays(WaitDays.builder().newPatient(10).establishedPatient(1).build())
+                        .waitDays(1)
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
