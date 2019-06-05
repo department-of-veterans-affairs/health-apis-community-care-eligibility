@@ -19,7 +19,8 @@ For details about building and running this application, see the [developer guid
 ----
 
 The API supports a search query that accepts a patient ICN, the patient's home address,
-a medical service type, and whether or not the patient is established.
+the patient's desired medical service type, and whether or not the patient is 
+established at the VA health facilities in their area.
 
 The medical service type is one of:
 * Audiology
@@ -30,7 +31,7 @@ The medical service type is one of:
 
 The API combines data from two sources:
 1. Patient eligibility information, from E&E.
-2. Medical facilities in the state, from Facilities API.
+2. VA health facilities in the state, from Facilities API.
 
 This data is used to compute an overall determination of community-care-eligibility
 based on the **objective** criteria of the MISSION Act. The six criteria are described
