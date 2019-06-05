@@ -23,19 +23,10 @@ a medical service type, and whether or not the patient is established.
 
 The medical service type is one of:
 * Audiology
-* Cardiology
-* Dermatology
-* EmergencyCare
-* Gastroenterology
-* Gynecology
-* MentalHealthCare
-* Ophthalmology
+* Nutrition
 * Optometry
-* Orthopedic
+* Podiatry
 * PrimaryCare
-* UrgentCare
-* Urology
-* WomensHealth
 
 The API combines data from two sources:
 1. Patient eligibility information, from E&E.
