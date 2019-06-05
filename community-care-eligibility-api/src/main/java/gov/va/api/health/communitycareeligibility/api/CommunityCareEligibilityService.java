@@ -19,7 +19,12 @@ import javax.ws.rs.Path;
         title = "Community Care Eligibility",
         version = "v0",
         description =
-            "Compute *objective* community care eligibility under the criteria of the MISSION Act."
+            "Compute community care eligibility under the **objective** criteria"
+                + " of the MISSION Act. Because MISSION Act also includes"
+                + " subjective criteria, this API does not provide a **final**"
+                + " eligibility decision. Any user-facing message based on these"
+                + " results should indicate that the patient is *probably* eligible"
+                + " or *probably not* eligible."
       ),
   externalDocs =
       @ExternalDocumentation(
@@ -32,7 +37,7 @@ import javax.ws.rs.Path;
 public interface CommunityCareEligibilityService {
   @Operation(
     summary =
-        "Compute *objective* community care eligibility by patient ICN, patient home address,"
+        "Compute community care eligibility by patient ICN, patient home address,"
             + " desired medical service type, and patient establishment."
   )
   @GET

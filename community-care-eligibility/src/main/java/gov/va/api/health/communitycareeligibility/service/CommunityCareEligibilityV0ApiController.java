@@ -171,12 +171,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
 
-    // For 'MentalHealthCare', use 'MentalHealth' for filtering
-    final String filteringServiceType =
-        equalsIgnoreCase(mappedServiceType, "MentalHealthCare")
-            ? "MentalHealth"
-            : mappedServiceType;
-
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection =
         eligibilityInfos(eeClient.requestEligibility(patientIcn.trim()));
@@ -199,8 +193,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     }
 
     boolean isPrimary =
-        equalsIgnoreCase(filteringServiceType, "primarycare")
-            || equalsIgnoreCase(filteringServiceType, "mentalhealth");
+        equalsIgnoreCase(mappedServiceType, "primarycare")
+            || equalsIgnoreCase(mappedServiceType, "mentalhealth");
     Address patientAddress =
         Address.builder()
             .street(street.trim())
@@ -216,12 +210,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             : stateResponse
                 .data()
                 .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
+                .filter(vaFacility -> hasServiceType(vaFacility, mappedServiceType))
                 .collect(Collectors.toList());
     log.info(
         "VA facilities in state '{}' for service type '{}': {}",
         patientAddress.state(),
-        filteringServiceType,
+        mappedServiceType,
         vaFacilitiesInStateForService
             .stream()
             .map(facility -> facility.id())
@@ -233,7 +227,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .map(
                 vaFacility ->
                     FacilityTransformer.builder()
-                        .serviceType(filteringServiceType)
+                        .serviceType(mappedServiceType)
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
@@ -249,7 +243,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     log.info(
         "VA facilities in state '{}' for service type '{}' within {}' mins drive: {}",
         patientAddress.state(),
-        filteringServiceType,
+        mappedServiceType,
         driveMins,
         facilitiesInStateNearbyForService
             .stream()
@@ -261,7 +255,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             facilitiesInStateNearbyForService, isPrimary, establishedPatient);
 
     boolean communityCareEligible =
-        eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
+        eligbleByEligbilityAndEnrollmentResponse(codeString, mappedServiceType);
     if (!communityCareEligible && !codeString.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
     }
