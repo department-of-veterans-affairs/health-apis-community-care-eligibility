@@ -52,22 +52,31 @@ public interface CommunityCareEligibilityService {
           schema = @Schema(implementation = CommunityCareEligibilityResponse.class)
         )
   )
+  // PETERTODO different error response classes lol
   @ApiResponse(
     responseCode = "400",
-    description = "Not found",
-    content =
-        @Content(
-          mediaType = "application/json",
-          schema = @Schema(implementation = ErrorResponse.class)
-        )
-  )
-  @ApiResponse(
-    responseCode = "404",
     description = "Bad request",
     content =
         @Content(
           mediaType = "application/json",
-          schema = @Schema(implementation = ErrorResponse.class)
+          schema =
+              @Schema(
+                implementation = ErrorResponse.class,
+                example = "SWAGGER_EXAMPLE_ERROR_RESPONSE_UNKNOWN_SERVICE"
+              )
+        )
+  )
+  @ApiResponse(
+    responseCode = "404",
+    description = "Not found",
+    content =
+        @Content(
+          mediaType = "application/json",
+          schema =
+              @Schema(
+                implementation = ErrorResponse.class,
+                example = "SWAGGER_EXAMPLE_ERROR_RESPONSE_UNKNOWN_PATIENT"
+              )
         )
   )
   CommunityCareEligibilityResponse search(

@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 @Builder
 public class FacilityTransformer {
   @NonNull private final String serviceType;
-  
+
   @NonNull private final Boolean establishedPatient;
 
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {

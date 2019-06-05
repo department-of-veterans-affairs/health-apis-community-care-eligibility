@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,6 @@ import lombok.NonNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonDeserialize(builder = ErrorResponse.ErrorResponseBuilder.class)
-@Schema(example = "SWAGGER_EXAMPLE_ERROR_RESPONSE")
 public final class ErrorResponse {
   long timestamp;
 
