@@ -45,7 +45,7 @@ stopApp() {
   taskkill //F //PID $pid
   else
   kill $pid
-  fi 
+  fi
 }
 
 pidOf() {

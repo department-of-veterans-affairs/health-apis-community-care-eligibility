@@ -32,7 +32,7 @@ The API combines data from two sources:
 1. Patient eligibility information, from E&E.
 2. Medical facilities in the state, from Facilities API.
 
-This data is used to compute an overall determination of community-care-eligibility 
+This data is used to compute an overall determination of community-care-eligibility
 based on the **objective** criteria of the MISSION Act. The six criteria are described
 [here](https://www.va.gov/COMMUNITYCARE/docs/pubfiles/factsheets/VA-FS_CC-Eligibility.pdf).
 The objective criteria of the MISSION Act are:
@@ -40,7 +40,7 @@ The objective criteria of the MISSION Act are:
 2. Residence in a state without a full-service VA medical facility
 3. 40-mile legacy/grandfathered from the Choice program
 4. Access standards
-   
+
 The other two criteria, *best medical interest* and *quality standards*, are subjective
 criteria outside the scope of this API. Because this API does not include subjective criteria,
 its eligibility decisions **are not final**. A user-facing message
