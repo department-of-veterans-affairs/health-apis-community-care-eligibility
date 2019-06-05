@@ -13,10 +13,10 @@ Commands
  k, stop      Stop applications
 
 Options
- --community-care   Include Community Care Eligibility
+ -c, --community-care   Include Community Care Eligibility
 
 Examples
- $0 start --community-care
+ $0 start -c
  $0 stop --community-care
 
 $1
@@ -82,13 +82,13 @@ SPRING_PROFILES_ACTIVE=dev
 
 ARGS=$(getopt -n $(basename ${0}) \
     -l "debug,help,community-care" \
-    -o "hima" -- "$@")
+    -o "ch" -- "$@")
 [ $? != 0 ] && usage
 eval set -- "$ARGS"
 while true
 do
   case "$1" in
-    --community-care) COMMUNITYCARE=true;;
+    -c|--community-care) COMMUNITYCARE=true;;
     --debug) set -x;;
     -h|--help) usage "halp! what this do?";;
     --) shift;break;;
