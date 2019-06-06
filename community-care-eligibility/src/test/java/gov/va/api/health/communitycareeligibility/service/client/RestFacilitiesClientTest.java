@@ -47,7 +47,7 @@ public final class RestFacilitiesClientTest {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
             eq(
-                "https://foo/bar/v1/nearby?state=FL&city=Melbourne&street_address=123%20Main&zip=12345&drive_time=30&type=health&page=1&per_page=500"),
+                "https://foo/bar/v1/nearby?state=FL&city=Melbourne&street_address=123 Main&zip=12345&drive_time=30&type=health&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaNearbyFacilitiesResponse.class)))
