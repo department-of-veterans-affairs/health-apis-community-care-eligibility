@@ -39,10 +39,16 @@ The [init-git-secrets.sh](src/scripts/init-git-secrets.sh) script can be used to
 ## Tools
 `src/scripts` provides tools to support development activities.
 
-> !!  Review each script before running to ensure you understand exactly what it does.
+> :warning: Review each script before running to ensure you understand exactly what it does.
+
+- `dev-app.sh`
+  Run the applilcation locally.
 
 - `init-git-secrets.sh`
   Initializes your clone of this repository to work with git secrets.
+
+- `make-configs.sh`
+  Create application configuration for local development.
 
 ----
 

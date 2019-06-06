@@ -84,36 +84,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   private static Map<String, String> servicesMap() {
     Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (String service :
-        Arrays.asList(
-            "PrimaryCare",
-            "MentalHealthCare",
-            "UrgentCare",
-            "EmergencyCare",
-            "Audiology",
-            "Cardiology",
-            "Dermatology",
-            "Gastroenterology",
-            "Gynecology",
-            "Ophthalmology",
-            "Optometry",
-            "Orthopedics",
-            "Urology",
-            "WomensHealth")) {
+        Arrays.asList("Audiology", "Nutrition", "Optometry", "Podiatry", "PrimaryCare")) {
       map.put(service, service);
     }
-    return map;
-  }
 
-  static Integer waitDays(Facility facility, boolean establishedPatient) {
-    if (facility == null) {
-      return null;
-    }
-    if (facility.waitDays() == null) {
-      return null;
-    }
-    return establishedPatient
-        ? facility.waitDays().establishedPatient()
-        : facility.waitDays().newPatient();
+    return map;
   }
 
   private boolean eligbleByEligbilityAndEnrollmentResponse(
@@ -160,10 +135,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
     return facilities
         .stream()
-        .filter(
-            facility ->
-                waitDays(facility, establishedPatient) != null
-                    && waitDays(facility, establishedPatient) <= waitDays)
+        .filter(facility -> facility.waitDays() != null && facility.waitDays() <= waitDays)
         .collect(Collectors.toList());
   }
 
@@ -178,17 +150,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
-      @RequestParam(value = "establishedPatient") Boolean establishedPatient) {
+      @RequestParam(value = "establishedPatient", defaultValue = "false")
+          boolean establishedPatient) {
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
-
-    // For 'MentalHealthCare', use 'MentalHealth' for filtering
-    final String filteringServiceType =
-        equalsIgnoreCase(mappedServiceType, "MentalHealthCare")
-            ? "MentalHealth"
-            : mappedServiceType;
 
     Instant timestamp = Instant.now();
     List<VceEligibilityInfo> vceEligibilityCollection =
@@ -212,8 +179,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     }
 
     boolean isPrimary =
-        equalsIgnoreCase(filteringServiceType, "primarycare")
-            || equalsIgnoreCase(filteringServiceType, "mentalhealth");
+        equalsIgnoreCase(mappedServiceType, "primarycare")
+            || equalsIgnoreCase(mappedServiceType, "mentalhealth");
     Address patientAddress =
         Address.builder()
             .street(street.trim())
@@ -229,12 +196,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             : stateResponse
                 .data()
                 .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, filteringServiceType))
+                .filter(vaFacility -> hasServiceType(vaFacility, mappedServiceType))
                 .collect(Collectors.toList());
     log.info(
         "VA facilities in state '{}' for service type '{}': {}",
         patientAddress.state(),
-        filteringServiceType,
+        mappedServiceType,
         vaFacilitiesInStateForService
             .stream()
             .map(facility -> facility.id())
@@ -246,7 +213,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .map(
                 vaFacility ->
                     FacilityTransformer.builder()
-                        .serviceType(filteringServiceType)
+                        .serviceType(mappedServiceType)
+                        .establishedPatient(establishedPatient)
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
@@ -262,7 +230,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     log.info(
         "VA facilities in state '{}' for service type '{}' within {}' mins drive: {}",
         patientAddress.state(),
-        filteringServiceType,
+        mappedServiceType,
         driveMins,
         facilitiesInStateNearbyForService
             .stream()
@@ -274,7 +242,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             facilitiesInStateNearbyForService, isPrimary, establishedPatient);
 
     boolean communityCareEligible =
-        eligbleByEligbilityAndEnrollmentResponse(codeString, filteringServiceType);
+        eligbleByEligbilityAndEnrollmentResponse(codeString, mappedServiceType);
     if (!communityCareEligible && !codeString.contains("X")) {
       communityCareEligible = facilitiesMeetingAccessStandards.isEmpty();
     }

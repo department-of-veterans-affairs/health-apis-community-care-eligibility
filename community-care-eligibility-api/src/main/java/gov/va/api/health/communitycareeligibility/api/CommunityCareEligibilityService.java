@@ -19,7 +19,12 @@ import javax.ws.rs.Path;
         title = "Community Care Eligibility",
         version = "v0",
         description =
-            "Compute *objective* community care eligibility under the criteria of the MISSION Act."
+            "Compute community care eligibility under the **objective** criteria"
+                + " of the MISSION Act. Because MISSION Act also includes"
+                + " subjective criteria, this API does not provide a **final**"
+                + " eligibility decision. Any user-facing message based on these"
+                + " results should indicate that the patient is *probably* eligible"
+                + " or *probably not* eligible."
       ),
   externalDocs =
       @ExternalDocumentation(
@@ -33,7 +38,8 @@ public interface CommunityCareEligibilityService {
   @Operation(
     summary =
         "Compute community care eligibility by patient ICN, patient home address,"
-            + " desired medical service type, and patient establishment."
+            + " desired medical service type, and patient establishment.",
+    tags = "Search"
   )
   @GET
   @Path("search")
@@ -48,20 +54,20 @@ public interface CommunityCareEligibilityService {
   )
   @ApiResponse(
     responseCode = "400",
-    description = "Not found",
-    content =
-        @Content(
-          mediaType = "application/json",
-          schema = @Schema(implementation = ErrorResponse.class)
-        )
-  )
-  @ApiResponse(
-    responseCode = "404",
     description = "Bad request",
     content =
         @Content(
           mediaType = "application/json",
-          schema = @Schema(implementation = ErrorResponse.class)
+          schema = @Schema(implementation = ErrorResponse.BadRequest.class)
+        )
+  )
+  @ApiResponse(
+    responseCode = "404",
+    description = "Not found",
+    content =
+        @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = ErrorResponse.NotFound.class)
         )
   )
   CommunityCareEligibilityResponse search(
@@ -109,24 +115,15 @@ public interface CommunityCareEligibilityService {
             in = ParameterIn.QUERY,
             required = true,
             name = "serviceType",
-            description = "The patient's desired medical service type",
+            description = "Patient's desired medical service type for community care",
             schema =
                 @Schema(
                   allowableValues = {
                     "Audiology",
-                    "Cardiology",
-                    "Dermatology",
-                    "EmergencyCare",
-                    "Gastroenterology",
-                    "Gynecology",
-                    "MentalHealthCare",
-                    "Ophthalmology",
+                    "Nutrition",
                     "Optometry",
-                    "Orthopedics",
-                    "PrimaryCare",
-                    "UrgentCare",
-                    "Urology",
-                    "WomensHealth"
+                    "Podiatry",
+                    "PrimaryCare"
                   }
                 )
           )
@@ -134,9 +131,10 @@ public interface CommunityCareEligibilityService {
           String serviceType,
       @Parameter(
             in = ParameterIn.QUERY,
-            required = true,
+            required = false,
             name = "establishedPatient",
-            description = "Whether or not this is an established patient"
+            description =
+                "Whether this patient is established at the VA health facilities in their area"
           )
-          Boolean establishedPatient);
+          boolean establishedPatient);
 }

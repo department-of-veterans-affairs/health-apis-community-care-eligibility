@@ -5,10 +5,17 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 class SwaggerErrorResponse {
-  static final ErrorResponse SWAGGER_EXAMPLE_ERROR_RESPONSE =
-      ErrorResponse.builder()
+  static final ErrorResponse.BadRequest SWAGGER_EXAMPLE_ERROR_RESPONSE_BAD_REQUEST =
+      ErrorResponse.BadRequest.builder()
           .timestamp(1557407878250L)
-          .type("EeUnavailableException")
-          .message("E&E is not available: Connection refused")
+          .type("UnknownServiceTypeException")
+          .message("Unknown service type: dentistry")
+          .build();
+
+  static final ErrorResponse.NotFound SWAGGER_EXAMPLE_ERROR_RESPONSE_NOT_FOUND =
+      ErrorResponse.NotFound.builder()
+          .timestamp(1557407878250L)
+          .type("UnknownPatientIcnException")
+          .message("Unknown patient ICN: 011235813V213455")
           .build();
 }

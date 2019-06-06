@@ -6,7 +6,6 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.WaitDays;
 import java.util.Locale;
 import java.util.Optional;
 import lombok.Builder;
@@ -16,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 @Builder
 public class FacilityTransformer {
   @NonNull private final String serviceType;
+
+  @NonNull private final Boolean establishedPatient;
 
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {
     VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
@@ -92,7 +93,7 @@ public class FacilityTransformer {
         .build();
   }
 
-  private WaitDays waitDays(VaFacilitiesResponse.Facility vaFacility) {
+  private Integer waitDays(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
     }
@@ -113,9 +114,7 @@ public class FacilityTransformer {
     if (!optWaitTime.isPresent()) {
       return null;
     }
-    return WaitDays.builder()
-        .newPatient(optWaitTime.get().neww())
-        .establishedPatient(optWaitTime.get().established())
-        .build();
+
+    return establishedPatient ? optWaitTime.get().established() : optWaitTime.get().neww();
   }
 }

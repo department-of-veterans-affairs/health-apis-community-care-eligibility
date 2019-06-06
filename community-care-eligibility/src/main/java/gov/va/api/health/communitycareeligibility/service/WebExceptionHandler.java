@@ -22,14 +22,14 @@ public class WebExceptionHandler {
     Exceptions.UnknownServiceTypeException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorResponse handleBadRequest(Exception e) {
-    return responseFor(e);
+  public ErrorResponse.BadRequest handleBadRequest(Exception e) {
+    return responseFor(new ErrorResponse.BadRequest(), e);
   }
 
   @ExceptionHandler({Exceptions.UnknownPatientIcnException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ErrorResponse handleNotFound(Exception e) {
-    return responseFor(e);
+  public ErrorResponse.NotFound handleNotFound(Exception e) {
+    return responseFor(new ErrorResponse.NotFound(), e);
   }
 
   @ExceptionHandler({
@@ -37,18 +37,18 @@ public class WebExceptionHandler {
     Exceptions.FacilitiesUnavailableException.class
   })
   @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-  public ErrorResponse handleServiceUnavailable(Exception e) {
-    return responseFor(e);
+  public ErrorResponse.ServiceUnavailable handleServiceUnavailable(Exception e) {
+    return responseFor(new ErrorResponse.ServiceUnavailable(), e);
   }
 
   @ExceptionHandler({Exception.class})
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ErrorResponse handleSnafu(Exception e) {
-    return responseFor(e);
+  public ErrorResponse.InternalServerError handleSnafu(Exception e) {
+    return responseFor(new ErrorResponse.InternalServerError(), e);
   }
 
-  private ErrorResponse responseFor(Exception e) {
-    ErrorResponse response = ErrorResponse.of(e);
+  private <T extends ErrorResponse> T responseFor(T response, Exception e) {
+    ErrorResponse.applyException(response, e);
     log.error("{}: {}", response.type(), response.message(), e);
     return response;
   }
