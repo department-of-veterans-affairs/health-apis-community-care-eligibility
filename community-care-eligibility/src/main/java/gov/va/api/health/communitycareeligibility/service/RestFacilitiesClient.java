@@ -75,6 +75,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .queryParam("type", "health")
             .queryParam("page", 1)
             .queryParam("per_page", 500)
+            .build()
             .toUriString();
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
