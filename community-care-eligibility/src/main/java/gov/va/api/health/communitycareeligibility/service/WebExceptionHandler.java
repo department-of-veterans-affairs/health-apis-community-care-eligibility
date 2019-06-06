@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @RequestMapping(produces = "application/json")
 public class WebExceptionHandler {
-  /** Map bad request exceptions. */
   @ExceptionHandler({
     ConstraintViolationException.class,
     Exceptions.UnknownServiceTypeException.class
@@ -27,14 +26,12 @@ public class WebExceptionHandler {
     return responseFor(new ErrorResponse.BadRequest(), e);
   }
 
-  /** Map not found exceptions. */
   @ExceptionHandler({Exceptions.UnknownPatientIcnException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorResponse.NotFound handleNotFound(Exception e) {
     return responseFor(new ErrorResponse.NotFound(), e);
   }
 
-  /** Map service unavailable exceptions. */
   @ExceptionHandler({
     Exceptions.EeUnavailableException.class,
     Exceptions.FacilitiesUnavailableException.class
