@@ -142,7 +142,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   /** Compute community care eligibility. */
   @Override
   @SneakyThrows
-  @GetMapping(value = "/search")
+  @GetMapping(value = "/v0/eligibility/search")
   public CommunityCareEligibilityResponse search(
       @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "street") String street,
