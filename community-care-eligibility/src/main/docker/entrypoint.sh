@@ -142,9 +142,6 @@ regressionTest() {
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
-  doCurl 500 $TOKEN
-
   # Unknown ICN
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=UNKNOWN"
   doCurl 404 $TOKEN
