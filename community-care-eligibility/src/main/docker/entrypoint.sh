@@ -74,7 +74,6 @@ smokeTest() {
       doCurl 200
     done
 
-  #/v0/eligibility
   # Happy Path
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 200 $TOKEN
