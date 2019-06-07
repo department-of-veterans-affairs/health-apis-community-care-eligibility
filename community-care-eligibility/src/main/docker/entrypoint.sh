@@ -16,6 +16,9 @@ PATHS=(/actuator/health \
 /openapi.json \
 /openapi.yaml)
 
+#Current Version(s) available
+VERSION="/v0/eligibility"
+
 SUCCESS=0
 
 FAILURE=0
@@ -31,7 +34,7 @@ Example
   smoke-test
     --endpoint-domain-name=localhost
     --environment=qa
-    --base-path=/community-care/v0/eligibility
+    --base-path=/community-care
     --street='46 W New Haven Ave'
     --city=Melbourne
     --state=Fl
@@ -45,11 +48,12 @@ exit 1
 }
 
 doCurl () {
-  REQUEST_URL="$ENDPOINT_DOMAIN_NAME$BASE_URL${path// /%20}"
   if [[ -n "$2" ]]
   then
+    REQUEST_URL="$ENDPOINT_DOMAIN_NAME$BASE_PATH$VERSION${path// /%20}"
     status_code=$(curl -k -H "Authorization: Bearer $2" --write-out %{http_code} --silent --output /dev/null "$REQUEST_URL")
   else
+    REQUEST_URL="$ENDPOINT_DOMAIN_NAME$BASE_PATH${path// /%20}"
     status_code=$(curl -k --write-out %{http_code} --silent --output /dev/null "$REQUEST_URL")
   fi
 
@@ -70,6 +74,7 @@ smokeTest() {
       doCurl 200
     done
 
+  #/v0/eligibility
   # Happy Path
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 200 $TOKEN
