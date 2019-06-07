@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping(produces = "application/json")
+@RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
   private int maxDriveMinsPrimary;
 
@@ -142,7 +142,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   /** Compute community care eligibility. */
   @Override
   @SneakyThrows
-  @GetMapping(value = "/v0/eligibility/search")
+  @GetMapping(value = "/search")
   public CommunityCareEligibilityResponse search(
       @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "street") String street,
