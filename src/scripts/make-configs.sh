@@ -14,7 +14,6 @@ Options
 
 Secrets Configuration
  This bash file is sourced and expected to set the following variables
- - BING_MAPS_API_KEY
  - EE_ENDPOINT_URL
  - EE_HEADER_PASSWORD
  - EE_HEADER_USERNAME
@@ -53,7 +52,6 @@ echo "Loading secrets: $SECRETS"
 . $SECRETS
 
 MISSING_SECRETS=false
-[ -z "$BING_MAPS_API_KEY" ] && echo "Missing configuration: BING_MAPS_API_KEY" && MISSING_SECRETS=true
 [ -z "$EE_ENDPOINT_URL" ] && echo "Missing configuration: EE_ENDPOINT_URL" && MISSING_SECRETS=true
 [ -z "$EE_HEADER_PASSWORD" ] && echo "Missing configuration: EE_HEADER_PASSWORD" && MISSING_SECRETS=true
 [ -z "$EE_HEADER_USERNAME" ] && echo "Missing configuration: EE_HEADER_USERNAME" && MISSING_SECRETS=true
@@ -123,7 +121,6 @@ sendMoarSpams() {
 }
 
 makeConfig community-care-eligibility $PROFILE
-configValue community-care-eligibility $PROFILE bing-maps.api-key "$BING_MAPS_API_KEY"
 configValue community-care-eligibility $PROFILE ee.endpoint.url "$EE_ENDPOINT_URL"
 configValue community-care-eligibility $PROFILE ee.header.password "$EE_HEADER_PASSWORD"
 configValue community-care-eligibility $PROFILE ee.header.username "$EE_HEADER_USERNAME"

@@ -4,21 +4,15 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 final class Exceptions {
-  static final class BingMapsUnavailableException extends RuntimeException {
-    BingMapsUnavailableException() {
-      super("Bing Maps API is not available");
+  static final class EeUnavailableException extends RuntimeException {
+    EeUnavailableException(Throwable cause) {
+      super("E&E is not available: " + cause.getMessage(), cause);
     }
   }
 
   static final class FacilitiesUnavailableException extends RuntimeException {
-    FacilitiesUnavailableException() {
-      super("Facilities API is not available");
-    }
-  }
-
-  static final class MalformedPatientIcnException extends RuntimeException {
-    MalformedPatientIcnException(String patientIcn, Throwable cause) {
-      super("Malformed patient ICN: " + patientIcn, cause);
+    FacilitiesUnavailableException(Throwable cause) {
+      super("Facilities API is not available: " + cause.getMessage(), cause);
     }
   }
 

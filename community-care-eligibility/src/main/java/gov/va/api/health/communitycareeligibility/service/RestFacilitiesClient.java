@@ -1,8 +1,13 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,15 +33,15 @@ public class RestFacilitiesClient implements FacilitiesClient {
       @Value("${va-facilities.url}") String baseUrl,
       @Autowired RestTemplate restTemplate) {
     this.vaFacilitiesApiKey = vaFacilitiesApiKey;
+    this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     this.restTemplate = restTemplate;
-    this.baseUrl = baseUrl;
   }
 
   @Override
   @SneakyThrows
   public VaFacilitiesResponse facilities(String state) {
     String url =
-        UriComponentsBuilder.fromHttpUrl(baseUrl)
+        UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
             .queryParam("state", state)
             .queryParam("type", "health")
             .queryParam("page", 1)
@@ -45,14 +50,56 @@ public class RestFacilitiesClient implements FacilitiesClient {
     HttpHeaders headers = new HttpHeaders();
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    VaFacilitiesResponse responseObject =
-        restTemplate
-            .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
-            .getBody();
-    log.info("Va Facilities Response" + responseObject);
-    if (responseObject == null) {
-      throw new Exceptions.FacilitiesUnavailableException();
+    try {
+      VaFacilitiesResponse responseObject =
+          restTemplate
+              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+              .getBody();
+      log.info("VA facilities for state {}: {}", state, responseObject);
+      return responseObject;
+    } catch (Exception e) {
+      throw new Exceptions.FacilitiesUnavailableException(e);
     }
-    return responseObject;
+  }
+
+  @Override
+  @SneakyThrows
+  public List<String> nearby(Address address, int driveMins) {
+    String url =
+        UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
+            .queryParam("state", address.state())
+            .queryParam("city", address.city())
+            .queryParam("street_address", address.street())
+            .queryParam("zip", address.zip())
+            .queryParam("drive_time", driveMins)
+            .queryParam("type", "health")
+            .queryParam("page", 1)
+            .queryParam("per_page", 500)
+            .build()
+            .toUriString();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("apiKey", vaFacilitiesApiKey);
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    try {
+      VaNearbyFacilitiesResponse responseObject =
+          restTemplate
+              .exchange(
+                  url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
+              .getBody();
+      if (responseObject == null) {
+        return Collections.emptyList();
+      }
+      List<String> ids =
+          responseObject
+              .data()
+              .stream()
+              .map(facility -> StringUtils.trimToNull(facility.id()))
+              .filter(Objects::nonNull)
+              .collect(Collectors.toList());
+      log.info("VA facilities within {} mins drive of {}: {}", driveMins, address, ids);
+      return ids;
+    } catch (Exception e) {
+      throw new Exceptions.FacilitiesUnavailableException(e);
+    }
   }
 }
