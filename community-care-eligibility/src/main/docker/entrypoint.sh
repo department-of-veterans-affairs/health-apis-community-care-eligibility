@@ -69,6 +69,10 @@ doCurl () {
 
 smokeTest() {
 
+  if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
+    ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
+  fi
+  
   for path in "${PATHS[@]}"
     do
       doCurl 200
@@ -97,6 +101,10 @@ smokeTest() {
 }
 
 regressionTest() {
+
+  if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
+    ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
+  fi
 
   for path in "${PATHS[@]}"
     do
