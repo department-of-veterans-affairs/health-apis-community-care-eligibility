@@ -72,7 +72,7 @@ smokeTest() {
   if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
     ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
   fi
-  
+
   for path in "${PATHS[@]}"
     do
       doCurl 200
@@ -149,10 +149,6 @@ regressionTest() {
 
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&patient=$PATIENT"
   doCurl 500 $TOKEN
-
-  # Unknown ICN
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=UNKNOWN"
-  doCurl 404 $TOKEN
 
   printResults
 }
