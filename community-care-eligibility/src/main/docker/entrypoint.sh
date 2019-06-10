@@ -93,10 +93,6 @@ smokeTest() {
   path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  # Unknown ICN
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=UNKNOWN"
-  doCurl 404 $TOKEN
-
   printResults
 }
 
