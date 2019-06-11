@@ -42,8 +42,8 @@ public final class CommunityCareEligibilityTest {
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
-    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(asList("FAC123"));
-    when(facilitiesClient.facilities("FL"))
+    when(facilitiesClient.nearby(patientAddress, 60, "Audiology")).thenReturn(asList("FAC123"));
+    when(facilitiesClient.facilities("FL", "Audiology"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -127,7 +127,7 @@ public final class CommunityCareEligibilityTest {
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
-    when(facilitiesClient.facilities("FL"))
+    when(facilitiesClient.facilities("FL", "PrimaryCare"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -183,7 +183,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 10)).thenReturn(asList("nearFac"));
+    when(facilitiesClient.nearby(patientAddress, 10, "PrimaryCare")).thenReturn(asList("nearFac"));
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .maxDriveTimePrimary(10)
@@ -342,7 +342,7 @@ public final class CommunityCareEligibilityTest {
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
 
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities("FL"))
+    when(facilitiesClient.facilities("FL", "PrimaryCare"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -380,7 +380,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 1)).thenReturn(emptyList());
+    when(facilitiesClient.nearby(patientAddress, 1, "PrimaryCare")).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -462,9 +462,10 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(any(String.class)))
+    when(facilitiesClient.facilities(any(String.class), any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
-    when(facilitiesClient.nearby(any(Address.class), any(int.class))).thenReturn(emptyList());
+    when(facilitiesClient.nearby(any(Address.class), any(int.class), any(String.class)))
+        .thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -520,7 +521,7 @@ public final class CommunityCareEligibilityTest {
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities("FL"))
+    when(facilitiesClient.facilities("FL", "Optometry"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -551,7 +552,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 60)).thenReturn(emptyList());
+    when(facilitiesClient.nearby(patientAddress, 60, "Optometry")).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
