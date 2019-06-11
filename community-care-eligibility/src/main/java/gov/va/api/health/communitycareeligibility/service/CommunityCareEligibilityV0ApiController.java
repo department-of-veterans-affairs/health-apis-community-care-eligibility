@@ -179,8 +179,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             : stateResponse
                 .data()
                 .stream()
-                .collect(Collectors.toList())
-                .stream()
                 .map(
                     vaFacility ->
                         FacilityTransformer.builder()
