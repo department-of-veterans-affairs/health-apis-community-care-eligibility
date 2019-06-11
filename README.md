@@ -2,14 +2,14 @@
 
 This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
 that computes **objective** overall community-care eligibility by combining eligibility codes
-from the Eligibility and Enrollment System (E&E) with wait- and drive-time access
+from the Eligibility and Enrollment System (E&E) with drive- and wait-time access
 standards.
-(Average historical wait times are provided by Facilities API. Average drive times are also provided by Facilities API. )
 
 ![applications](src/plantuml/apps.png)
 
-Historical wait times from the Facilities API are expected to be replaced
-with live wait times from the VistA Integration Adapter (VIA).
+Average drive times are also provided by Facilities API.
+Live appointment wait times will be provided by the VistA Integration Adapter (VIA). 
+(Integration with VIA is in-progress.)
 
 For more information about the deployment architecture in different environments,
 see the [architecture diagrams](architecture.md).
