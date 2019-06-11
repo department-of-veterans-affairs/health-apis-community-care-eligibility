@@ -5,13 +5,13 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public final class Exceptions {
   public static final class EeUnavailableException extends RuntimeException {
-    EeUnavailableException(Throwable cause) {
+    public EeUnavailableException(Throwable cause) {
       super("E&E is not available: " + cause.getMessage(), cause);
     }
   }
 
   public static final class FacilitiesUnavailableException extends RuntimeException {
-    FacilitiesUnavailableException(Throwable cause) {
+    public FacilitiesUnavailableException(Throwable cause) {
       super("Facilities API is not available: " + cause.getMessage(), cause);
     }
   }
