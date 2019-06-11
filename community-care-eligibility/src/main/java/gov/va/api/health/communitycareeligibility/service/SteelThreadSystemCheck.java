@@ -26,6 +26,8 @@ public class SteelThreadSystemCheck implements HealthIndicator {
 
   private final int driveMinutes;
 
+  private final String serviceType;
+
   /** 'By hand' all args constructor is required to inject non-string values from our properties. */
   public SteelThreadSystemCheck(
       @Autowired EligibilityAndEnrollmentClient eeClient,
@@ -42,6 +44,7 @@ public class SteelThreadSystemCheck implements HealthIndicator {
             .street("505 N John Rodes Blvd")
             .build();
     this.driveMinutes = 60;
+    this.serviceType = "PrimaryCare";
   }
 
   @Override
@@ -52,7 +55,7 @@ public class SteelThreadSystemCheck implements HealthIndicator {
     }
     try {
       eeClient.requestEligibility(icn);
-      facilitiesClient.nearby(address, driveMinutes);
+      facilitiesClient.nearby(address, driveMinutes, serviceType);
       return Health.up().build();
     } catch (HttpServerErrorException
         | HttpClientErrorException
