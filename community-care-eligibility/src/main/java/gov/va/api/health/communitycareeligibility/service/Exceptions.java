@@ -3,14 +3,14 @@ package gov.va.api.health.communitycareeligibility.service;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-final class Exceptions {
-  static final class EeUnavailableException extends RuntimeException {
+public final class Exceptions {
+  public static final class EeUnavailableException extends RuntimeException {
     EeUnavailableException(Throwable cause) {
       super("E&E is not available: " + cause.getMessage(), cause);
     }
   }
 
-  static final class FacilitiesUnavailableException extends RuntimeException {
+  public static final class FacilitiesUnavailableException extends RuntimeException {
     FacilitiesUnavailableException(Throwable cause) {
       super("Facilities API is not available: " + cause.getMessage(), cause);
     }
