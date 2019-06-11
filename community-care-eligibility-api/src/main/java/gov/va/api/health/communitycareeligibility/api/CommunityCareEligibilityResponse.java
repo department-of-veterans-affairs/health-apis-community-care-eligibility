@@ -131,8 +131,6 @@ public final class CommunityCareEligibilityResponse {
 
     String serviceType;
 
-    Boolean establishedPatient;
-
     String timestamp;
   }
 }

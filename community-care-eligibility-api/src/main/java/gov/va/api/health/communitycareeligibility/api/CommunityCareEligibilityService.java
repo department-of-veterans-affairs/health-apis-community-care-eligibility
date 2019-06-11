@@ -24,7 +24,9 @@ import javax.ws.rs.Path;
                 + " subjective criteria, this API does not provide a **final**"
                 + " eligibility decision. Any user-facing message based on these"
                 + " results should indicate that the patient is *probably* eligible"
-                + " or *probably not* eligible."
+                + " or *probably not* eligible, and that no decision is final until"
+                + " they have consulted VA staff and"
+                + " scheduled their appointment."
       ),
   externalDocs =
       @ExternalDocumentation(
@@ -38,7 +40,7 @@ public interface CommunityCareEligibilityService {
   @Operation(
     summary =
         "Compute community care eligibility by patient ICN, patient home address,"
-            + " desired medical service type, and patient establishment.",
+            + " and desired medical service type",
     tags = "Search"
   )
   @GET
@@ -128,13 +130,5 @@ public interface CommunityCareEligibilityService {
                 )
           )
           @NotBlank
-          String serviceType,
-      @Parameter(
-            in = ParameterIn.QUERY,
-            required = false,
-            name = "establishedPatient",
-            description =
-                "Whether this patient is established at the VA health facilities in their area"
-          )
-          boolean establishedPatient);
+          String serviceType);
 }
