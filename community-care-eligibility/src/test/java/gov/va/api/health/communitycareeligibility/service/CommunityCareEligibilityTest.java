@@ -59,8 +59,7 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .established(1)
-                                                        .neww(10)
+                                                        .neww(1)
                                                         .service("Audiology")
                                                         .build()))
                                             .build())
@@ -86,7 +85,7 @@ public final class CommunityCareEligibilityTest {
             .maxWaitSpecialty(2)
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "Audiology", true);
+        controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "Audiology");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -101,7 +100,6 @@ public final class CommunityCareEligibilityTest {
                             .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Audiology")
-                    .establishedPatient(true)
                     .build())
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
@@ -145,7 +143,6 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .established(100)
                                                         .neww(100)
                                                         .service("primarycare")
                                                         .build()))
@@ -171,7 +168,6 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .established(0)
                                                         .neww(0)
                                                         .service("primarycare")
                                                         .build()))
@@ -196,8 +192,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search(
-            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
+        controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -211,7 +206,6 @@ public final class CommunityCareEligibilityTest {
                             .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .patientIcn("123")
-                    .establishedPatient(false)
                     .serviceType("PrimaryCare")
                     .build()))
             .communityCareEligibility(
@@ -245,7 +239,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .build();
     CommunityCareEligibilityResponse result =
-        controller.search("123", "66 Main St", "Melbourne", "fl", "12345 ", "primarycare", false);
+        controller.search("123", "66 Main St", "Melbourne", "fl", "12345 ", "primarycare");
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -260,7 +254,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .patientIcn("123")
                         .timestamp(result.patientRequest().timestamp())
-                        .establishedPatient(false)
                         .serviceType("PrimaryCare")
                         .build())
                 .communityCareEligibility(
@@ -274,8 +267,7 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void facilityTransformerNullChecks() {
-    FacilityTransformer transformer =
-        FacilityTransformer.builder().serviceType("xyz").establishedPatient(false).build();
+    FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
 
     // facility is null
     assertThat(transformer.toFacility(null)).isNull();
@@ -371,7 +363,6 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .established(10)
                                                         .neww(1)
                                                         .service("primarycare")
                                                         .build()))
@@ -398,8 +389,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search(
-            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
+        controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -413,7 +403,6 @@ public final class CommunityCareEligibilityTest {
                             .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .patientIcn("123")
-                    .establishedPatient(false)
                     .serviceType("PrimaryCare")
                     .build()))
             .communityCareEligibility(
@@ -484,8 +473,7 @@ public final class CommunityCareEligibilityTest {
             .maxWaitPrimary(1)
             .build();
     CommunityCareEligibilityResponse result =
-        controller.search(
-            "123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare", false);
+        controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
     assertThat(result.facilities().isEmpty());
   }
 
@@ -499,7 +487,7 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(1)
             .maxWaitPrimary(1)
             .build();
-    controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "Dentistry", false);
+    controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "Dentistry");
   }
 
   @Test
@@ -548,8 +536,7 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .established(1)
-                                                        .neww(10)
+                                                        .neww(1)
                                                         .service("optometry")
                                                         .build()))
                                             .build())
@@ -573,7 +560,7 @@ public final class CommunityCareEligibilityTest {
             .maxWaitPrimary(2)
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "optometry", true);
+        controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "optometry");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -588,7 +575,6 @@ public final class CommunityCareEligibilityTest {
                             .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Optometry")
-                    .establishedPatient(true)
                     .build())
             .communityCareEligibility(
                 CommunityCareEligibilityResponse.CommunityCareEligibility.builder()

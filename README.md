@@ -19,8 +19,7 @@ For details about building and running this application, see the [developer guid
 ----
 
 The API supports a search query that accepts a patient ICN, the patient's home address,
-the patient's desired medical service type, and whether or not the patient is 
-established at the VA health facilities in their area.
+and the patient's desired medical service type.
 
 The medical service type is one of:
 * Audiology
@@ -54,7 +53,7 @@ facilities that satisfy the access standards.
 Sample request:
 
 ```
-https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare&establishedPatient=false
+https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare
 ```
 
 Sample response:
@@ -70,7 +69,6 @@ Sample response:
       "zip" : "89144"
     },
     "serviceType" : "PrimaryCare",
-    "establishedPatient" : false,
     "timestamp" : "2019-05-09T13:17:58.250Z"
   },
   "communityCareEligibility" : {
