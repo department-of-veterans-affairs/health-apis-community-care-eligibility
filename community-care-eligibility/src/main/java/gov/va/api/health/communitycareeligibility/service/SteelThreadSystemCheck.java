@@ -1,9 +1,6 @@
-package gov.va.api.health.communitycareeligibility.service.healthcheck;
+package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
-import gov.va.api.health.communitycareeligibility.service.EligibilityAndEnrollmentClient;
-import gov.va.api.health.communitycareeligibility.service.Exceptions;
-import gov.va.api.health.communitycareeligibility.service.FacilitiesClient;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,7 @@ public class SteelThreadSystemCheck implements HealthIndicator {
 
   private final String icn;
 
-  private final CommunityCareEligibilityResponse.Address address;
+  private final Address address;
 
   private final int driveMinutes;
 
@@ -33,17 +30,18 @@ public class SteelThreadSystemCheck implements HealthIndicator {
   public SteelThreadSystemCheck(
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient,
-      @Value("${health-check.icn}") String icn,
-      @Value("${health-check.address.street}") String street,
-      @Value("${health-check.address.city}") String city,
-      @Value("${health-check.address.state}") String state,
-      @Value("${health-check.address.zip}") String zip,
-      @Value("${health-check.drive-minutes}") int driveMinutes) {
+      @Value("${health-check.icn}") String icn) {
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
     this.icn = icn;
-    this.address = new CommunityCareEligibilityResponse.Address(street, city, state, zip);
-    this.driveMinutes = driveMinutes;
+    this.address =
+        Address.builder()
+            .city("Melbourne")
+            .state("FL")
+            .zip("32934")
+            .street("505 N John Rodes Blvd")
+            .build();
+    this.driveMinutes = 60;
   }
 
   @Override

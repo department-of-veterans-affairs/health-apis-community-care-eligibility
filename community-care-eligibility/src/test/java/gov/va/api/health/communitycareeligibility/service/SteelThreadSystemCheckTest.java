@@ -1,11 +1,8 @@
-package gov.va.api.health.communitycareeligibility.service.healthcheck;
+package gov.va.api.health.communitycareeligibility.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import gov.va.api.health.communitycareeligibility.service.EligibilityAndEnrollmentClient;
-import gov.va.api.health.communitycareeligibility.service.Exceptions;
-import gov.va.api.health.communitycareeligibility.service.FacilitiesClient;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +26,7 @@ public class SteelThreadSystemCheckTest {
   @Test
   public void healthCheckHappyPathEe() {
     GetEESummaryResponse root = new GetEESummaryResponse();
-    SteelThreadSystemCheck test =
-        new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", "Test Street", "Testville", "FL", "12345", 60);
+    SteelThreadSystemCheck test = new SteelThreadSystemCheck(eeClient, facilitiesClient, "123");
     when(eeClient.requestEligibility(Mockito.any())).thenReturn(root);
     assertThat(test.health().getStatus()).isEqualTo(Status.UP);
   }
@@ -39,9 +34,7 @@ public class SteelThreadSystemCheckTest {
   @Test
   public void healthCheckHappyPathFacilities() {
     List<String> facilities = new ArrayList<>();
-    SteelThreadSystemCheck test =
-        new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", "Test Street", "Testville", "FL", "12345", 60);
+    SteelThreadSystemCheck test = new SteelThreadSystemCheck(eeClient, facilitiesClient, "123");
     when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt())).thenReturn(facilities);
     assertThat(test.health().getStatus()).isEqualTo(Status.UP);
   }
@@ -49,9 +42,7 @@ public class SteelThreadSystemCheckTest {
   @Test
   public void healthCheckSadPathEe() {
 
-    SteelThreadSystemCheck test =
-        new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", "Test Street", "Testville", "FL", "12345", 60);
+    SteelThreadSystemCheck test = new SteelThreadSystemCheck(eeClient, facilitiesClient, "123");
     when(eeClient.requestEligibility(Mockito.any()))
         .thenThrow(new Exceptions.EeUnavailableException(new Throwable()));
     assertThat(test.health().getStatus()).isEqualTo(Status.DOWN);
@@ -60,9 +51,7 @@ public class SteelThreadSystemCheckTest {
   @Test
   public void healthCheckSadPathFacilities() {
 
-    SteelThreadSystemCheck test =
-        new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", "Test Street", "Testville", "FL", "12345", 60);
+    SteelThreadSystemCheck test = new SteelThreadSystemCheck(eeClient, facilitiesClient, "123");
     when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt()))
         .thenThrow(new Exceptions.FacilitiesUnavailableException(new Throwable()));
     assertThat(test.health().getStatus()).isEqualTo(Status.DOWN);
