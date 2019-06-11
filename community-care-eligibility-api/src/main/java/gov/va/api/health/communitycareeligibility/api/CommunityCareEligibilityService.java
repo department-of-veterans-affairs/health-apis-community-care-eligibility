@@ -24,7 +24,9 @@ import javax.ws.rs.Path;
                 + " subjective criteria, this API does not provide a **final**"
                 + " eligibility decision. Any user-facing message based on these"
                 + " results should indicate that the patient is *probably* eligible"
-                + " or *probably not* eligible."
+                + " or *probably not* eligible, and that no decision is final until"
+                + " they have consulted VA staff and"
+                + " scheduled their appointment."
       ),
   externalDocs =
       @ExternalDocumentation(

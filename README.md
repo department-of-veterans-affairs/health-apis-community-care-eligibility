@@ -45,7 +45,8 @@ The other two criteria, *best medical interest* and *quality standards*, are sub
 criteria outside the scope of this API. Because this API does not include subjective criteria,
 its eligibility decisions **are not final**. A user-facing message
 based on the result of this API should stress that the patient is *probably* eligible or
-*probably not* eligible.
+*probably not* eligible, and that no decision is final until they have consulted VA staff
+and scheduled their appointment.
 
 The response includes a description of the E&E eligibility codes and the IDs of any VA health
 facilities that satisfy the access standards.
