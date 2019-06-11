@@ -64,23 +64,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     this.facilitiesClient = facilitiesClient;
   }
 
-  private static boolean hasServiceType(
-      VaFacilitiesResponse.Facility vaFacility, String serviceType) {
-    return vaFacility != null
-        && vaFacility.attributes() != null
-        && vaFacility.attributes().waitTimes() != null
-        && vaFacility
-            .attributes()
-            .waitTimes()
-            .health()
-            .stream()
-            .anyMatch(
-                waitTime ->
-                    waitTime != null
-                        && waitTime.service() != null
-                        && equalsIgnoreCase(serviceType, waitTime.service()));
-  }
-
   private static Map<String, String> servicesMap() {
     Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (String service :
@@ -187,37 +170,28 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .zip(zip.trim())
             .build();
 
-    VaFacilitiesResponse stateResponse = facilitiesClient.facilities(patientAddress.state());
-    List<VaFacilitiesResponse.Facility> vaFacilitiesInStateForService =
+    VaFacilitiesResponse stateResponse =
+        facilitiesClient.facilities(patientAddress.state(), mappedServiceType);
+
+    List<Facility> facilitiesInStateForService =
         stateResponse == null
             ? Collections.emptyList()
             : stateResponse
                 .data()
                 .stream()
-                .filter(vaFacility -> hasServiceType(vaFacility, mappedServiceType))
+                .collect(Collectors.toList())
+                .stream()
+                .map(
+                    vaFacility ->
+                        FacilityTransformer.builder()
+                            .serviceType(mappedServiceType)
+                            .build()
+                            .toFacility(vaFacility))
                 .collect(Collectors.toList());
-    log.info(
-        "VA facilities in state '{}' for service type '{}': {}",
-        patientAddress.state(),
-        mappedServiceType,
-        vaFacilitiesInStateForService
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList()));
-
-    List<Facility> facilitiesInStateForService =
-        vaFacilitiesInStateForService
-            .stream()
-            .map(
-                vaFacility ->
-                    FacilityTransformer.builder()
-                        .serviceType(mappedServiceType)
-                        .build()
-                        .toFacility(vaFacility))
-            .collect(Collectors.toList());
 
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    List<String> facilityIdsWithinDriveTime = facilitiesClient.nearby(patientAddress, driveMins);
+    List<String> facilityIdsWithinDriveTime =
+        facilitiesClient.nearby(patientAddress, driveMins, mappedServiceType);
 
     List<Facility> facilitiesInStateNearbyForService =
         facilitiesInStateForService
