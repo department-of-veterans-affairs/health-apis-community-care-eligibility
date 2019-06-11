@@ -16,8 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 public class FacilityTransformer {
   @NonNull private final String serviceType;
 
-  @NonNull private final Boolean establishedPatient;
-
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {
     VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
     if (attributes == null) {
@@ -115,6 +113,6 @@ public class FacilityTransformer {
       return null;
     }
 
-    return establishedPatient ? optWaitTime.get().established() : optWaitTime.get().neww();
+    return optWaitTime.get().neww();
   }
 }

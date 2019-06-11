@@ -131,7 +131,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
   @SneakyThrows
   private List<Facility> facilitiesMeetingWaitTimeStandards(
-      List<Facility> facilities, boolean isPrimary, boolean establishedPatient) {
+      List<Facility> facilities, boolean isPrimary) {
     int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
     return facilities
         .stream()
@@ -149,9 +149,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @NotBlank @RequestParam(value = "city") String city,
       @NotBlank @RequestParam(value = "state") String state,
       @NotBlank @RequestParam(value = "zip") String zip,
-      @NotBlank @RequestParam(value = "serviceType") String serviceType,
-      @RequestParam(value = "establishedPatient", defaultValue = "false")
-          boolean establishedPatient) {
+      @NotBlank @RequestParam(value = "serviceType") String serviceType) {
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
@@ -214,7 +212,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 vaFacility ->
                     FacilityTransformer.builder()
                         .serviceType(mappedServiceType)
-                        .establishedPatient(establishedPatient)
                         .build()
                         .toFacility(vaFacility))
             .collect(Collectors.toList());
@@ -238,8 +235,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .collect(Collectors.toList()));
 
     List<Facility> facilitiesMeetingAccessStandards =
-        facilitiesMeetingWaitTimeStandards(
-            facilitiesInStateNearbyForService, isPrimary, establishedPatient);
+        facilitiesMeetingWaitTimeStandards(facilitiesInStateNearbyForService, isPrimary);
 
     boolean communityCareEligible =
         eligbleByEligbilityAndEnrollmentResponse(codeString, mappedServiceType);
@@ -251,7 +247,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         .patientRequest(
             CommunityCareEligibilityResponse.PatientRequest.builder()
                 .serviceType(mappedServiceType)
-                .establishedPatient(establishedPatient)
                 .patientIcn(patientIcn)
                 .patientAddress(patientAddress)
                 .timestamp(timestamp.toString())

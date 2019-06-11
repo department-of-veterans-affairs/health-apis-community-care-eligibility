@@ -116,8 +116,6 @@ public final class VaFacilitiesResponse {
 
     @JsonProperty("new")
     private Integer neww;
-
-    private Integer established;
   }
 
   @Data

@@ -27,7 +27,6 @@ class SwaggerCommunityCareEligibilityResponse {
                               .zip("89144")
                               .build())
                       .serviceType("PrimaryCare")
-                      .establishedPatient(false)
                       .timestamp("2019-05-09T13:17:58.250Z")
                       .build())
               .communityCareEligibility(
