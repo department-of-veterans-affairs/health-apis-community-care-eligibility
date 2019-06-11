@@ -35,7 +35,8 @@ public class SteelThreadSystemCheckTest {
   public void healthCheckHappyPathFacilities() {
     List<String> facilities = new ArrayList<>();
     SteelThreadSystemCheck test = new SteelThreadSystemCheck(eeClient, facilitiesClient, "123");
-    when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt())).thenReturn(facilities);
+    when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt(), Mockito.any()))
+        .thenReturn(facilities);
     assertThat(test.health().getStatus()).isEqualTo(Status.UP);
   }
 
@@ -52,7 +53,7 @@ public class SteelThreadSystemCheckTest {
   public void healthCheckSadPathFacilities() {
 
     SteelThreadSystemCheck test = new SteelThreadSystemCheck(eeClient, facilitiesClient, "123");
-    when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt()))
+    when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt(), Mockito.any()))
         .thenThrow(new Exceptions.FacilitiesUnavailableException(new Throwable()));
     assertThat(test.health().getStatus()).isEqualTo(Status.DOWN);
   }
