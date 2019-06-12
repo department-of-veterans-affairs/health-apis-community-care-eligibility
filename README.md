@@ -92,7 +92,7 @@ Sample response:
     {
       "id" : "vha_1597XY",
       "name" : "Springfield VA Clinic",
-      "address" : {
+      "physicalAddress" : {
         "street" : "2584 South Street",
         "city" : "Springfield",
         "state" : "KY",
@@ -103,12 +103,13 @@ Sample response:
         "longitude" : 67.65
       },
       "phoneNumber" : "177-112-8657 x",
+      "website" : "https://www.va.gov",
       "waitDays" : 19
     },
     {
       "id" : "vha_46368ZZ",
       "name" : "Shelbyville VA Clinic",
-      "address" : {
+      "physicalAddress" : {
         "street" : "121393 Main Street",
         "city" : "Shelbyville",
         "state" : "KY",
@@ -119,6 +120,7 @@ Sample response:
         "longitude" : 317.811
       },
       "phoneNumber" : "1-422-983-2040",
+      "website" : "https://www.va.gov",
       "waitDays" : 14
     }
   ]
