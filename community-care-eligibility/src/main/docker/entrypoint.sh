@@ -11,13 +11,15 @@ ZIP="$ZIP"
 SERVICE_TYPE="$SERVICE_TYPE"
 PATIENT="$PATIENT"
 
-#Put Health endpoints here if you got them
-PATHS=(/actuator/health \
-/v0/eligibility/openapi.json \
-/v0/eligibility/openapi.yaml)
-
 #Current Version(s) available
 VERSION="/v0/eligibility"
+
+#Put Health endpoints here if you got them
+PATHS=(/actuator/health \
+$VERSION/openapi.json \
+$VERSION/openapi.yaml)
+
+
 
 SUCCESS=0
 
