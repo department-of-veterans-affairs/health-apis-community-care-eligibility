@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -28,11 +29,17 @@ public class SteelThreadSystemCheck implements HealthIndicator {
 
   private final String serviceType;
 
+  private final SteelThreadSystemCheckLedger ledger;
+
+  private final int consecutiveFailureThreshold;
+
   /** 'By hand' all args constructor is required to inject non-string values from our properties. */
   public SteelThreadSystemCheck(
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient,
-      @Value("${health-check.icn}") String icn) {
+      @Value("${health-check.icn}") String icn,
+      @Autowired SteelThreadSystemCheckLedger ledger,
+      @Value("${health-check.consecutive-failure-threshold}") int consecutiveFailureThreshold) {
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
     this.icn = icn;
@@ -45,6 +52,8 @@ public class SteelThreadSystemCheck implements HealthIndicator {
             .build();
     this.driveMinutes = 60;
     this.serviceType = "PrimaryCare";
+    this.ledger = ledger;
+    this.consecutiveFailureThreshold = consecutiveFailureThreshold;
   }
 
   @Override
@@ -53,22 +62,49 @@ public class SteelThreadSystemCheck implements HealthIndicator {
     if ("skip".equals(icn)) {
       return Health.up().withDetail("skipped", true).build();
     }
+
+    // The count is read and stored for consistency because there is another thread writing it.
+    int consecutiveFails = ledger.getConsecutiveFailureCount();
+
+    if (consecutiveFails < consecutiveFailureThreshold) {
+      return Health.up().build();
+    }
+
+    return Health.down()
+        .withDetail(
+            "failures",
+            String.format(
+                "Error threshold of %d hit with %d consecutive failure(s).",
+                consecutiveFailureThreshold, consecutiveFails))
+        .build();
+  }
+
+  /**
+   * Asynchronously perform the steel thread read and save the results for health check to use.
+   * Frequency is configurable via properties.
+   */
+  @Scheduled(
+    fixedDelayString = "${health-check.read-frequency-ms}",
+    initialDelayString = "${health-check.read-frequency-ms}"
+  )
+  @SneakyThrows
+  public void runSteelThreadCheckAsynchronously() {
+    log.info("Performing health check.");
     try {
       eeClient.requestEligibility(icn);
       facilitiesClient.nearby(address, driveMinutes, serviceType);
-      return Health.up().build();
+
+      ledger.recordSuccess();
     } catch (HttpServerErrorException
         | HttpClientErrorException
         | ResourceAccessException
         | Exceptions.EeUnavailableException
         | Exceptions.FacilitiesUnavailableException e) {
-
-      return Health.down()
-          .withDetail("exception", e.getClass())
-          .withDetail("message", e.getMessage())
-          .build();
+      int consecutiveFailures = ledger.recordFailure();
+      log.error("Failed to complete health check. Failure count is " + consecutiveFailures);
     } catch (Exception e) {
-      log.error("Failed to complete health check.", e);
+      int consecutiveFailures = ledger.recordFailure();
+      log.error("Failed to complete health check. Failure count is " + consecutiveFailures, e);
       throw e;
     }
   }
