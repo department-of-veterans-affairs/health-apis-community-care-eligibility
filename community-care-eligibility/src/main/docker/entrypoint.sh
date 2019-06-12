@@ -13,8 +13,8 @@ PATIENT="$PATIENT"
 
 #Put Health endpoints here if you got them
 PATHS=(/actuator/health \
-/openapi.json \
-/openapi.yaml)
+/v0/eligibility/openapi.json \
+/v0/eligibility/openapi.yaml)
 
 #Current Version(s) available
 VERSION="/v0/eligibility"
