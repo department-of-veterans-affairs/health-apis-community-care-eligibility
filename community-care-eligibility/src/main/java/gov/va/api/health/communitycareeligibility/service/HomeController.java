@@ -26,7 +26,7 @@ public class HomeController {
 
   /** REST endpoint for OpenAPI JSON + redirect. */
   @GetMapping(
-    value = {"/", "/openapi.json", "/api/openapi.json"},
+    value = {"/v0/eligibility", "/openapi.json", "/api/openapi.json"},
     produces = "application/json"
   )
   @ResponseBody
