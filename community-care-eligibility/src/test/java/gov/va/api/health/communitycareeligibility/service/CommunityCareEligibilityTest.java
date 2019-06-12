@@ -110,7 +110,8 @@ public final class CommunityCareEligibilityTest {
                 singletonList(
                     Facility.builder()
                         .id("FAC123")
-                        .address(Address.builder().street("911 derp st").state("FL").build())
+                        .physicalAddress(
+                            Address.builder().street("911 derp st").state("FL").build())
                         .coordinates(facilityCoordinates)
                         .waitDays(1)
                         .build()))
@@ -216,13 +217,13 @@ public final class CommunityCareEligibilityTest {
                 asList(
                     Facility.builder()
                         .id("nearFac")
-                        .address(Address.builder().street("near st").state("FL").build())
+                        .physicalAddress(Address.builder().street("near st").state("FL").build())
                         .coordinates(nearCoordinates)
                         .waitDays(100)
                         .build(),
                     Facility.builder()
                         .id("farFac")
-                        .address(Address.builder().street("far st").state("FL").build())
+                        .physicalAddress(Address.builder().street("far st").state("FL").build())
                         .coordinates(farCoordinates)
                         .waitDays(0)
                         .build()))
@@ -420,7 +421,7 @@ public final class CommunityCareEligibilityTest {
                     Facility.builder()
                         .id("FAC123")
                         .name("some facility")
-                        .address(
+                        .physicalAddress(
                             Address.builder()
                                 .street("911 derp st")
                                 .city("Palm Bay")
@@ -591,7 +592,8 @@ public final class CommunityCareEligibilityTest {
                 singletonList(
                     Facility.builder()
                         .id("FAC123")
-                        .address(Address.builder().street("911 derp st").state("FL").build())
+                        .physicalAddress(
+                            Address.builder().street("911 derp st").state("FL").build())
                         .coordinates(facilityCoordinates)
                         .waitDays(1)
                         .build()))
