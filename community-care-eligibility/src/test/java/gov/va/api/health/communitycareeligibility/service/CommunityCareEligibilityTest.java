@@ -416,22 +416,6 @@ public final class CommunityCareEligibilityTest {
                                 .code("H")
                                 .build()))
                     .build())
-            .facilities(
-                singletonList(
-                    Facility.builder()
-                        .id("FAC123")
-                        .name("some facility")
-                        .physicalAddress(
-                            Address.builder()
-                                .street("911 derp st")
-                                .city("Palm Bay")
-                                .state("FL")
-                                .zip("75319")
-                                .build())
-                        .coordinates(testCoordinates)
-                        .phoneNumber("867-5309")
-                        .waitDays(1)
-                        .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
   }
@@ -588,15 +572,6 @@ public final class CommunityCareEligibilityTest {
                                 .description("Ineligible")
                                 .build()))
                     .build())
-            .facilities(
-                singletonList(
-                    Facility.builder()
-                        .id("FAC123")
-                        .physicalAddress(
-                            Address.builder().street("911 derp st").state("FL").build())
-                        .coordinates(facilityCoordinates)
-                        .waitDays(1)
-                        .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
   }
