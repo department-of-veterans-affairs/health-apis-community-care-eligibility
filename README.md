@@ -11,6 +11,8 @@ Average drive times are also provided by Facilities API.
 Live appointment wait times will be provided by the VistA Integration Adapter (VIA). 
 (Integration with VIA is in-progress.)
 
+For more information about the end-to-end flow of information and interactions between systems/APIs, see the [sequence diagram](sequence-diagram.md).
+
 For more information about the deployment architecture in different environments,
 see the [architecture diagrams](architecture.md).
 
