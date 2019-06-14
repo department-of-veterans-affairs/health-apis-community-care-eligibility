@@ -24,6 +24,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -156,24 +157,23 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .state(state.toUpperCase(Locale.US).trim())
             .zip(zip.trim())
             .build();
+    CommunityCareEligibilityResponse communityCareEligibilityResponse =
+        CommunityCareEligibilityResponse.builder()
+            .patientRequest(
+                CommunityCareEligibilityResponse.PatientRequest.builder()
+                    .serviceType(mappedServiceType)
+                    .patientIcn(patientIcn)
+                    .patientAddress(patientAddress)
+                    .timestamp(timestamp.toString())
+                    .build())
+            .build();
 
-    boolean communityCareEligible = eligbleByEligbilityAndEnrollmentResponse(codeString);
-
-    if (communityCareEligible || codeString.contains("X")) {
-      return CommunityCareEligibilityResponse.builder()
-          .patientRequest(
-              CommunityCareEligibilityResponse.PatientRequest.builder()
-                  .serviceType(mappedServiceType)
-                  .patientIcn(patientIcn)
-                  .patientAddress(patientAddress)
-                  .timestamp(timestamp.toString())
-                  .build())
-          .communityCareEligibility(
-              CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                  .eligible(communityCareEligible)
-                  .eligibilityCode(eligibilityCodes)
-                  .build())
-          .build();
+    if (CollectionUtils.containsAny(codeString, Arrays.asList("G", "N", "H", "X"))) {
+      return communityCareEligibilityResponse.communityCareEligibility(
+          CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+              .eligible(!codeString.contains("X"))
+              .eligibilityCode(eligibilityCodes)
+              .build());
     }
 
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
@@ -181,20 +181,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     List<String> facilityIdsWithinDriveTime =
         facilitiesClient.nearby(patientAddress, driveMins, mappedServiceType);
     if (facilityIdsWithinDriveTime.isEmpty()) {
-      return CommunityCareEligibilityResponse.builder()
-          .patientRequest(
-              CommunityCareEligibilityResponse.PatientRequest.builder()
-                  .serviceType(mappedServiceType)
-                  .patientIcn(patientIcn)
-                  .patientAddress(patientAddress)
-                  .timestamp(timestamp.toString())
-                  .build())
-          .communityCareEligibility(
-              CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                  .eligible(true)
-                  .eligibilityCode(eligibilityCodes)
-                  .build())
-          .build();
+      return communityCareEligibilityResponse.communityCareEligibility(
+          CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
+              .eligible(true)
+              .eligibilityCode(eligibilityCodes)
+              .build());
     }
 
     VaFacilitiesResponse stateResponse =
@@ -231,14 +222,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     List<Facility> facilitiesMeetingAccessStandards =
         facilitiesMeetingWaitTimeStandards(facilitiesInStateNearbyForService, isPrimary);
 
-    return CommunityCareEligibilityResponse.builder()
-        .patientRequest(
-            CommunityCareEligibilityResponse.PatientRequest.builder()
-                .serviceType(mappedServiceType)
-                .patientIcn(patientIcn)
-                .patientAddress(patientAddress)
-                .timestamp(timestamp.toString())
-                .build())
+    return communityCareEligibilityResponse
         .communityCareEligibility(
             CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
                 .eligible(facilitiesMeetingAccessStandards.isEmpty())
@@ -249,7 +233,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         .map(facility -> facility.id())
                         .collect(Collectors.toList()))
                 .build())
-        .facilities(facilitiesInStateForService)
-        .build();
+        .facilities(facilitiesInStateForService);
   }
 }
