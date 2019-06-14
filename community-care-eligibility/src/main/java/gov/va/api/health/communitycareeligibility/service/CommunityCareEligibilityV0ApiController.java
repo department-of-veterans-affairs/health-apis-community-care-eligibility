@@ -75,15 +75,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return map;
   }
 
-  private boolean eligbleByEligbilityAndEnrollmentResponse(List<String> eligibilityCodes) {
-    if (eligibilityCodes.contains("G")
-        || eligibilityCodes.contains("N")
-        || eligibilityCodes.contains("H")) {
-      return true;
-    }
-    return false;
-  }
-
   private List<VceEligibilityInfo> eligibilityInfos(GetEESummaryResponse response) {
     return response == null
             || response.getSummary() == null
