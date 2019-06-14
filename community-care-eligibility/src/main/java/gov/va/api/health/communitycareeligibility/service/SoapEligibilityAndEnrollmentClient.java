@@ -62,7 +62,8 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
                   .build()),
           GetEESummaryResponse.class);
     } catch (Exception e) {
-      if (StringUtils.containsIgnoreCase(e.getMessage(), "getEESummaryResponse is Missing")) {
+      if (StringUtils.containsIgnoreCase(e.getMessage(), "PERSON_NOT_FOUND")
+          || StringUtils.containsIgnoreCase(e.getMessage(), "unknown patient")) {
         throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
       } else {
         throw new Exceptions.EeUnavailableException(e);
