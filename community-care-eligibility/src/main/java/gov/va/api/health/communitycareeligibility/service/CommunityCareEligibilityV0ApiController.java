@@ -157,14 +157,17 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                     .patientAddress(patientAddress)
                     .timestamp(timestamp.toString())
                     .build())
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
             .build();
 
     if (CollectionUtils.containsAny(codeString, Arrays.asList("G", "N", "H", "X"))) {
-      return communityCareEligibilityResponse.communityCareEligibility(
-          CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-              .eligible(!codeString.contains("X"))
-              .eligibilityCode(eligibilityCodes)
-              .build());
+
+      return communityCareEligibilityResponse
+          .eligible(!codeString.contains("X"))
+          .eligibilityCodes(eligibilityCodes)
+          .grandfathered(codeString.contains("G"))
+          .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
 
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
@@ -172,11 +175,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     List<String> facilityIdsWithinDriveTime =
         facilitiesClient.nearby(patientAddress, driveMins, mappedServiceType);
     if (facilityIdsWithinDriveTime.isEmpty()) {
-      return communityCareEligibilityResponse.communityCareEligibility(
-          CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-              .eligible(true)
-              .eligibilityCode(eligibilityCodes)
-              .build());
+      return communityCareEligibilityResponse.eligible(true).eligibilityCodes(eligibilityCodes);
     }
 
     VaFacilitiesResponse stateResponse =
@@ -214,16 +213,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         facilitiesMeetingWaitTimeStandards(facilitiesInStateNearbyForService, isPrimary);
 
     return communityCareEligibilityResponse
-        .communityCareEligibility(
-            CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                .eligible(facilitiesMeetingAccessStandards.isEmpty())
-                .eligibilityCode(eligibilityCodes)
-                .facilities(
-                    facilitiesMeetingAccessStandards
-                        .stream()
-                        .map(facility -> facility.id())
-                        .collect(Collectors.toList()))
-                .build())
-        .facilities(facilitiesInStateForService);
+        .eligible(facilitiesMeetingAccessStandards.isEmpty())
+        .eligibilityCodes(eligibilityCodes)
+        .facilities(facilitiesInStateForService)
+        .accessStandardsFacilities(
+            facilitiesMeetingAccessStandards
+                .stream()
+                .map(accessStandardFacility -> accessStandardFacility.id())
+                .collect(Collectors.toList()));
   }
 }

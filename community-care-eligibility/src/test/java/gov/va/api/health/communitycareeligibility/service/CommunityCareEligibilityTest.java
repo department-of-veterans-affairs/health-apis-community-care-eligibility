@@ -101,11 +101,11 @@ public final class CommunityCareEligibilityTest {
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Audiology")
                     .build())
-            .communityCareEligibility(
-                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                    .eligible(false)
-                    .facilities(singletonList("FAC123"))
-                    .build())
+            .eligible(false)
+            .eligibilityCodes(emptyList())
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
+            .accessStandardsFacilities(singletonList("FAC123"))
             .facilities(
                 singletonList(
                     Facility.builder()
@@ -209,10 +209,11 @@ public final class CommunityCareEligibilityTest {
                     .patientIcn("123")
                     .serviceType("PrimaryCare")
                     .build()))
-            .communityCareEligibility(
-                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                    .eligible(true)
-                    .build())
+            .eligibilityCodes(emptyList())
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
+            .eligible(true)
+            .accessStandardsFacilities(emptyList())
             .facilities(
                 asList(
                     Facility.builder()
@@ -257,10 +258,10 @@ public final class CommunityCareEligibilityTest {
                         .timestamp(result.patientRequest().timestamp())
                         .serviceType("PrimaryCare")
                         .build())
-                .communityCareEligibility(
-                    CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                        .eligible(true)
-                        .build())
+                .eligibilityCodes(emptyList())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .eligible(true)
                 .facilities(Collections.emptyList())
                 .build());
   }
@@ -406,16 +407,15 @@ public final class CommunityCareEligibilityTest {
                     .patientIcn("123")
                     .serviceType("PrimaryCare")
                     .build()))
-            .communityCareEligibility(
-                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                    .eligible(true)
-                    .eligibilityCode(
-                        Collections.singletonList(
-                            CommunityCareEligibilityResponse.EligibilityCode.builder()
-                                .description("Hardship")
-                                .code("H")
-                                .build()))
-                    .build())
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
+            .eligible(true)
+            .eligibilityCodes(
+                Collections.singletonList(
+                    CommunityCareEligibilityResponse.EligibilityCode.builder()
+                        .description("Hardship")
+                        .code("H")
+                        .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
   }
@@ -549,6 +549,8 @@ public final class CommunityCareEligibilityTest {
         controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "optometry");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
             .patientRequest(
                 CommunityCareEligibilityResponse.PatientRequest.builder()
                     .patientIcn("123")
@@ -562,17 +564,15 @@ public final class CommunityCareEligibilityTest {
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Optometry")
                     .build())
-            .communityCareEligibility(
-                CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                    .eligible(false)
-                    .eligibilityCode(
-                        Collections.singletonList(
-                            CommunityCareEligibilityResponse.EligibilityCode.builder()
-                                .code("X")
-                                .description("Ineligible")
-                                .build()))
-                    .build())
+            .eligible(false)
+            .eligibilityCodes(
+                Collections.singletonList(
+                    CommunityCareEligibilityResponse.EligibilityCode.builder()
+                        .description("Ineligible")
+                        .code("X")
+                        .build()))
             .build();
+
     assertThat(actual).isEqualTo(expected);
   }
 }
