@@ -8,10 +8,10 @@
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility</artifactId>
-  <version>1.0.37-SNAPSHOT</version>
+  <version>1.0.37</version>
   <packaging>jar</packaging>
   <properties>
-    <ee-artifacts.version>1.1.40</ee-artifacts.version>
+    <ee-artifacts.version>1.1.41</ee-artifacts.version>
     <jacoco.coverage>0.86</jacoco.coverage>
   </properties>
   <dependencies>
