@@ -29,7 +29,7 @@ public final class CommunityCareEligibilityResponse {
 
   Boolean noFullServiceVaMedicalFacility;
 
-  List<Facility> facilities;
+  List<Facility> nearbyFacilities;
 
   List<String> accessStandardsFacilities;
 
@@ -53,10 +53,10 @@ public final class CommunityCareEligibilityResponse {
 
   /** Lazy getter. */
   public List<Facility> facilities() {
-    if (facilities == null) {
-      facilities = new ArrayList<>();
+    if (nearbyFacilities == null) {
+      nearbyFacilities = new ArrayList<>();
     }
-    return facilities;
+    return nearbyFacilities;
   }
 
   @Data

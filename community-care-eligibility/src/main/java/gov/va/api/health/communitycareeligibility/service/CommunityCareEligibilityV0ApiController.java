@@ -215,7 +215,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return communityCareEligibilityResponse
         .eligible(facilitiesMeetingAccessStandards.isEmpty())
         .eligibilityCodes(eligibilityCodes)
-        .facilities(facilitiesInStateForService)
+        .nearbyFacilities(facilitiesInStateForService)
         .accessStandardsFacilities(
             facilitiesMeetingAccessStandards
                 .stream()

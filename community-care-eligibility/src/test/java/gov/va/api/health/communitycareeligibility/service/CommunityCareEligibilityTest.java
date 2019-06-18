@@ -106,7 +106,7 @@ public final class CommunityCareEligibilityTest {
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .accessStandardsFacilities(singletonList("FAC123"))
-            .facilities(
+            .nearbyFacilities(
                 singletonList(
                     Facility.builder()
                         .id("FAC123")
@@ -214,7 +214,7 @@ public final class CommunityCareEligibilityTest {
             .noFullServiceVaMedicalFacility(false)
             .eligible(true)
             .accessStandardsFacilities(emptyList())
-            .facilities(
+            .nearbyFacilities(
                 asList(
                     Facility.builder()
                         .id("nearFac")
@@ -262,7 +262,7 @@ public final class CommunityCareEligibilityTest {
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
                 .eligible(true)
-                .facilities(Collections.emptyList())
+                .nearbyFacilities(Collections.emptyList())
                 .build());
   }
 

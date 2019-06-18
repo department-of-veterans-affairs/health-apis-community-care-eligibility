@@ -41,7 +41,7 @@ class SwaggerCommunityCareEligibilityResponse {
                           .code("U")
                           .build()))
               .accessStandardsFacilities(asList("vha_1597XY"))
-              .facilities(
+              .nearbyFacilities(
                   asList(
                       Facility.builder()
                           .id("vha_1597XY")
