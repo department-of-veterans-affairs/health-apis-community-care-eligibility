@@ -262,7 +262,6 @@ public final class CommunityCareEligibilityTest {
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
                 .eligible(true)
-                .nearbyFacilities(Collections.emptyList())
                 .build());
   }
 
