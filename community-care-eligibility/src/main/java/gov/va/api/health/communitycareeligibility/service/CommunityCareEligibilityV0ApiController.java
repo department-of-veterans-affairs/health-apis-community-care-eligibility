@@ -22,6 +22,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -157,6 +158,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                     .patientAddress(patientAddress)
                     .timestamp(timestamp.toString())
                     .build())
+            .eligibilityCodes(eligibilityCodes)
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .build();
@@ -165,25 +167,32 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
       return communityCareEligibilityResponse
           .eligible(!codeString.contains("X"))
-          .eligibilityCodes(eligibilityCodes)
           .grandfathered(codeString.contains("G"))
           .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
 
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    List<String> facilityIdsWithinDriveTime =
-        facilitiesClient.nearby(patientAddress, driveMins, mappedServiceType);
-    if (facilityIdsWithinDriveTime.isEmpty()) {
-      return communityCareEligibilityResponse.eligible(true).eligibilityCodes(eligibilityCodes);
-    }
+    VaFacilitiesResponse facilityIdsWithinDriveTimeResponse =
+        facilitiesClient.nearbyFacilities(patientAddress, driveMins, mappedServiceType);
 
-    VaFacilitiesResponse stateResponse =
-        facilitiesClient.facilities(patientAddress.state(), mappedServiceType);
-    List<Facility> facilitiesInStateForService =
-        stateResponse == null
+    List<String> facilityIdsWithinDriveTime =
+        facilityIdsWithinDriveTimeResponse == null
             ? Collections.emptyList()
-            : stateResponse
+            : facilityIdsWithinDriveTimeResponse
+                .data()
+                .stream()
+                .map(facility -> StringUtils.trimToNull(facility.id()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+    if (facilityIdsWithinDriveTime.isEmpty()) {
+      return communityCareEligibilityResponse.eligible(true);
+    }
+    List<Facility> nearbyFacilities =
+        facilityIdsWithinDriveTimeResponse == null
+            ? Collections.emptyList()
+            : facilityIdsWithinDriveTimeResponse
                 .data()
                 .stream()
                 .map(
@@ -194,28 +203,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                             .toFacility(vaFacility))
                 .collect(Collectors.toList());
 
-    List<Facility> facilitiesInStateNearbyForService =
-        facilitiesInStateForService
-            .stream()
-            .filter(facility -> facilityIdsWithinDriveTime.contains(facility.id()))
-            .collect(Collectors.toList());
-    log.info(
-        "VA facilities in state '{}' for service type '{}' within {}' mins drive: {}",
-        patientAddress.state(),
-        mappedServiceType,
-        driveMins,
-        facilitiesInStateNearbyForService
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList()));
-
     List<Facility> facilitiesMeetingAccessStandards =
-        facilitiesMeetingWaitTimeStandards(facilitiesInStateNearbyForService, isPrimary);
+        facilitiesMeetingWaitTimeStandards(nearbyFacilities, isPrimary);
 
     return communityCareEligibilityResponse
         .eligible(facilitiesMeetingAccessStandards.isEmpty())
-        .eligibilityCodes(eligibilityCodes)
-        .nearbyFacilities(facilitiesInStateForService)
+        .nearbyFacilities(nearbyFacilities)
         .accessStandardsFacilities(
             facilitiesMeetingAccessStandards
                 .stream()

@@ -42,8 +42,7 @@ public final class CommunityCareEligibilityTest {
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
-    when(facilitiesClient.nearby(patientAddress, 60, "Audiology")).thenReturn(asList("FAC123"));
-    when(facilitiesClient.facilities("FL", "Audiology"))
+    when(facilitiesClient.nearbyFacilities(patientAddress, 60, "Audiology"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -59,7 +58,10 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .neww(1)
+                                                        .waitDays(
+                                                            VaFacilitiesResponse.WaitDays.builder()
+                                                                .neww(1.0)
+                                                                .build())
                                                         .service("Audiology")
                                                         .build()))
                                             .build())
@@ -128,7 +130,7 @@ public final class CommunityCareEligibilityTest {
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
 
-    when(facilitiesClient.facilities("FL", "PrimaryCare"))
+    when(facilitiesClient.nearbyFacilities(patientAddress, 10, "PrimaryCare"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -144,7 +146,10 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .neww(100)
+                                                        .waitDays(
+                                                            VaFacilitiesResponse.WaitDays.builder()
+                                                                .neww(100.0)
+                                                                .build())
                                                         .service("primarycare")
                                                         .build()))
                                             .build())
@@ -157,34 +162,9 @@ public final class CommunityCareEligibilityTest {
                                                     .build())
                                             .build())
                                     .build())
-                            .build(),
-                        VaFacilitiesResponse.Facility.builder()
-                            .id("farFac")
-                            .attributes(
-                                VaFacilitiesResponse.Attributes.builder()
-                                    .lat(3D)
-                                    .longg(4D)
-                                    .waitTimes(
-                                        VaFacilitiesResponse.WaitTimes.builder()
-                                            .health(
-                                                singletonList(
-                                                    VaFacilitiesResponse.WaitTime.builder()
-                                                        .neww(0)
-                                                        .service("primarycare")
-                                                        .build()))
-                                            .build())
-                                    .address(
-                                        VaFacilitiesResponse.Address.builder()
-                                            .physical(
-                                                VaFacilitiesResponse.PhysicalAddress.builder()
-                                                    .address1("far st")
-                                                    .state("fl")
-                                                    .build())
-                                            .build())
-                                    .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 10, "PrimaryCare")).thenReturn(asList("nearFac"));
+
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .maxDriveTimePrimary(10)
@@ -221,12 +201,6 @@ public final class CommunityCareEligibilityTest {
                         .physicalAddress(Address.builder().street("near st").state("FL").build())
                         .coordinates(nearCoordinates)
                         .waitDays(100)
-                        .build(),
-                    Facility.builder()
-                        .id("farFac")
-                        .physicalAddress(Address.builder().street("far st").state("FL").build())
-                        .coordinates(farCoordinates)
-                        .waitDays(0)
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
@@ -338,12 +312,11 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    Coordinates testCoordinates = Coordinates.builder().latitude(200.00).longitude(100.00).build();
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
 
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities("FL", "PrimaryCare"))
+    when(facilitiesClient.nearbyFacilities(patientAddress, 1, "PrimaryCare"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -364,7 +337,10 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .neww(1)
+                                                        .waitDays(
+                                                            VaFacilitiesResponse.WaitDays.builder()
+                                                                .neww(1.0)
+                                                                .build())
                                                         .service("primarycare")
                                                         .build()))
                                             .build())
@@ -381,7 +357,6 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 1, "PrimaryCare")).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -446,10 +421,8 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities(any(String.class), any(String.class)))
+    when(facilitiesClient.nearbyFacilities(any(Address.class), any(int.class), any(String.class)))
         .thenReturn(VaFacilitiesResponse.builder().build());
-    when(facilitiesClient.nearby(any(Address.class), any(int.class), any(String.class)))
-        .thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -459,7 +432,7 @@ public final class CommunityCareEligibilityTest {
             .build();
     CommunityCareEligibilityResponse result =
         controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
-    assertThat(result.facilities().isEmpty());
+    assertThat(result.nearbyFacilities().isEmpty());
   }
 
   @SneakyThrows
@@ -501,11 +474,10 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilities("FL", "Optometry"))
+    when(facilitiesClient.nearbyFacilities(patientAddress, 60, "Optometry"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -521,7 +493,10 @@ public final class CommunityCareEligibilityTest {
                                             .health(
                                                 singletonList(
                                                     VaFacilitiesResponse.WaitTime.builder()
-                                                        .neww(1)
+                                                        .waitDays(
+                                                            VaFacilitiesResponse.WaitDays.builder()
+                                                                .neww(1.0)
+                                                                .build())
                                                         .service("optometry")
                                                         .build()))
                                             .build())
@@ -536,7 +511,6 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    when(facilitiesClient.nearby(patientAddress, 60, "Optometry")).thenReturn(emptyList());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)

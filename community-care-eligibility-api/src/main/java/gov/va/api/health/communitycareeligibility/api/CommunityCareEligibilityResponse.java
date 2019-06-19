@@ -36,7 +36,7 @@ public final class CommunityCareEligibilityResponse {
   Boolean eligible;
 
   /** Lazy getter. */
-  public List<String> accessStandardFacilities() {
+  public List<String> accessStandardsFacilities() {
     if (accessStandardsFacilities == null) {
       accessStandardsFacilities = new ArrayList<>();
     }
@@ -44,7 +44,7 @@ public final class CommunityCareEligibilityResponse {
   }
 
   /** Lazy getter. */
-  public List<EligibilityCode> eligibilityCode() {
+  public List<EligibilityCode> eligibilityCodes() {
     if (eligibilityCodes == null) {
       eligibilityCodes = new ArrayList<>();
     }
@@ -52,7 +52,7 @@ public final class CommunityCareEligibilityResponse {
   }
 
   /** Lazy getter. */
-  public List<Facility> facilities() {
+  public List<Facility> nearbyFacilities() {
     if (nearbyFacilities == null) {
       nearbyFacilities = new ArrayList<>();
     }

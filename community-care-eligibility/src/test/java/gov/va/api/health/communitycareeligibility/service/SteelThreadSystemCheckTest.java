@@ -6,8 +6,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -75,12 +73,11 @@ public class SteelThreadSystemCheckTest {
    */
   @Test
   public void runSteelThreadHappyPathFacilities() {
-    List<String> facilities = new ArrayList<>();
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
             eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
-    when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt(), Mockito.any()))
-        .thenReturn(facilities);
+    when(facilitiesClient.nearbyFacilities(Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
+        .thenReturn(VaFacilitiesResponse.builder().build());
     test.runSteelThreadCheckAsynchronously();
     verify(ledger, times(1)).recordSuccess();
   }
@@ -110,7 +107,7 @@ public class SteelThreadSystemCheckTest {
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
             eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
-    when(facilitiesClient.nearby(Mockito.any(), Mockito.anyInt(), Mockito.any()))
+    when(facilitiesClient.nearbyFacilities(Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
         .thenThrow(new Exceptions.FacilitiesUnavailableException(new Throwable()));
     when(ledger.recordFailure()).thenReturn(failureThresholdForTests);
     test.runSteelThreadCheckAsynchronously();

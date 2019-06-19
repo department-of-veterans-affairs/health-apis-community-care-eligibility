@@ -58,7 +58,7 @@ public final class VaFacilitiesResponse {
 
     private String website;
 
-    @JsonProperty("wait_times")
+    @JsonProperty("services")
     private WaitTimes waitTimes;
   }
 
@@ -113,11 +113,23 @@ public final class VaFacilitiesResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class WaitDays {
+
+    @JsonProperty("new")
+    private Double neww;
+  }
+
+  @Data
+  @Builder
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class WaitTime {
     private String service;
 
-    @JsonProperty("new")
-    private Integer neww;
+    @JsonProperty("wait_times")
+    private WaitDays waitDays;
   }
 
   @Data
