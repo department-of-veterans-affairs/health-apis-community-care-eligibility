@@ -56,6 +56,8 @@ public final class VaFacilitiesResponse {
 
     private Phone phone;
 
+    private String website;
+
     @JsonProperty("wait_times")
     private WaitTimes waitTimes;
   }
@@ -116,8 +118,6 @@ public final class VaFacilitiesResponse {
 
     @JsonProperty("new")
     private Integer neww;
-
-    private Integer established;
   }
 
   @Data

@@ -110,11 +110,13 @@ public final class CommunityCareEligibilityResponse {
 
     String name;
 
-    Address address;
+    Address physicalAddress;
 
     Coordinates coordinates;
 
     String phoneNumber;
+
+    String website;
 
     Integer waitDays;
   }
@@ -130,8 +132,6 @@ public final class CommunityCareEligibilityResponse {
     Address patientAddress;
 
     String serviceType;
-
-    Boolean establishedPatient;
 
     String timestamp;
   }

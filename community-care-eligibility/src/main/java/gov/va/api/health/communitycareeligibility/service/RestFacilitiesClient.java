@@ -39,11 +39,12 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse facilities(String state) {
+  public VaFacilitiesResponse facilities(String state, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
             .queryParam("state", state)
             .queryParam("type", "health")
+            .queryParam("services[]", serviceType)
             .queryParam("page", 1)
             .queryParam("per_page", 500)
             .toUriString();
@@ -64,7 +65,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public List<String> nearby(Address address, int driveMins) {
+  public List<String> nearby(Address address, int driveMins, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
             .queryParam("state", address.state())
@@ -73,6 +74,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .queryParam("zip", address.zip())
             .queryParam("drive_time", driveMins)
             .queryParam("type", "health")
+            .queryParam("services[]", serviceType)
             .queryParam("page", 1)
             .queryParam("per_page", 500)
             .build()

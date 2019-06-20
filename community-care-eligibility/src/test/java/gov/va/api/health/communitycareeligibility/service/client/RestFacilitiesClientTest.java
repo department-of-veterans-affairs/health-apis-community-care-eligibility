@@ -27,7 +27,8 @@ public final class RestFacilitiesClientTest {
 
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
-            eq("https://foo/bar/v0/facilities?state=FL&type=health&page=1&per_page=500"),
+            eq(
+                "https://foo/bar/v0/facilities?state=FL&type=health&services%5B%5D=PrimaryCare&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaFacilitiesResponse.class)))
@@ -35,7 +36,8 @@ public final class RestFacilitiesClientTest {
 
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "https://foo/bar", restTemplate);
-    assertThat(client.facilities("FL")).isEqualTo(VaFacilitiesResponse.builder().build());
+    assertThat(client.facilities("FL", "PrimaryCare"))
+        .isEqualTo(VaFacilitiesResponse.builder().build());
   }
 
   @Test
@@ -47,7 +49,7 @@ public final class RestFacilitiesClientTest {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
             eq(
-                "https://foo/bar/v1/nearby?state=FL&city=Melbourne&street_address=123 Main&zip=12345&drive_time=30&type=health&page=1&per_page=500"),
+                "https://foo/bar/v1/nearby?state=FL&city=Melbourne&street_address=123 Main&zip=12345&drive_time=30&type=health&services[]=PrimaryCare&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaNearbyFacilitiesResponse.class)))
@@ -63,7 +65,8 @@ public final class RestFacilitiesClientTest {
                     .street("123 Main")
                     .zip("12345")
                     .build(),
-                30))
+                30,
+                "PrimaryCare"))
         .isEqualTo(emptyList());
   }
 }

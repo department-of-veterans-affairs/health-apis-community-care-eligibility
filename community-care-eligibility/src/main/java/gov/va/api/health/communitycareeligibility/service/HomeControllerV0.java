@@ -10,17 +10,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class HomeController {
+@RequestMapping(value = "/v0/eligibility", produces = "application/json")
+public class HomeControllerV0 {
   private static final YAMLMapper MAPPER = new YAMLMapper();
 
   private final Resource openApi;
 
   @Autowired
-  public HomeController(@Value("classpath:/openapi.yaml") Resource openapi) {
+  public HomeControllerV0(@Value("classpath:/openapi.yaml") Resource openapi) {
     this.openApi = openapi;
   }
 
@@ -31,7 +33,7 @@ public class HomeController {
   )
   @ResponseBody
   public Object openApiJson() throws IOException {
-    return HomeController.MAPPER.readValue(openApiYamlContent(), Object.class);
+    return HomeControllerV0.MAPPER.readValue(openApiYamlContent(), Object.class);
   }
 
   /** REST endpoint OpenAPI YAML. */

@@ -27,7 +27,6 @@ class SwaggerCommunityCareEligibilityResponse {
                               .zip("89144")
                               .build())
                       .serviceType("PrimaryCare")
-                      .establishedPatient(false)
                       .timestamp("2019-05-09T13:17:58.250Z")
                       .build())
               .communityCareEligibility(
@@ -47,7 +46,7 @@ class SwaggerCommunityCareEligibilityResponse {
                       Facility.builder()
                           .id("vha_1597XY")
                           .name("Springfield VA Clinic")
-                          .address(
+                          .physicalAddress(
                               Address.builder()
                                   .street("2584 South Street")
                                   .city("Springfield")
@@ -57,12 +56,13 @@ class SwaggerCommunityCareEligibilityResponse {
                           .coordinates(
                               Coordinates.builder().latitude(41.81).longitude(67.65).build())
                           .phoneNumber("177-112-8657 x")
+                          .website("https://www.va.gov")
                           .waitDays(19)
                           .build(),
                       Facility.builder()
                           .id("vha_46368ZZ")
                           .name("Shelbyville VA Clinic")
-                          .address(
+                          .physicalAddress(
                               Address.builder()
                                   .street("121393 Main Street")
                                   .city("Shelbyville")
@@ -72,6 +72,7 @@ class SwaggerCommunityCareEligibilityResponse {
                           .coordinates(
                               Coordinates.builder().latitude(196.418).longitude(317.811).build())
                           .phoneNumber("1-422-983-2040")
+                          .website("https://www.va.gov")
                           .waitDays(14)
                           .build()))
               .build();

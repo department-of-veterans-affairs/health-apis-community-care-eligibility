@@ -2,14 +2,16 @@
 
 This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
 that computes **objective** overall community-care eligibility by combining eligibility codes
-from the Eligibility and Enrollment System (E&E) with wait- and drive-time access
+from the Eligibility and Enrollment System (E&E) with drive- and wait-time access
 standards.
-(Average historical wait times are provided by Facilities API. Average drive times are also provided by Facilities API. )
 
 ![applications](src/plantuml/apps.png)
 
-Historical wait times from the Facilities API are expected to be replaced
-with live wait times from the VistA Integration Adapter (VIA).
+Average drive times are also provided by Facilities API.
+Live appointment wait times will be provided by the VistA Integration Adapter (VIA). 
+(Integration with VIA is in-progress.)
+
+For more information about the end-to-end flow of information and interactions between systems/APIs, see the [sequence diagram](sequence-diagram.md).
 
 For more information about the deployment architecture in different environments,
 see the [architecture diagrams](architecture.md).
@@ -19,8 +21,7 @@ For details about building and running this application, see the [developer guid
 ----
 
 The API supports a search query that accepts a patient ICN, the patient's home address,
-the patient's desired medical service type, and whether or not the patient is 
-established at the VA health facilities in their area.
+and the patient's desired medical service type.
 
 The medical service type is one of:
 * Audiology
@@ -46,7 +47,8 @@ The other two criteria, *best medical interest* and *quality standards*, are sub
 criteria outside the scope of this API. Because this API does not include subjective criteria,
 its eligibility decisions **are not final**. A user-facing message
 based on the result of this API should stress that the patient is *probably* eligible or
-*probably not* eligible.
+*probably not* eligible, and that no decision is final until they have consulted VA staff
+and scheduled their appointment.
 
 The response includes a description of the E&E eligibility codes and the IDs of any VA health
 facilities that satisfy the access standards.
@@ -54,7 +56,7 @@ facilities that satisfy the access standards.
 Sample request:
 
 ```
-https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare&establishedPatient=false
+https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare
 ```
 
 Sample response:
@@ -70,7 +72,6 @@ Sample response:
       "zip" : "89144"
     },
     "serviceType" : "PrimaryCare",
-    "establishedPatient" : false,
     "timestamp" : "2019-05-09T13:17:58.250Z"
   },
   "communityCareEligibility" : {
@@ -93,7 +94,7 @@ Sample response:
     {
       "id" : "vha_1597XY",
       "name" : "Springfield VA Clinic",
-      "address" : {
+      "physicalAddress" : {
         "street" : "2584 South Street",
         "city" : "Springfield",
         "state" : "KY",
@@ -104,12 +105,13 @@ Sample response:
         "longitude" : 67.65
       },
       "phoneNumber" : "177-112-8657 x",
+      "website" : "https://www.va.gov",
       "waitDays" : 19
     },
     {
       "id" : "vha_46368ZZ",
       "name" : "Shelbyville VA Clinic",
-      "address" : {
+      "physicalAddress" : {
         "street" : "121393 Main Street",
         "city" : "Shelbyville",
         "state" : "KY",
@@ -120,6 +122,7 @@ Sample response:
         "longitude" : 317.811
       },
       "phoneNumber" : "1-422-983-2040",
+      "website" : "https://www.va.gov",
       "waitDays" : 14
     }
   ]

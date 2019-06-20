@@ -16,8 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 public class FacilityTransformer {
   @NonNull private final String serviceType;
 
-  @NonNull private final Boolean establishedPatient;
-
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {
     VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
     if (attributes == null) {
@@ -78,6 +76,13 @@ public class FacilityTransformer {
     return trimToNull(vaFacility.attributes().phone().main());
   }
 
+  private static String website(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility.attributes() == null) {
+      return null;
+    }
+    return trimToNull(vaFacility.attributes().website());
+  }
+
   /** Check for Facility. */
   public Facility toFacility(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility == null) {
@@ -86,9 +91,10 @@ public class FacilityTransformer {
     return Facility.builder()
         .id(trimToNull(vaFacility.id()))
         .name(name(vaFacility))
-        .address(address(vaFacility))
+        .physicalAddress(address(vaFacility))
         .coordinates(coordinates(vaFacility))
         .phoneNumber(phoneNumber(vaFacility))
+        .website(website(vaFacility))
         .waitDays(waitDays(vaFacility))
         .build();
   }
@@ -114,7 +120,6 @@ public class FacilityTransformer {
     if (!optWaitTime.isPresent()) {
       return null;
     }
-
-    return establishedPatient ? optWaitTime.get().established() : optWaitTime.get().neww();
+    return optWaitTime.get().neww();
   }
 }

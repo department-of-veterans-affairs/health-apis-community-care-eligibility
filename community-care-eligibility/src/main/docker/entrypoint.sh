@@ -11,13 +11,15 @@ ZIP="$ZIP"
 SERVICE_TYPE="$SERVICE_TYPE"
 PATIENT="$PATIENT"
 
-#Put Health endpoints here if you got them
-PATHS=(/actuator/health \
-/openapi.json \
-/openapi.yaml)
-
 #Current Version(s) available
 VERSION="/v0/eligibility"
+
+#Put Health endpoints here if you got them
+PATHS=(/actuator/health \
+$VERSION/openapi.json \
+$VERSION/openapi.yaml)
+
+
 
 SUCCESS=0
 
@@ -69,6 +71,10 @@ doCurl () {
 
 smokeTest() {
 
+  if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
+    ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
+  fi
+
   for path in "${PATHS[@]}"
     do
       doCurl 200
@@ -89,14 +95,14 @@ smokeTest() {
   path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 500 $TOKEN
 
-  # Unknown ICN
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=UNKNOWN"
-  doCurl 404 $TOKEN
-
   printResults
 }
 
 regressionTest() {
+
+  if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
+    ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
+  fi
 
   for path in "${PATHS[@]}"
     do
@@ -141,10 +147,6 @@ regressionTest() {
 
   path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&patient=$PATIENT"
   doCurl 500 $TOKEN
-
-  # Unknown ICN
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=UNKNOWN"
-  doCurl 404 $TOKEN
 
   printResults
 }
