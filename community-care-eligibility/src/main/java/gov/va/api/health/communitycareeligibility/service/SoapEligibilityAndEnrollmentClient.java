@@ -3,6 +3,7 @@ package gov.va.api.health.communitycareeligibility.service;
 import gov.va.api.health.queenelizabeth.ee.Eligibilities;
 import gov.va.api.health.queenelizabeth.ee.SoapMessageGenerator;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
+import java.io.Reader;
 import java.io.StringReader;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -44,20 +45,16 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   @SuppressWarnings("cast")
   private static <T> T unmarshal(String xml, Class<T> resultClass) {
     SAXParserFactory spf = SAXParserFactory.newInstance();
-    spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
     spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
     spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
     spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     spf.setNamespaceAware(true);
-
-    Source source =
-        new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(new StringReader(xml)));
-
-    Unmarshaller jaxbUnmarshaller = JAXBContext.newInstance(resultClass).createUnmarshaller();
-
-    JAXBElement<T> jaxbElement = (JAXBElement<T>) jaxbUnmarshaller.unmarshal(source, resultClass);
-
-    return jaxbElement.getValue();
+    try (Reader reader = new StringReader(xml)) {
+      Source source = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(reader));
+      Unmarshaller jaxbUnmarshaller = JAXBContext.newInstance(resultClass).createUnmarshaller();
+      JAXBElement<T> jaxbElement = (JAXBElement<T>) jaxbUnmarshaller.unmarshal(source, resultClass);
+      return jaxbElement.getValue();
+    }
   }
 
   @Override
