@@ -22,7 +22,6 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -173,26 +172,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    VaFacilitiesResponse facilityIdsWithinDriveTimeResponse =
+    VaFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientAddress, driveMins, mappedServiceType);
 
-    List<String> facilityIdsWithinDriveTime =
-        facilityIdsWithinDriveTimeResponse == null
-            ? Collections.emptyList()
-            : facilityIdsWithinDriveTimeResponse
-                .data()
-                .stream()
-                .map(facility -> StringUtils.trimToNull(facility.id()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-    if (facilityIdsWithinDriveTime.isEmpty()) {
-      return communityCareEligibilityResponse.eligible(true);
-    }
     List<Facility> nearbyFacilities =
-        facilityIdsWithinDriveTimeResponse == null
+        nearbyResponse == null
             ? Collections.emptyList()
-            : facilityIdsWithinDriveTimeResponse
+            : nearbyResponse
                 .data()
                 .stream()
                 .map(
@@ -202,13 +188,16 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                             .build()
                             .toFacility(vaFacility))
                 .collect(Collectors.toList());
+    communityCareEligibilityResponse.nearbyFacilities(nearbyFacilities);
+    if (nearbyFacilities.isEmpty()) {
+      return communityCareEligibilityResponse.eligible(true);
+    }
 
     List<Facility> facilitiesMeetingAccessStandards =
         facilitiesMeetingWaitTimeStandards(nearbyFacilities, isPrimary);
 
     return communityCareEligibilityResponse
         .eligible(facilitiesMeetingAccessStandards.isEmpty())
-        .nearbyFacilities(nearbyFacilities)
         .accessStandardsFacilities(
             facilitiesMeetingAccessStandards
                 .stream()
