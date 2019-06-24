@@ -27,20 +27,14 @@ class SwaggerCommunityCareEligibilityResponse {
                       .serviceType("PrimaryCare")
                       .timestamp("2019-05-09T13:17:58.250Z")
                       .build())
-              .eligible(true)
-              .grandfathered(false)
-              .noFullServiceVaMedicalFacility(false)
               .eligibilityCodes(
                   asList(
                       CommunityCareEligibilityResponse.EligibilityCode.builder()
-                          .description("Hardship")
-                          .code("H")
-                          .build(),
-                      CommunityCareEligibilityResponse.EligibilityCode.builder()
-                          .description("Urgent Care")
-                          .code("U")
+                          .description("Basic")
+                          .code("B")
                           .build()))
-              .accessStandardsFacilities(asList("vha_1597XY"))
+              .grandfathered(false)
+              .noFullServiceVaMedicalFacility(false)
               .nearbyFacilities(
                   asList(
                       Facility.builder()
@@ -75,5 +69,7 @@ class SwaggerCommunityCareEligibilityResponse {
                           .website("https://www.va.gov")
                           .waitDays(14)
                           .build()))
+              .accessStandardsFacilities(asList("vha_1597XY"))
+              .eligible(false)
               .build();
 }

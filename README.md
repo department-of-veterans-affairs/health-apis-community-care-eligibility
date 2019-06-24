@@ -74,18 +74,14 @@ Sample response:
     "serviceType" : "PrimaryCare",
     "timestamp" : "2019-05-09T13:17:58.250Z"
   },
-  "eligibilityCode" : [
+  "eligibilityCodes" : [
     {
-      "description" : "Hardship",
-      "code" : "H"
-    },
-    {
-      "description" : "Urgent Care",
-      "code" : "U"
+      "description" : "Basic",
+      "code" : "B"
     }
   ],
-  "grandfathered": false,
-  "noFullServiceVaMedicalFacility": false,
+  "grandfathered" : false,
+  "noFullServiceVaMedicalFacility" : false,
   "nearbyFacilities" : [
     {
       "id" : "vha_1597XY",
@@ -123,9 +119,8 @@ Sample response:
     }
   ],
   "accessStandardsFacilities" : [
-        "vha_1597XY"
-      ]
-    },
-  "eligible": false
+    "vha_1597XY"
+  ],
+  "eligible" : false
 }
 ```
