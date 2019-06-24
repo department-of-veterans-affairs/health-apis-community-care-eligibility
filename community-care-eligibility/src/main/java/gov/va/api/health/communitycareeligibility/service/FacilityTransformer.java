@@ -120,6 +120,6 @@ public class FacilityTransformer {
     if (!optWaitTime.isPresent()) {
       return null;
     }
-    return optWaitTime.get().neww();
+    return (int) Math.ceil(optWaitTime.get().waitDays().neww());
   }
 }

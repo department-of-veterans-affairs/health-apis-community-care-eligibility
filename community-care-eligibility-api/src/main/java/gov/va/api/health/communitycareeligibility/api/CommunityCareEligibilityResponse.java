@@ -20,18 +20,43 @@ import lombok.NoArgsConstructor;
 )
 @Schema(example = "SWAGGER_EXAMPLE_COMMUNITY_CARE_ELIGIBILITY_RESPONSE")
 public final class CommunityCareEligibilityResponse {
+
   PatientRequest patientRequest;
 
-  CommunityCareEligibility communityCareEligibility;
+  List<EligibilityCode> eligibilityCodes;
 
-  List<Facility> facilities;
+  Boolean grandfathered;
+
+  Boolean noFullServiceVaMedicalFacility;
+
+  List<Facility> nearbyFacilities;
+
+  List<String> accessStandardsFacilities;
+
+  Boolean eligible;
 
   /** Lazy getter. */
-  public List<Facility> facilities() {
-    if (facilities == null) {
-      facilities = new ArrayList<>();
+  public List<String> accessStandardsFacilities() {
+    if (accessStandardsFacilities == null) {
+      accessStandardsFacilities = new ArrayList<>();
     }
-    return facilities;
+    return accessStandardsFacilities;
+  }
+
+  /** Lazy getter. */
+  public List<EligibilityCode> eligibilityCodes() {
+    if (eligibilityCodes == null) {
+      eligibilityCodes = new ArrayList<>();
+    }
+    return eligibilityCodes;
+  }
+
+  /** Lazy getter. */
+  public List<Facility> nearbyFacilities() {
+    if (nearbyFacilities == null) {
+      nearbyFacilities = new ArrayList<>();
+    }
+    return nearbyFacilities;
   }
 
   @Data
@@ -40,6 +65,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
+
     String street;
 
     String city;
@@ -54,36 +80,8 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class CommunityCareEligibility {
-    Boolean eligible;
-
-    List<EligibilityCode> eligibilityCode;
-
-    List<String> facilities;
-
-    /** Lazy getter. */
-    public List<EligibilityCode> eligibilityCode() {
-      if (eligibilityCode == null) {
-        eligibilityCode = new ArrayList<>();
-      }
-      return eligibilityCode;
-    }
-
-    /** Lazy getter. */
-    public List<String> facilities() {
-      if (facilities == null) {
-        facilities = new ArrayList<>();
-      }
-      return facilities;
-    }
-  }
-
-  @Data
-  @Builder
-  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Coordinates {
+
     Double latitude;
 
     Double longitude;
@@ -95,6 +93,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class EligibilityCode {
+
     String description;
 
     String code;
@@ -106,6 +105,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Facility {
+
     String id;
 
     String name;
@@ -127,6 +127,7 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class PatientRequest {
+
     String patientIcn;
 
     Address patientAddress;

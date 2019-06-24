@@ -2,12 +2,8 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -39,33 +35,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse facilities(String state, String serviceType) {
-    String url =
-        UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
-            .queryParam("state", state)
-            .queryParam("type", "health")
-            .queryParam("services[]", serviceType)
-            .queryParam("page", 1)
-            .queryParam("per_page", 500)
-            .toUriString();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("apiKey", vaFacilitiesApiKey);
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-    try {
-      VaFacilitiesResponse responseObject =
-          restTemplate
-              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
-              .getBody();
-      log.info("VA facilities for state {}: {}", state, responseObject);
-      return responseObject;
-    } catch (Exception e) {
-      throw new Exceptions.FacilitiesUnavailableException(e);
-    }
-  }
-
-  @Override
-  @SneakyThrows
-  public List<String> nearby(Address address, int driveMins, String serviceType) {
+  public VaFacilitiesResponse nearbyFacilities(Address address, int driveMins, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
             .queryParam("state", address.state())
@@ -83,23 +53,11 @@ public class RestFacilitiesClient implements FacilitiesClient {
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     try {
-      VaNearbyFacilitiesResponse responseObject =
+      VaFacilitiesResponse responseObject =
           restTemplate
-              .exchange(
-                  url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
+              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
               .getBody();
-      if (responseObject == null) {
-        return Collections.emptyList();
-      }
-      List<String> ids =
-          responseObject
-              .data()
-              .stream()
-              .map(facility -> StringUtils.trimToNull(facility.id()))
-              .filter(Objects::nonNull)
-              .collect(Collectors.toList());
-      log.info("VA facilities within {} mins drive of {}: {}", driveMins, address, ids);
-      return ids;
+      return responseObject;
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
     }
