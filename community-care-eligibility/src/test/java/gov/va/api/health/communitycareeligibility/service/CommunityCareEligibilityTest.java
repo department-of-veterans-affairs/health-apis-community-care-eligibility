@@ -52,7 +52,7 @@ public final class CommunityCareEligibilityTest {
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
                                     .lat(200D)
-                                    .longg(100D)
+                                    .lng(100D)
                                     .waitTimes(
                                         VaFacilitiesResponse.WaitTimes.builder()
                                             .health(
@@ -140,7 +140,7 @@ public final class CommunityCareEligibilityTest {
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
                                     .lat(1D)
-                                    .longg(2D)
+                                    .lng(2D)
                                     .waitTimes(
                                         VaFacilitiesResponse.WaitTimes.builder()
                                             .health(
@@ -326,7 +326,7 @@ public final class CommunityCareEligibilityTest {
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
                                     .lat(200.00)
-                                    .longg(100.00)
+                                    .lng(100.00)
                                     .name(" some facility ")
                                     .phone(
                                         VaFacilitiesResponse.Phone.builder()
@@ -487,7 +487,7 @@ public final class CommunityCareEligibilityTest {
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
                                     .lat(200D)
-                                    .longg(100D)
+                                    .lng(100D)
                                     .waitTimes(
                                         VaFacilitiesResponse.WaitTimes.builder()
                                             .health(

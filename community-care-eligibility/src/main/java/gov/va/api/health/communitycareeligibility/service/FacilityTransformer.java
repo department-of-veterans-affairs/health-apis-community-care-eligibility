@@ -50,12 +50,12 @@ public class FacilityTransformer {
     if (vaFacility.attributes() == null) {
       return null;
     }
-    if (allBlank(vaFacility.attributes().lat(), vaFacility.attributes().longg())) {
+    if (allBlank(vaFacility.attributes().lat(), vaFacility.attributes().lng())) {
       return null;
     }
     return Coordinates.builder()
         .latitude(vaFacility.attributes().lat())
-        .longitude(vaFacility.attributes().longg())
+        .longitude(vaFacility.attributes().lng())
         .build();
   }
 

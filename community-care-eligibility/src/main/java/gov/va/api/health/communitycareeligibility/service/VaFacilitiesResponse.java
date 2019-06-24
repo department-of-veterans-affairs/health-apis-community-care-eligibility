@@ -49,8 +49,7 @@ public final class VaFacilitiesResponse {
 
     private Double lat;
 
-    @JsonProperty("long")
-    private Double longg;
+    private Double lng;
 
     private Address address;
 

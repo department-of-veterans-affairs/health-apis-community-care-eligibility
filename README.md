@@ -74,23 +74,19 @@ Sample response:
     "serviceType" : "PrimaryCare",
     "timestamp" : "2019-05-09T13:17:58.250Z"
   },
-  "communityCareEligibility" : {
-    "eligible" : true,
-    "eligibilityCode" : [
-      {
-        "description" : "Hardship",
-        "code" : "H"
-      },
-      {
-        "description" : "Urgent Care",
-        "code" : "U"
-      }
-    ],
-    "facilities" : [
-      "vha_1597XY"
-    ]
-  },
-  "facilities" : [
+  "eligibilityCode" : [
+    {
+      "description" : "Hardship",
+      "code" : "H"
+    },
+    {
+      "description" : "Urgent Care",
+      "code" : "U"
+    }
+  ],
+  "grandfathered": false,
+  "noFullServiceVaMedicalFacility": false,
+  "nearbyFacilities" : [
     {
       "id" : "vha_1597XY",
       "name" : "Springfield VA Clinic",
@@ -125,6 +121,11 @@ Sample response:
       "website" : "https://www.va.gov",
       "waitDays" : 14
     }
-  ]
+  ],
+  "accessStandardsFacilities" : [
+        "vha_1597XY"
+      ]
+    },
+  "eligible": false
 }
 ```
