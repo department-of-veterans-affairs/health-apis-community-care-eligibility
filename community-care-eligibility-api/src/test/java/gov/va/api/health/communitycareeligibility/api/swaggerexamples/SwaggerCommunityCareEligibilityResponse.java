@@ -4,9 +4,7 @@ import static java.util.Arrays.asList;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.CommunityCareEligibility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.EligibilityCode;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
 import lombok.experimental.UtilityClass;
@@ -29,19 +27,15 @@ class SwaggerCommunityCareEligibilityResponse {
                       .serviceType("PrimaryCare")
                       .timestamp("2019-05-09T13:17:58.250Z")
                       .build())
-              .communityCareEligibility(
-                  CommunityCareEligibility.builder()
-                      .eligible(true)
-                      .eligibilityCode(
-                          asList(
-                              EligibilityCode.builder().description("Hardship").code("H").build(),
-                              EligibilityCode.builder()
-                                  .description("Urgent Care")
-                                  .code("U")
-                                  .build()))
-                      .facilities(asList("vha_1597XY"))
-                      .build())
-              .facilities(
+              .eligibilityCodes(
+                  asList(
+                      CommunityCareEligibilityResponse.EligibilityCode.builder()
+                          .description("Basic")
+                          .code("B")
+                          .build()))
+              .grandfathered(false)
+              .noFullServiceVaMedicalFacility(false)
+              .nearbyFacilities(
                   asList(
                       Facility.builder()
                           .id("vha_1597XY")
@@ -75,5 +69,7 @@ class SwaggerCommunityCareEligibilityResponse {
                           .website("https://www.va.gov")
                           .waitDays(14)
                           .build()))
+              .accessStandardsFacilities(asList("vha_1597XY"))
+              .eligible(false)
               .build();
 }

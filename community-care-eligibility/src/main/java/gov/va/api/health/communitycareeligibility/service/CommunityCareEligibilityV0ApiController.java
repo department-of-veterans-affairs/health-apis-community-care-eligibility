@@ -157,34 +157,28 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                     .patientAddress(patientAddress)
                     .timestamp(timestamp.toString())
                     .build())
+            .eligibilityCodes(eligibilityCodes)
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
             .build();
 
     if (CollectionUtils.containsAny(codeString, Arrays.asList("G", "N", "H", "X"))) {
-      return communityCareEligibilityResponse.communityCareEligibility(
-          CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-              .eligible(!codeString.contains("X"))
-              .eligibilityCode(eligibilityCodes)
-              .build());
+
+      return communityCareEligibilityResponse
+          .eligible(!codeString.contains("X"))
+          .grandfathered(codeString.contains("G"))
+          .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
 
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    List<String> facilityIdsWithinDriveTime =
-        facilitiesClient.nearby(patientAddress, driveMins, mappedServiceType);
-    if (facilityIdsWithinDriveTime.isEmpty()) {
-      return communityCareEligibilityResponse.communityCareEligibility(
-          CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-              .eligible(true)
-              .eligibilityCode(eligibilityCodes)
-              .build());
-    }
+    VaFacilitiesResponse nearbyResponse =
+        facilitiesClient.nearbyFacilities(patientAddress, driveMins, mappedServiceType);
 
-    VaFacilitiesResponse stateResponse =
-        facilitiesClient.facilities(patientAddress.state(), mappedServiceType);
-    List<Facility> facilitiesInStateForService =
-        stateResponse == null
+    List<Facility> nearbyFacilities =
+        nearbyResponse == null
             ? Collections.emptyList()
-            : stateResponse
+            : nearbyResponse
                 .data()
                 .stream()
                 .map(
@@ -194,36 +188,20 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                             .build()
                             .toFacility(vaFacility))
                 .collect(Collectors.toList());
-
-    List<Facility> facilitiesInStateNearbyForService =
-        facilitiesInStateForService
-            .stream()
-            .filter(facility -> facilityIdsWithinDriveTime.contains(facility.id()))
-            .collect(Collectors.toList());
-    log.info(
-        "VA facilities in state '{}' for service type '{}' within {}' mins drive: {}",
-        patientAddress.state(),
-        mappedServiceType,
-        driveMins,
-        facilitiesInStateNearbyForService
-            .stream()
-            .map(facility -> facility.id())
-            .collect(Collectors.toList()));
+    communityCareEligibilityResponse.nearbyFacilities(nearbyFacilities);
+    if (nearbyFacilities.isEmpty()) {
+      return communityCareEligibilityResponse.eligible(true);
+    }
 
     List<Facility> facilitiesMeetingAccessStandards =
-        facilitiesMeetingWaitTimeStandards(facilitiesInStateNearbyForService, isPrimary);
+        facilitiesMeetingWaitTimeStandards(nearbyFacilities, isPrimary);
 
     return communityCareEligibilityResponse
-        .communityCareEligibility(
-            CommunityCareEligibilityResponse.CommunityCareEligibility.builder()
-                .eligible(facilitiesMeetingAccessStandards.isEmpty())
-                .eligibilityCode(eligibilityCodes)
-                .facilities(
-                    facilitiesMeetingAccessStandards
-                        .stream()
-                        .map(facility -> facility.id())
-                        .collect(Collectors.toList()))
-                .build())
-        .facilities(facilitiesInStateForService);
+        .eligible(facilitiesMeetingAccessStandards.isEmpty())
+        .accessStandardsFacilities(
+            facilitiesMeetingAccessStandards
+                .stream()
+                .map(accessStandardFacility -> accessStandardFacility.id())
+                .collect(Collectors.toList()));
   }
 }

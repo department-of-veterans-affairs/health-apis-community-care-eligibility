@@ -95,7 +95,7 @@ public class SteelThreadSystemCheck implements HealthIndicator {
     log.info("Performing health check.");
     try {
       eeClient.requestEligibility(icn);
-      facilitiesClient.nearby(address, driveMinutes, serviceType);
+      facilitiesClient.nearbyFacilities(address, driveMinutes, serviceType);
 
       ledger.recordSuccess();
     } catch (HttpServerErrorException
