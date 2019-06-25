@@ -47,6 +47,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     // Secure XML parser configuration that prevents XXE injections. Satisfies Fortify requirements.
     SAXParserFactory spf = SAXParserFactory.newInstance();
     spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
     spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
     spf.setNamespaceAware(true);
     try (Reader reader = new StringReader(xml)) {
