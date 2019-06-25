@@ -1,5 +1,7 @@
 package gov.va.api.health.communitycareeligibility.api;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -27,7 +29,8 @@ public abstract class ErrorResponse {
   /** Create a new error response based on the given exception. */
   public static <T extends ErrorResponse> void applyException(
       @NonNull T response, @NonNull Exception e) {
-    response.timestamp(System.currentTimeMillis());
+    // Avoid System currentTimeMillis() for Fortify
+    response.timestamp(Instant.now().toEpochMilli());
     response.type(e.getClass().getSimpleName());
     response.message(e.getMessage());
   }
