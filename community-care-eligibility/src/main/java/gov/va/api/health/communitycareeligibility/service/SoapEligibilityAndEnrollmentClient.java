@@ -44,11 +44,10 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   @SneakyThrows
   @SuppressWarnings("cast")
   private static <T> T unmarshal(String xml, Class<T> resultClass) {
-    //Secure XML parser configuration that prevents XXE injections. Satisfies Fortify requirements.
+    // Secure XML parser configuration that prevents XXE injections. Satisfies Fortify requirements.
     SAXParserFactory spf = SAXParserFactory.newInstance();
     spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
-    spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-    spf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
     spf.setNamespaceAware(true);
     try (Reader reader = new StringReader(xml)) {
       Source source = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(reader));
