@@ -1,9 +1,8 @@
 package gov.va.api.health.communitycareeligibility.api;
 
-import java.time.Instant;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
