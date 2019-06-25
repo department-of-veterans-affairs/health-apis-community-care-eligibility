@@ -8,12 +8,15 @@ import java.io.StringReader;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.xml.sax.InputSource;
 
 @Component
 public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollmentClient {
@@ -41,10 +44,16 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   @SneakyThrows
   @SuppressWarnings("cast")
   private static <T> T unmarshal(String xml, Class<T> resultClass) {
+    // Secure XML parser configuration that prevents XXE injections. Satisfies Fortify requirements.
+    SAXParserFactory spf = SAXParserFactory.newInstance();
+    spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+    spf.setNamespaceAware(true);
     try (Reader reader = new StringReader(xml)) {
+      Source source = new SAXSource(spf.newSAXParser().getXMLReader(), new InputSource(reader));
       Unmarshaller jaxbUnmarshaller = JAXBContext.newInstance(resultClass).createUnmarshaller();
-      JAXBElement<T> jaxbElement =
-          (JAXBElement<T>) jaxbUnmarshaller.unmarshal(new StreamSource(reader), resultClass);
+      JAXBElement<T> jaxbElement = (JAXBElement<T>) jaxbUnmarshaller.unmarshal(source, resultClass);
       return jaxbElement.getValue();
     }
   }

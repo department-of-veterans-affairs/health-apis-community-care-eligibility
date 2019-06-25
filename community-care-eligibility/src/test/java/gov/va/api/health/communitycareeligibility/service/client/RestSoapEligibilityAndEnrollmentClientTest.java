@@ -30,7 +30,6 @@ public final class RestSoapEligibilityAndEnrollmentClientTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void requestEligibility() {
     Eligibilities eligibilities = mock(Eligibilities.class);
     when(eligibilities.request(
