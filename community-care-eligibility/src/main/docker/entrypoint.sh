@@ -4,10 +4,6 @@ ENDPOINT_DOMAIN_NAME="$K8S_LOAD_BALANCER"
 ENVIRONMENT="$K8S_ENVIRONMENT"
 TOKEN="$TOKEN"
 BASE_PATH="$BASE_PATH"
-STREET="$STREET"
-CITY="$CITY"
-STATE="$STATE"
-ZIP="$ZIP"
 SERVICE_TYPE="$SERVICE_TYPE"
 PATIENT="$PATIENT"
 
@@ -37,10 +33,6 @@ Example
     --endpoint-domain-name=localhost
     --environment=qa
     --base-path=/community-care
-    --street='46 W New Haven Ave'
-    --city=Melbourne
-    --state=Fl
-    --zip=32901
     --service-type=PrimaryCare
     --patient=12345678V90
 
@@ -81,18 +73,18 @@ smokeTest() {
     done
 
   # Happy Path
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
+  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 200 $TOKEN
 
   # Token validation
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
+  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=123NOTME"
+  path="/search?serviceType=$SERVICE_TYPE&patient=123NOTME"
   doCurl 403 $TOKEN
 
   # Single missing parameter check for smoke test
-  path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
+  path="/search?serviceType=$SERVICE_TYPE"
   doCurl 500 $TOKEN
 
   printResults
@@ -110,42 +102,33 @@ regressionTest() {
     done
 
   # Happy Path Primary Care
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=PrimaryCare&patient=$PATIENT"
+  path="/search?serviceType=PrimaryCare&patient=$PATIENT"
   doCurl 200 $TOKEN
 
   # Happy Path Primary Care
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=PrimaryCare&patient=$PATIENT"
+  path="/search?serviceType=PrimaryCare&patient=$PATIENT"
   doCurl 200 $TOKEN
 
   # Happy Path Specialty Care (Audiology)
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=Audiology&patient=$PATIENT"
+  path="/search?serviceType=Audiology&patient=$PATIENT"
   doCurl 200 $TOKEN
 
   # Happy Path Specialty Care (Audiology)
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=Audiology&patient=$PATIENT"
+  path="/search?serviceType=Audiology&patient=$PATIENT"
   doCurl 200 $TOKEN
 
   # Token validation
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
+  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
 
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=123NOTME"
+  path="/search?serviceType=$SERVICE_TYPE&patient=123NOTME"
   doCurl 403 $TOKEN
 
   # Missing Parameters
-  path="/search?city=$CITY&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
+  path="/search?serviceType=$SERVICE_TYPE"
   doCurl 500 $TOKEN
 
-  path="/search?street=$STREET&state=$STATE&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
-  doCurl 500 $TOKEN
-
-  path="/search?street=$STREET&city=$CITY&zip=$ZIP&serviceType=$SERVICE_TYPE&patient=$PATIENT"
-  doCurl 500 $TOKEN
-
-  path="/search?street=$STREET&city=$CITY&state=$STATE&serviceType=$SERVICE_TYPE&patient=$PATIENT"
-  doCurl 500 $TOKEN
-
-  path="/search?street=$STREET&city=$CITY&state=$STATE&zip=$ZIP&patient=$PATIENT"
+  path="/search?patient=$PATIENT"
   doCurl 500 $TOKEN
 
   printResults
@@ -163,8 +146,8 @@ printResults () {
 
 # Let's get down to business
 ARGS=$(getopt -n $(basename ${0}) \
-    -l "endpoint-domain-name:,environment:,token:,base-path:,street:,city:,state:,zip:,service-type:,patient:,help" \
-    -o "d:e:t:b:s:c:a:z:v:p:h" -- "$@")
+    -l "endpoint-domain-name:,environment:,token:,base-path:,service-type:,patient:,help" \
+    -o "d:e:t:b:v:p:h" -- "$@")
 [ $? != 0 ] && usage
 eval set -- "$ARGS"
 while true
@@ -174,10 +157,6 @@ do
     -e|--environment) ENVIRONMENT=$2;;
     -t|--token) TOKEN=$2;;
     -b|--base-path) BASE_PATH=$2;;
-    -s|--street) STREET=$2;;
-    -c|--city) CITY=$2;;
-    -a|--state) STATE=$2;;
-    -z|--zip) ZIP=$2;;
     -v|--service-type) SERVICE_TYPE=$2;;
     -p|--patient) PATIENT=$2;;
     -h|--help) usage "I need a hero! I'm holding out for a hero...";;
@@ -196,22 +175,6 @@ fi
 
 if [[ -z "$TOKEN" || -e "$TOKEN" ]]; then
   usage "Missing variable TOKEN or option --token|-t."
-fi
-
-if [[ -z "$STREET" || -e "$STREET" ]]; then
-  usage "Missing variable STREET or option --street|-s."
-fi
-
-if [[ -z "$CITY" || -e "$CITY" ]]; then
-  usage "Missing variable CITY or option --city|-c."
-fi
-
-if [[ -z "$STATE" || -e "$STATE" ]]; then
-  usage "Missing variable STATE or option --state|-a."
-fi
-
-if [[ -z "$ZIP" || -e "$ZIP" ]]; then
-  usage "Missing variable ZIP or option --zip|-z."
 fi
 
 if [[ -z "$SERVICE_TYPE" || -e "$SERVICE_TYPE" ]]; then
