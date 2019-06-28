@@ -22,7 +22,6 @@ import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -95,17 +94,16 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("")
-                                                                .zipCode("12345")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
@@ -210,17 +208,16 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("")
-                                                                .zipCode("12345")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
@@ -283,17 +280,16 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("")
-                                                                .zipCode("12345")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
@@ -406,18 +402,17 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("Apt. 602")
-                                                                .zipCode("12345")
-                                                                .zipPlus4("0104")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("Apt. 602")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .zipPlus4("0104")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
@@ -540,17 +535,16 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("")
-                                                                .zipCode("12345")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
@@ -586,17 +580,16 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("")
-                                                                .zipCode("12345")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
@@ -643,17 +636,16 @@ public final class CommunityCareEligibilityTest {
                                         .addresses(
                                             AddressCollection.builder()
                                                 .address(
-                                                    new ArrayList<AddressInfo>(
-                                                        Arrays.asList(
-                                                            AddressInfo.builder()
-                                                                .addressTypeCode("Residential")
-                                                                .state("FL")
-                                                                .city("Melbourne")
-                                                                .line1("66 Main St")
-                                                                .line2("")
-                                                                .line3("")
-                                                                .zipCode("12345")
-                                                                .build())))
+                                                    Arrays.asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
                                                 .build())
                                         .build())
                                 .build())
