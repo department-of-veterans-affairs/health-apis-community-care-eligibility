@@ -27,4 +27,16 @@ final class Exceptions {
       super("Unknown service type: " + serviceType);
     }
   }
+
+  static final class MissingResidentialAddressException extends NullPointerException {
+    MissingResidentialAddressException() {
+      super("No residential address found");
+    }
+  }
+
+  static final class MissingAddressInformationException extends NullPointerException {
+    MissingAddressInformationException() {
+      super("Residential address has incomplete information");
+    }
+  }
 }

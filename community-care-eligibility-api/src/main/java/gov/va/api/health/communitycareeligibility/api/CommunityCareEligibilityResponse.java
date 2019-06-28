@@ -23,6 +23,8 @@ public final class CommunityCareEligibilityResponse {
 
   PatientRequest patientRequest;
 
+  Address patientAddress;
+
   List<EligibilityCode> eligibilityCodes;
 
   Boolean grandfathered;
@@ -129,8 +131,6 @@ public final class CommunityCareEligibilityResponse {
   public static final class PatientRequest {
 
     String patientIcn;
-
-    Address patientAddress;
 
     String serviceType;
 

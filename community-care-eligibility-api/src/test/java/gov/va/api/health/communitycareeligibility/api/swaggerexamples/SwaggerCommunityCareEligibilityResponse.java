@@ -17,15 +17,15 @@ class SwaggerCommunityCareEligibilityResponse {
               .patientRequest(
                   PatientRequest.builder()
                       .patientIcn("011235813V213455")
-                      .patientAddress(
-                          Address.builder()
-                              .street("742 Evergeen Terrace")
-                              .city("Springfield")
-                              .state("KY")
-                              .zip("89144")
-                              .build())
                       .serviceType("PrimaryCare")
                       .timestamp("2019-05-09T13:17:58.250Z")
+                      .build())
+              .patientAddress(
+                  Address.builder()
+                      .street("742 Evergeen Terrace")
+                      .city("Springfield")
+                      .state("KY")
+                      .zip("89144")
                       .build())
               .eligibilityCodes(
                   asList(
