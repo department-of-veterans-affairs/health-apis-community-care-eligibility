@@ -31,17 +31,7 @@ public final class CommunityCareEligibilityResponse {
 
   List<Facility> nearbyFacilities;
 
-  List<String> accessStandardsFacilities;
-
   Boolean eligible;
-
-  /** Lazy getter. */
-  public List<String> accessStandardsFacilities() {
-    if (accessStandardsFacilities == null) {
-      accessStandardsFacilities = new ArrayList<>();
-    }
-    return accessStandardsFacilities;
-  }
 
   /** Lazy getter. */
   public List<EligibilityCode> eligibilityCodes() {
@@ -117,8 +107,6 @@ public final class CommunityCareEligibilityResponse {
     String phoneNumber;
 
     String website;
-
-    Integer waitDays;
   }
 
   @Data

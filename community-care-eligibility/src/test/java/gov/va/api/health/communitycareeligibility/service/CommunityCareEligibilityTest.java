@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,18 +52,6 @@ public final class CommunityCareEligibilityTest {
                                 VaFacilitiesResponse.Attributes.builder()
                                     .lat(200D)
                                     .lng(100D)
-                                    .waitTimes(
-                                        VaFacilitiesResponse.WaitTimes.builder()
-                                            .health(
-                                                singletonList(
-                                                    VaFacilitiesResponse.WaitTime.builder()
-                                                        .waitDays(
-                                                            VaFacilitiesResponse.WaitDays.builder()
-                                                                .neww(1.0)
-                                                                .build())
-                                                        .service("Audiology")
-                                                        .build()))
-                                            .build())
                                     .address(
                                         VaFacilitiesResponse.Address.builder()
                                             .physical(
@@ -107,7 +94,6 @@ public final class CommunityCareEligibilityTest {
             .eligibilityCodes(emptyList())
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
-            .accessStandardsFacilities(singletonList("FAC123"))
             .nearbyFacilities(
                 singletonList(
                     Facility.builder()
@@ -115,92 +101,6 @@ public final class CommunityCareEligibilityTest {
                         .physicalAddress(
                             Address.builder().street("911 derp st").state("FL").build())
                         .coordinates(facilityCoordinates)
-                        .waitDays(1)
-                        .build()))
-            .build();
-    assertThat(actual).isEqualTo(expected);
-  }
-
-  @Test
-  @SneakyThrows
-  public void disjointWaitTimeAndDriveTime() {
-    Coordinates nearCoordinates = Coordinates.builder().latitude(1D).longitude(2D).build();
-    Coordinates farCoordinates = Coordinates.builder().latitude(3D).longitude(4D).build();
-    Address patientAddress =
-        Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-
-    when(facilitiesClient.nearbyFacilities(patientAddress, 10, "PrimaryCare"))
-        .thenReturn(
-            VaFacilitiesResponse.builder()
-                .data(
-                    asList(
-                        VaFacilitiesResponse.Facility.builder()
-                            .id("nearFac")
-                            .attributes(
-                                VaFacilitiesResponse.Attributes.builder()
-                                    .lat(1D)
-                                    .lng(2D)
-                                    .waitTimes(
-                                        VaFacilitiesResponse.WaitTimes.builder()
-                                            .health(
-                                                singletonList(
-                                                    VaFacilitiesResponse.WaitTime.builder()
-                                                        .waitDays(
-                                                            VaFacilitiesResponse.WaitDays.builder()
-                                                                .neww(100.0)
-                                                                .build())
-                                                        .service("primarycare")
-                                                        .build()))
-                                            .build())
-                                    .address(
-                                        VaFacilitiesResponse.Address.builder()
-                                            .physical(
-                                                VaFacilitiesResponse.PhysicalAddress.builder()
-                                                    .address1("near st")
-                                                    .state("fl")
-                                                    .build())
-                                            .build())
-                                    .build())
-                            .build()))
-                .build());
-
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .maxDriveTimePrimary(10)
-            .maxWaitPrimary(5)
-            .facilitiesClient(facilitiesClient)
-            .eeClient(mock(EligibilityAndEnrollmentClient.class))
-            .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
-    CommunityCareEligibilityResponse expected =
-        CommunityCareEligibilityResponse.builder()
-            .patientRequest(
-                (CommunityCareEligibilityResponse.PatientRequest.builder()
-                    .patientAddress(
-                        Address.builder()
-                            .state("FL")
-                            .city("Melbourne")
-                            .zip("12345")
-                            .street("66 Main St")
-                            .build())
-                    .timestamp(actual.patientRequest().timestamp())
-                    .patientIcn("123")
-                    .serviceType("PrimaryCare")
-                    .build()))
-            .eligibilityCodes(emptyList())
-            .grandfathered(false)
-            .noFullServiceVaMedicalFacility(false)
-            .eligible(true)
-            .accessStandardsFacilities(emptyList())
-            .nearbyFacilities(
-                asList(
-                    Facility.builder()
-                        .id("nearFac")
-                        .physicalAddress(Address.builder().street("near st").state("FL").build())
-                        .coordinates(nearCoordinates)
-                        .waitDays(100)
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
@@ -331,18 +231,6 @@ public final class CommunityCareEligibilityTest {
                                     .phone(
                                         VaFacilitiesResponse.Phone.builder()
                                             .main(" 867-5309 ")
-                                            .build())
-                                    .waitTimes(
-                                        VaFacilitiesResponse.WaitTimes.builder()
-                                            .health(
-                                                singletonList(
-                                                    VaFacilitiesResponse.WaitTime.builder()
-                                                        .waitDays(
-                                                            VaFacilitiesResponse.WaitDays.builder()
-                                                                .neww(1.0)
-                                                                .build())
-                                                        .service("primarycare")
-                                                        .build()))
                                             .build())
                                     .address(
                                         VaFacilitiesResponse.Address.builder()
@@ -488,18 +376,6 @@ public final class CommunityCareEligibilityTest {
                                 VaFacilitiesResponse.Attributes.builder()
                                     .lat(200D)
                                     .lng(100D)
-                                    .waitTimes(
-                                        VaFacilitiesResponse.WaitTimes.builder()
-                                            .health(
-                                                singletonList(
-                                                    VaFacilitiesResponse.WaitTime.builder()
-                                                        .waitDays(
-                                                            VaFacilitiesResponse.WaitDays.builder()
-                                                                .neww(1.0)
-                                                                .build())
-                                                        .service("optometry")
-                                                        .build()))
-                                            .build())
                                     .address(
                                         VaFacilitiesResponse.Address.builder()
                                             .physical(

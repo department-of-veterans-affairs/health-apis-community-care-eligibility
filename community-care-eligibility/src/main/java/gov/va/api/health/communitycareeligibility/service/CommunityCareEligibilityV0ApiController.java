@@ -38,11 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
   private int maxDriveMinsPrimary;
 
-  private int maxWaitDaysPrimary;
-
   private int maxDriveMinsSpecialty;
-
-  private int maxWaitDaysSpecialty;
 
   private EligibilityAndEnrollmentClient eeClient;
 
@@ -58,9 +54,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
-    this.maxWaitDaysPrimary = maxWaitPrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
-    this.maxWaitDaysSpecialty = maxWaitSpecialty;
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
   }
@@ -68,7 +62,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   private static Map<String, String> servicesMap() {
     Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (String service :
-        Arrays.asList("Audiology", "Nutrition", "Optometry", "Podiatry", "PrimaryCare")) {
+        Arrays.asList(
+            "PrimaryCare",
+            "MentalHealthCare",
+            "Audiology",
+            "Cardiology",
+            "Dermatology",
+            "Gastroenterology",
+            "Gynecology",
+            "Ophthalmology",
+            "Optometry",
+            "Orthopedics",
+            "Urology",
+            "WomensHealth")) {
       map.put(service, service);
     }
 
@@ -92,16 +98,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .getCommunityCareEligibilityInfo()
             .getEligibilities()
             .getEligibility();
-  }
-
-  @SneakyThrows
-  private List<Facility> facilitiesMeetingWaitTimeStandards(
-      List<Facility> facilities, boolean isPrimary) {
-    int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
-    return facilities
-        .stream()
-        .filter(facility -> facility.waitDays() != null && facility.waitDays() <= waitDays)
-        .collect(Collectors.toList());
   }
 
   /** Compute community care eligibility. */
@@ -193,15 +189,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       return communityCareEligibilityResponse.eligible(true);
     }
 
-    List<Facility> facilitiesMeetingAccessStandards =
-        facilitiesMeetingWaitTimeStandards(nearbyFacilities, isPrimary);
-
-    return communityCareEligibilityResponse
-        .eligible(facilitiesMeetingAccessStandards.isEmpty())
-        .accessStandardsFacilities(
-            facilitiesMeetingAccessStandards
-                .stream()
-                .map(accessStandardFacility -> accessStandardFacility.id())
-                .collect(Collectors.toList()));
+    return communityCareEligibilityResponse.eligible(nearbyFacilities.isEmpty());
   }
 }

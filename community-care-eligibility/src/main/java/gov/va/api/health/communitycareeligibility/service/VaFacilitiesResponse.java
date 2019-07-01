@@ -56,9 +56,6 @@ public final class VaFacilitiesResponse {
     private Phone phone;
 
     private String website;
-
-    @JsonProperty("services")
-    private WaitTimes waitTimes;
   }
 
   @Data
@@ -104,48 +101,5 @@ public final class VaFacilitiesResponse {
 
     @JsonProperty("address_3")
     private String address3;
-  }
-
-  @Data
-  @Builder
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class WaitDays {
-
-    @JsonProperty("new")
-    private Double neww;
-  }
-
-  @Data
-  @Builder
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class WaitTime {
-    private String service;
-
-    @JsonProperty("wait_times")
-    private WaitDays waitDays;
-  }
-
-  @Data
-  @Builder
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  @NoArgsConstructor(access = AccessLevel.PRIVATE)
-  @AllArgsConstructor(access = AccessLevel.PRIVATE)
-  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-  public static final class WaitTimes {
-    private List<WaitTime> health;
-
-    /** Health wait time. */
-    public List<WaitTime> health() {
-      if (health == null) {
-        health = new ArrayList<>();
-      }
-      return health;
-    }
   }
 }
