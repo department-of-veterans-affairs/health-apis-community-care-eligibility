@@ -488,7 +488,8 @@ public final class CommunityCareEligibilityTest {
     assertThat(actual).isEqualTo(expected);
   }
 
-  @Test(expected = Exceptions.MissingAddressInformationException.class)
+  @SneakyThrows
+  @Test(expected = Exceptions.IncompleteAddressException.class)
   public void missingAddressInfo() {
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
     when(client.requestEligibility("123"))
@@ -525,6 +526,7 @@ public final class CommunityCareEligibilityTest {
     controller.search("123", "PrimaryCare");
   }
 
+  @SneakyThrows
   @Test(expected = Exceptions.MissingResidentialAddressException.class)
   public void noResidentialFound() {
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);

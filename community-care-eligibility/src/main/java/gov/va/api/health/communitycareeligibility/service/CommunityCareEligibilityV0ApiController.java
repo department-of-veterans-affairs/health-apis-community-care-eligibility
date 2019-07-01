@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
@@ -22,7 +23,6 @@ import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -69,38 +69,43 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
   @SneakyThrows
   private static Address parsePatientAddress(AddressInfo addressInfo) {
-    if (addressInfo == null) {
-      throw new Exceptions.MissingResidentialAddressException();
-    }
     Address patientAddress =
         Address.builder()
-            .city(StringUtils.trim(addressInfo.getCity()))
-            .state(StringUtils.trim(addressInfo.getState().toUpperCase()))
+            .city(trimToEmpty(addressInfo.getCity()))
+            .state(trimToEmpty(addressInfo.getState().toUpperCase()))
             .street(
-                StringUtils.trim(
-                    StringUtils.trimToEmpty(addressInfo.getLine1())
+                trimToEmpty(
+                    trimToEmpty(addressInfo.getLine1())
                         + " "
-                        + StringUtils.trimToEmpty(addressInfo.getLine2())
+                        + trimToEmpty(addressInfo.getLine2())
                         + " "
-                        + StringUtils.trimToEmpty(addressInfo.getLine3())))
+                        + trimToEmpty(addressInfo.getLine3())))
             .build();
     if (addressInfo.getZipCode().isEmpty()) {
       if (addressInfo.getPostalCode().isEmpty()) {
-        patientAddress.zip(StringUtils.trimToEmpty(addressInfo.getZipCode()));
+        patientAddress.zip(trimToEmpty(addressInfo.getZipCode()));
       } else {
-        patientAddress.zip(StringUtils.trimToEmpty(addressInfo.getPostalCode()));
+        patientAddress.zip(trimToEmpty(addressInfo.getPostalCode()));
       }
     } else {
-      patientAddress.zip(StringUtils.trimToEmpty(addressInfo.getZipCode()));
+      patientAddress.zip(trimToEmpty(addressInfo.getZipCode()));
     }
     if (addressInfo.getZipPlus4() != null) {
-      patientAddress.zip(
-          StringUtils.trimToEmpty(patientAddress.zip() + "-" + addressInfo.getZipPlus4()));
+      patientAddress.zip(trimToEmpty(patientAddress.zip() + "-" + addressInfo.getZipPlus4()));
+    }
+
+    if (patientAddress.city().isEmpty()
+        || patientAddress.state().isEmpty()
+        || patientAddress.zip().isEmpty()
+        || patientAddress.street().isEmpty()) {
+      throw new Exceptions.IncompleteAddressException(patientAddress);
     }
     return patientAddress;
   }
 
-  private static AddressInfo patientResidentialAddressInfo(GetEESummaryResponse response) {
+  @SneakyThrows
+  private static AddressInfo patientResidentialAddressInfo(
+      GetEESummaryResponse response, String patientIcn) {
     if (response == null
         || response.getSummary() == null
         || response.getSummary().getDemographics() == null
@@ -111,18 +116,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     for (AddressInfo info :
         response.getSummary().getDemographics().getContactInfo().getAddresses().getAddress()) {
       if ("Residential".equals(info.getAddressTypeCode())) {
-        if (info.getCity() == null
-            || info.getState() == null
-            || ((info.getZipCode() == null) && (info.getPostalCode()) == null)
-            || ((info.getLine1() == null)
-                && (info.getLine2() == null)
-                && (info.getLine3() == null))) {
-          throw new Exceptions.MissingAddressInformationException();
-        }
         return info;
       }
     }
-    return null;
+    throw new Exceptions.MissingResidentialAddressException(patientIcn);
   }
 
   private static Map<String, String> servicesMap() {
@@ -212,7 +209,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .grandfathered(codeString.contains("G"))
           .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
-    Address patientAddress = parsePatientAddress(patientResidentialAddressInfo(eeResponse));
+    Address patientAddress =
+        parsePatientAddress(patientResidentialAddressInfo(eeResponse, patientIcn.trim()));
     communityCareEligibilityResponse.patientAddress(patientAddress);
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
