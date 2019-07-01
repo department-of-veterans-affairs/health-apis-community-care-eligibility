@@ -17,24 +17,6 @@ final class Exceptions {
     }
   }
 
-  static final class UnknownPatientIcnException extends RuntimeException {
-    UnknownPatientIcnException(String patientIcn, Throwable cause) {
-      super("Unknown patient ICN: " + patientIcn, cause);
-    }
-  }
-
-  static final class UnknownServiceTypeException extends RuntimeException {
-    UnknownServiceTypeException(String serviceType) {
-      super("Unknown service type: " + serviceType);
-    }
-  }
-
-  static final class MissingResidentialAddressException extends RuntimeException {
-    MissingResidentialAddressException(String patientIcn) {
-      super("No residential address found for ICN: " + patientIcn);
-    }
-  }
-
   static final class IncompleteAddressException extends RuntimeException {
     IncompleteAddressException(Address patientAddress) {
       super(
@@ -51,6 +33,24 @@ final class Exceptions {
               + System.lineSeparator()
               + "Zipcode: "
               + patientAddress.zip());
+    }
+  }
+
+  static final class MissingResidentialAddressException extends RuntimeException {
+    MissingResidentialAddressException(String patientIcn) {
+      super("No residential address found for ICN: " + patientIcn);
+    }
+  }
+
+  static final class UnknownPatientIcnException extends RuntimeException {
+    UnknownPatientIcnException(String patientIcn, Throwable cause) {
+      super("Unknown patient ICN: " + patientIcn, cause);
+    }
+  }
+
+  static final class UnknownServiceTypeException extends RuntimeException {
+    UnknownServiceTypeException(String serviceType) {
+      super("Unknown service type: " + serviceType);
     }
   }
 }
