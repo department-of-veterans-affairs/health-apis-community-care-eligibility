@@ -20,7 +20,7 @@ For details about building and running this application, see the [developer guid
 
 ----
 
-The API supports a search query that accepts a patient ICN, the patient's home address,
+The API supports a search query that accepts a patient ICN
 and the patient's desired medical service type.
 
 The medical service type is one of:

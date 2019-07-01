@@ -23,13 +23,13 @@ public final class CommunityCareEligibilityResponse {
 
   PatientRequest patientRequest;
 
-  Address patientAddress;
-
   List<EligibilityCode> eligibilityCodes;
 
   Boolean grandfathered;
 
   Boolean noFullServiceVaMedicalFacility;
+
+  Address patientAddress;
 
   List<Facility> nearbyFacilities;
 
