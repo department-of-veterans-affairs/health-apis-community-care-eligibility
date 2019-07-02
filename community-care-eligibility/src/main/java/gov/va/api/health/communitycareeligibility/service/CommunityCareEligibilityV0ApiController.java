@@ -48,9 +48,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   @Builder
   public CommunityCareEligibilityV0ApiController(
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
-      @Value("${community-care.max-wait-days-primary}") int maxWaitPrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
-      @Value("${community-care.max-wait-days-specialty}") int maxWaitSpecialty,
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
@@ -63,16 +61,16 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (String service :
         Arrays.asList(
-            "PrimaryCare",
-            "MentalHealthCare",
             "Audiology",
             "Cardiology",
             "Dermatology",
             "Gastroenterology",
             "Gynecology",
+            "MentalHealthCare",
             "Ophthalmology",
             "Optometry",
             "Orthopedics",
+            "PrimaryCare",
             "Urology",
             "WomensHealth")) {
       map.put(service, service);
@@ -189,6 +187,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       return communityCareEligibilityResponse.eligible(true);
     }
 
-    return communityCareEligibilityResponse.eligible(nearbyFacilities.isEmpty());
+    return communityCareEligibilityResponse.eligible(false);
   }
 }

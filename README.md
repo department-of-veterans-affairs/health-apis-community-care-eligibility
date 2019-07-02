@@ -2,13 +2,12 @@
 
 This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
 that computes **objective** overall community-care eligibility by combining eligibility codes
-from the Eligibility and Enrollment System (E&E) with drive- and wait-time access
+from the Eligibility and Enrollment System (E&E) with drive-time access
 standards.
 
 ![applications](src/plantuml/apps.png)
 
 Average drive times are also provided by Facilities API.
-Live appointment wait times will be provided by the VistA Integration Adapter (VIA). 
 (Integration with VIA is in-progress.)
 
 For more information about the end-to-end flow of information and interactions between systems/APIs, see the [sequence diagram](sequence-diagram.md).
@@ -98,7 +97,6 @@ Sample response:
       },
       "phoneNumber" : "177-112-8657 x",
       "website" : "https://www.va.gov",
-      "waitDays" : 19
     },
     {
       "id" : "vha_46368ZZ",
@@ -115,11 +113,7 @@ Sample response:
       },
       "phoneNumber" : "1-422-983-2040",
       "website" : "https://www.va.gov",
-      "waitDays" : 14
     }
-  ],
-  "accessStandardsFacilities" : [
-    "vha_1597XY"
   ],
   "eligible" : false
 }

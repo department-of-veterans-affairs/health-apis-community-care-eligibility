@@ -70,8 +70,6 @@ public final class CommunityCareEligibilityTest {
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
-            .maxWaitPrimary(2)
-            .maxWaitSpecialty(2)
             .build();
     CommunityCareEligibilityResponse actual =
         controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "Audiology");
@@ -249,7 +247,6 @@ public final class CommunityCareEligibilityTest {
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
             .maxDriveTimePrimary(1)
-            .maxWaitPrimary(1)
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
@@ -316,7 +313,6 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(facilitiesClient)
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
-            .maxWaitPrimary(1)
             .build();
     CommunityCareEligibilityResponse result =
         controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
@@ -331,7 +327,6 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .maxDriveTimePrimary(1)
-            .maxWaitPrimary(1)
             .build();
     controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "Dentistry");
   }
@@ -392,7 +387,6 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(facilitiesClient)
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
-            .maxWaitPrimary(2)
             .build();
     CommunityCareEligibilityResponse actual =
         controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "optometry");
