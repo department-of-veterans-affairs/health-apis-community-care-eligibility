@@ -20,19 +20,7 @@ final class Exceptions {
   static final class IncompleteAddressException extends RuntimeException {
     IncompleteAddressException(Address patientAddress) {
       super(
-          "Residential address has incomplete information"
-              + System.lineSeparator()
-              + "Street: "
-              + patientAddress.street()
-              + System.lineSeparator()
-              + "City: "
-              + patientAddress.city()
-              + System.lineSeparator()
-              + "State: "
-              + patientAddress.state()
-              + System.lineSeparator()
-              + "Zipcode: "
-              + patientAddress.zip());
+          "Residential address has incomplete information: " + patientAddress);
     }
   }
 
