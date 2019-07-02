@@ -20,7 +20,7 @@ For details about building and running this application, see the [developer guid
 
 ----
 
-The API supports a search query that accepts a patient ICN, the patient's home address,
+The API supports a search query that accepts a patient ICN
 and the patient's desired medical service type.
 
 The medical service type is one of:
@@ -56,7 +56,7 @@ facilities that satisfy the access standards.
 Sample request:
 
 ```
-https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&street=742%20Evergreen%20Terrace&city=Springfield&state=KY&zip=89144&serviceType=primarycare
+https://foo.com/community-care/v0/eligibility/search?patient=011235813V213455&serviceType=primarycare
 ```
 
 Sample response:
