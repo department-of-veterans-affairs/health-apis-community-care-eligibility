@@ -11,7 +11,11 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.med.esr.webservices.jaxws.schemas.AddressCollection;
+import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
+import gov.va.med.esr.webservices.jaxws.schemas.ContactInfo;
+import gov.va.med.esr.webservices.jaxws.schemas.DemographicInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummary;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityCollection;
@@ -26,6 +30,7 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
+
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
@@ -40,7 +45,6 @@ public final class CommunityCareEligibilityTest {
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-
     when(facilitiesClient.nearbyFacilities(patientAddress, 60, "Audiology"))
         .thenReturn(
             VaFacilitiesResponse.builder()
@@ -63,30 +67,56 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
-            .eeClient(mock(EligibilityAndEnrollmentClient.class))
+            .eeClient(client)
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
             .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "Audiology");
+    CommunityCareEligibilityResponse actual = controller.search("123", "Audiology");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
                 CommunityCareEligibilityResponse.PatientRequest.builder()
                     .patientIcn("123")
-                    .patientAddress(
-                        Address.builder()
-                            .state("FL")
-                            .city("Melbourne")
-                            .zip("12345")
-                            .street("66 Main St")
-                            .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Audiology")
+                    .build())
+            .patientAddress(
+                Address.builder()
+                    .state("FL")
+                    .city("Melbourne")
+                    .zip("12345")
+                    .street("66 Main St")
                     .build())
             .eligible(false)
             .eligibilityCodes(emptyList())
@@ -107,28 +137,55 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void empty() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(mock(EligibilityAndEnrollmentClient.class))
+            .eeClient(client)
             .build();
-    CommunityCareEligibilityResponse result =
-        controller.search("123", "66 Main St", "Melbourne", "fl", "12345 ", "primarycare");
+    CommunityCareEligibilityResponse result = controller.search("123", "primarycare");
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
                 .patientRequest(
                     CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .patientAddress(
-                            Address.builder()
-                                .state("FL")
-                                .city("Melbourne")
-                                .zip("12345")
-                                .street("66 Main St")
-                                .build())
                         .patientIcn("123")
                         .timestamp(result.patientRequest().timestamp())
                         .serviceType("PrimaryCare")
+                        .build())
+                .patientAddress(
+                    Address.builder()
+                        .state("FL")
+                        .city("Melbourne")
+                        .zip("12345")
+                        .street("66 Main St")
                         .build())
                 .eligibilityCodes(emptyList())
                 .grandfathered(false)
@@ -141,14 +198,11 @@ public final class CommunityCareEligibilityTest {
   @SneakyThrows
   public void facilityTransformerNullChecks() {
     FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
-
     // facility is null
     assertThat(transformer.toFacility(null)).isNull();
-
     // top level attributes is null
     assertThat(transformer.toFacility(VaFacilitiesResponse.Facility.builder().build()))
         .isEqualTo(Facility.builder().build());
-
     // empty attributes
     assertThat(
             transformer.toFacility(
@@ -156,7 +210,6 @@ public final class CommunityCareEligibilityTest {
                     .attributes(VaFacilitiesResponse.Attributes.builder().build())
                     .build()))
         .isEqualTo(Facility.builder().build());
-
     // empty address
     assertThat(
             transformer.toFacility(
@@ -167,7 +220,6 @@ public final class CommunityCareEligibilityTest {
                             .build())
                     .build()))
         .isEqualTo(Facility.builder().build());
-
     // empty physical address
     assertThat(
             transformer.toFacility(
@@ -208,11 +260,36 @@ public final class CommunityCareEligibilityTest {
                                                     .build()))
                                         .build())
                                 .build())
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("Apt. 602")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .zipPlus4("0104")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
                         .build())
                 .build());
     Address patientAddress =
-        Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
-
+        Address.builder()
+            .city("Melbourne")
+            .state("FL")
+            .zip("12345-0104")
+            .street("66 Main St Apt. 602")
+            .build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(patientAddress, 1, "PrimaryCare"))
         .thenReturn(
@@ -249,19 +326,11 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(1)
             .eeClient(eeClient)
             .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
+    CommunityCareEligibilityResponse actual = controller.search("123", "primarycare");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
                 (CommunityCareEligibilityResponse.PatientRequest.builder()
-                    .patientAddress(
-                        Address.builder()
-                            .state("FL")
-                            .city("Melbourne")
-                            .zip("12345")
-                            .street("66 Main St")
-                            .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .patientIcn("123")
                     .serviceType("PrimaryCare")
@@ -277,6 +346,78 @@ public final class CommunityCareEligibilityTest {
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
+  }
+
+  @SneakyThrows
+  @Test(expected = Exceptions.IncompleteAddressException.class)
+  public void missingAddressInfo() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .build();
+    controller.search("123", "PrimaryCare");
+  }
+
+  @SneakyThrows
+  @Test(expected = Exceptions.MissingResidentialAddressException.class)
+  public void noResidentialFound() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("NON_RESIDENTIAL")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .build();
+    controller.search("123", "PrimaryCare");
   }
 
   @Test
@@ -303,6 +444,26 @@ public final class CommunityCareEligibilityTest {
                                                     .build()))
                                         .build())
                                 .build())
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
                         .build())
                 .build());
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
@@ -314,21 +475,48 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
             .build();
-    CommunityCareEligibilityResponse result =
-        controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "primarycare");
+    CommunityCareEligibilityResponse result = controller.search("123", "primarycare");
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
   @SneakyThrows
   @Test(expected = Exceptions.UnknownServiceTypeException.class)
   public void unknownServiceType() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(mock(EligibilityAndEnrollmentClient.class))
+            .eeClient(client)
             .maxDriveTimePrimary(1)
             .build();
-    controller.search("123", " 66 Main St", "Melbourne  ", " fl", " 12345 ", "Dentistry");
+    controller.search("123", "Dentistry");
   }
 
   @Test
@@ -353,6 +541,26 @@ public final class CommunityCareEligibilityTest {
                                                         parseXmlGregorianCalendar(
                                                             "2019-03-27T14:37:48Z"))
                                                     .build()))
+                                        .build())
+                                .build())
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipCode("12345")
+                                                            .build()))
+                                                .build())
                                         .build())
                                 .build())
                         .build())
@@ -388,8 +596,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("123", "66 Main St", "Melbourne", "fl", "12345", "optometry");
+    CommunityCareEligibilityResponse actual = controller.search("123", "optometry");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .grandfathered(false)
@@ -397,13 +604,6 @@ public final class CommunityCareEligibilityTest {
             .patientRequest(
                 CommunityCareEligibilityResponse.PatientRequest.builder()
                     .patientIcn("123")
-                    .patientAddress(
-                        Address.builder()
-                            .state("FL")
-                            .city("Melbourne")
-                            .zip("12345")
-                            .street("66 Main St")
-                            .build())
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Optometry")
                     .build())
@@ -415,7 +615,6 @@ public final class CommunityCareEligibilityTest {
                         .code("X")
                         .build()))
             .build();
-
     assertThat(actual).isEqualTo(expected);
   }
 }

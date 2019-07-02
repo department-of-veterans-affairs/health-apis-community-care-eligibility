@@ -29,6 +29,8 @@ public final class CommunityCareEligibilityResponse {
 
   Boolean noFullServiceVaMedicalFacility;
 
+  Address patientAddress;
+
   List<Facility> nearbyFacilities;
 
   Boolean eligible;
@@ -117,8 +119,6 @@ public final class CommunityCareEligibilityResponse {
   public static final class PatientRequest {
 
     String patientIcn;
-
-    Address patientAddress;
 
     String serviceType;
 

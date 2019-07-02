@@ -38,9 +38,7 @@ import javax.ws.rs.Path;
 @Path("/")
 public interface CommunityCareEligibilityService {
   @Operation(
-    summary =
-        "Compute community care eligibility by patient ICN, patient home address,"
-            + " and desired medical service type",
+    summary = "Compute community care eligibility by patient ICN and desired medical service type",
     tags = "Search"
   )
   @GET
@@ -81,38 +79,6 @@ public interface CommunityCareEligibilityService {
           )
           @NotBlank
           String patientIcn,
-      @Parameter(
-            in = ParameterIn.QUERY,
-            required = true,
-            name = "street",
-            description = "Street of patient's home address"
-          )
-          @NotBlank
-          String street,
-      @Parameter(
-            in = ParameterIn.QUERY,
-            required = true,
-            name = "city",
-            description = "City of patient's home address"
-          )
-          @NotBlank
-          String city,
-      @Parameter(
-            in = ParameterIn.QUERY,
-            required = true,
-            name = "state",
-            description = "State of patient's home address"
-          )
-          @NotBlank
-          String state,
-      @Parameter(
-            in = ParameterIn.QUERY,
-            required = true,
-            name = "zip",
-            description = "ZIP code of patient's home address"
-          )
-          @NotBlank
-          String zip,
       @Parameter(
             in = ParameterIn.QUERY,
             required = true,
