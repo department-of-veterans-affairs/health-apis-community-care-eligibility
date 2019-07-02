@@ -72,19 +72,20 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   private static Address parsePatientAddress(AddressInfo addressInfo) {
     String zip = trimToEmpty(addressInfo.getZipCode());
     if (zip.isEmpty()) {
-      if (addressInfo.getPostalCode().isEmpty()) {
+      if (trimToEmpty(addressInfo.getPostalCode()).isEmpty()) {
         zip = trimToEmpty(addressInfo.getZipcode());
+      } else {
+        zip = trimToEmpty(addressInfo.getPostalCode());
       }
-      zip = trimToEmpty(addressInfo.getPostalCode());
     }
-
-    if (addressInfo.getZipPlus4() != null && !zip.isEmpty()) {
-      zip = zip + "-" + trimToEmpty(addressInfo.getZipPlus4());
+    String zipPlus4 = trimToEmpty(addressInfo.getZipPlus4());
+    if (!zip.isEmpty() && !zipPlus4.isEmpty()) {
+      zip = zip + "-" + zipPlus4;
     }
     Address patientAddress =
         Address.builder()
             .city(trimToEmpty(addressInfo.getCity()))
-            .state(trimToEmpty(addressInfo.getState().toUpperCase()))
+            .state(trimToEmpty(addressInfo.getState()).toUpperCase())
             .street(
                 trimToEmpty(
                     trimToEmpty(addressInfo.getLine1())

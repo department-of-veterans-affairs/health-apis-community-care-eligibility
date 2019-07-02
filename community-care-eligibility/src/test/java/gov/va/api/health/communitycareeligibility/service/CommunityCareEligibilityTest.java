@@ -507,11 +507,6 @@ public final class CommunityCareEligibilityTest {
                                                     asList(
                                                         AddressInfo.builder()
                                                             .addressTypeCode("Residential")
-                                                            .state("FL")
-                                                            .line1("66 Main St")
-                                                            .line2("")
-                                                            .line3("")
-                                                            .zipCode("12345")
                                                             .build()))
                                                 .build())
                                         .build())
