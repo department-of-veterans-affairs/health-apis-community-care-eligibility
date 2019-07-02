@@ -19,8 +19,7 @@ final class Exceptions {
 
   static final class IncompleteAddressException extends RuntimeException {
     IncompleteAddressException(Address patientAddress) {
-      super(
-          "Residential address has incomplete information: " + patientAddress);
+      super("Residential address has incomplete information: " + patientAddress);
     }
   }
 

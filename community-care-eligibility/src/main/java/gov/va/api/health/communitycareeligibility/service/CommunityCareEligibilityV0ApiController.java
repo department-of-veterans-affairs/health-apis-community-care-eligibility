@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
@@ -69,6 +70,17 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
   @SneakyThrows
   private static Address parsePatientAddress(AddressInfo addressInfo) {
+    String zip = trimToEmpty(addressInfo.getZipCode());
+    if (zip.isEmpty()) {
+      if (addressInfo.getPostalCode().isEmpty()) {
+        zip = trimToEmpty(addressInfo.getZipcode());
+      }
+      zip = trimToEmpty(addressInfo.getPostalCode());
+    }
+
+    if (addressInfo.getZipPlus4() != null && !zip.isEmpty()) {
+      zip = zip + "-" + trimToEmpty(addressInfo.getZipPlus4());
+    }
     Address patientAddress =
         Address.builder()
             .city(trimToEmpty(addressInfo.getCity()))
@@ -80,20 +92,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         + trimToEmpty(addressInfo.getLine2())
                         + " "
                         + trimToEmpty(addressInfo.getLine3())))
+            .zip(zip)
             .build();
-    if (addressInfo.getZipCode().isEmpty()) {
-      if (addressInfo.getPostalCode().isEmpty()) {
-        patientAddress.zip(trimToEmpty(addressInfo.getZipCode()));
-      } else {
-        patientAddress.zip(trimToEmpty(addressInfo.getPostalCode()));
-      }
-    } else {
-      patientAddress.zip(trimToEmpty(addressInfo.getZipCode()));
-    }
-    if (addressInfo.getZipPlus4() != null) {
-      patientAddress.zip(trimToEmpty(patientAddress.zip() + "-" + addressInfo.getZipPlus4()));
-    }
-
     if (patientAddress.city().isEmpty()
         || patientAddress.state().isEmpty()
         || patientAddress.zip().isEmpty()
@@ -113,11 +113,18 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         || response.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
       return null;
     }
-    for (AddressInfo info :
-        response.getSummary().getDemographics().getContactInfo().getAddresses().getAddress()) {
-      if ("Residential".equals(info.getAddressTypeCode())) {
-        return info;
-      }
+    Optional<AddressInfo> info =
+        response
+            .getSummary()
+            .getDemographics()
+            .getContactInfo()
+            .getAddresses()
+            .getAddress()
+            .stream()
+            .filter(a -> "Residential".equals(a.getAddressTypeCode()))
+            .findFirst();
+    if (info.isPresent()) {
+      return info.get();
     }
     throw new Exceptions.MissingResidentialAddressException(patientIcn);
   }
