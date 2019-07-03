@@ -7,7 +7,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import java.util.Locale;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
@@ -95,31 +94,6 @@ public class FacilityTransformer {
         .coordinates(coordinates(vaFacility))
         .phoneNumber(phoneNumber(vaFacility))
         .website(website(vaFacility))
-        .waitDays(waitDays(vaFacility))
         .build();
-  }
-
-  private Integer waitDays(VaFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility.attributes() == null) {
-      return null;
-    }
-    if (vaFacility.attributes().waitTimes() == null) {
-      return null;
-    }
-    Optional<VaFacilitiesResponse.WaitTime> optWaitTime =
-        vaFacility
-            .attributes()
-            .waitTimes()
-            .health()
-            .stream()
-            .filter(
-                waitTime ->
-                    waitTime != null
-                        && StringUtils.equalsIgnoreCase(waitTime.service(), serviceType))
-            .findFirst();
-    if (!optWaitTime.isPresent()) {
-      return null;
-    }
-    return (int) Math.ceil(optWaitTime.get().waitDays().neww());
   }
 }

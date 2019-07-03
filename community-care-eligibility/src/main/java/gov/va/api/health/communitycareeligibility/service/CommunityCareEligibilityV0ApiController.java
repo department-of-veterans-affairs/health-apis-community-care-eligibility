@@ -41,11 +41,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
   private int maxDriveMinsPrimary;
 
-  private int maxWaitDaysPrimary;
-
   private int maxDriveMinsSpecialty;
-
-  private int maxWaitDaysSpecialty;
 
   private EligibilityAndEnrollmentClient eeClient;
 
@@ -55,15 +51,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   @Builder
   public CommunityCareEligibilityV0ApiController(
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
-      @Value("${community-care.max-wait-days-primary}") int maxWaitPrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
-      @Value("${community-care.max-wait-days-specialty}") int maxWaitSpecialty,
       @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
-    this.maxWaitDaysPrimary = maxWaitPrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
-    this.maxWaitDaysSpecialty = maxWaitSpecialty;
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
   }
@@ -133,7 +125,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   private static Map<String, String> servicesMap() {
     Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     for (String service :
-        Arrays.asList("Audiology", "Nutrition", "Optometry", "Podiatry", "PrimaryCare")) {
+        Arrays.asList(
+            "Audiology",
+            "Cardiology",
+            "Dermatology",
+            "Gastroenterology",
+            "Gynecology",
+            "MentalHealthCare",
+            "Ophthalmology",
+            "Optometry",
+            "Orthopedics",
+            "PrimaryCare",
+            "Urology",
+            "WomensHealth")) {
       map.put(service, service);
     }
     return map;
@@ -156,16 +160,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .getCommunityCareEligibilityInfo()
             .getEligibilities()
             .getEligibility();
-  }
-
-  @SneakyThrows
-  private List<Facility> facilitiesMeetingWaitTimeStandards(
-      List<Facility> facilities, boolean isPrimary) {
-    int waitDays = isPrimary ? maxWaitDaysPrimary : maxWaitDaysSpecialty;
-    return facilities
-        .stream()
-        .filter(facility -> facility.waitDays() != null && facility.waitDays() <= waitDays)
-        .collect(Collectors.toList());
   }
 
   /** Compute community care eligibility. */
@@ -241,14 +235,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (nearbyFacilities.isEmpty()) {
       return communityCareEligibilityResponse.eligible(true);
     }
-    List<Facility> facilitiesMeetingAccessStandards =
-        facilitiesMeetingWaitTimeStandards(nearbyFacilities, isPrimary);
-    return communityCareEligibilityResponse
-        .eligible(facilitiesMeetingAccessStandards.isEmpty())
-        .accessStandardsFacilities(
-            facilitiesMeetingAccessStandards
-                .stream()
-                .map(accessStandardFacility -> accessStandardFacility.id())
-                .collect(Collectors.toList()));
+
+    return communityCareEligibilityResponse.eligible(false);
   }
 }

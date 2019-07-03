@@ -11,8 +11,8 @@
   <version>1.0.45-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
+    <jacoco.coverage>0.86</jacoco.coverage>
     <ee-artifacts.version>1.1.45</ee-artifacts.version>
-    <jacoco.coverage>0.87</jacoco.coverage>
   </properties>
   <dependencies>
     <dependency>

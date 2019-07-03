@@ -57,9 +57,7 @@ Applications _must_ define the following properties.
 va-facilities.api-key .......................VA Facilities API
 va-facilities.url ...........................VA Facilities API URL
 community-care.max-drive-time-min-primary....Max drive time (minutes) criteria for primary care eligibility
-community-care.max-wait-days-primary.........Max wait time (days) for primary care eligibility
 community-care.max-drive-time-min-specialty..Max drive time (minutes) criteria for specialty care eligibility
-community-care.max-wait-days-specialty.......Max wait time (days) for specialty care eligibility
 
 # Server SSL
 server.ssl.key-store ....................Path to keystore, e.g. /opt/va/certs/<any>.jks

@@ -51,7 +51,6 @@ class SwaggerCommunityCareEligibilityResponse {
                               Coordinates.builder().latitude(41.81).longitude(67.65).build())
                           .phoneNumber("177-112-8657 x")
                           .website("https://www.va.gov")
-                          .waitDays(19)
                           .build(),
                       Facility.builder()
                           .id("vha_46368ZZ")
@@ -67,9 +66,7 @@ class SwaggerCommunityCareEligibilityResponse {
                               Coordinates.builder().latitude(196.418).longitude(317.811).build())
                           .phoneNumber("1-422-983-2040")
                           .website("https://www.va.gov")
-                          .waitDays(14)
                           .build()))
-              .accessStandardsFacilities(asList("vha_1597XY"))
               .eligible(false)
               .build();
 }
