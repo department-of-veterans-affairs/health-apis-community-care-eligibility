@@ -1,8 +1,9 @@
 # Configuration Guide
 
-Like Health APIs Data Query, Community Care Eligibility runs in Docker containers in AWS and are configured via properties files in AWS S3
-buckets. Application properties, certificates, and the corresponding Kong configuration are copied from
-the S3 bucket into containers during the start up process.
+Like Health APIs Data Query, Community Care Eligibility runs in Docker containers
+in AWS that are configured via properties files in AWS S3 buckets. Application properties,
+certificates, and the corresponding Kong configuration are copied from the S3 bucket into
+containers during the start up process.
 
 Docker containers must be bootstrapped with environment variables that enable access
 to the S3 buckets.
@@ -82,6 +83,5 @@ ee.header.password ......................E&E Password
 ee.request.name .........................E&E Request Name
 ee.truststore.path ......................E&E truststore path
 ee.truststore.password ..................E&E truststore password
-
 
 ```

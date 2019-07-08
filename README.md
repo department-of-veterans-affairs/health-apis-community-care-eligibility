@@ -7,8 +7,8 @@ standards.
 
 ![applications](src/plantuml/apps.png)
 
-Average drive times are also provided by Facilities API.
-(Integration with VIA is in-progress.)
+Average drive times are computed by Facilities API,
+based on the patient's physical (residential) address in E&E.
 
 For more information about the end-to-end flow of information and interactions between systems/APIs, see the [sequence diagram](sequence-diagram.md).
 
@@ -19,18 +19,25 @@ For details about building and running this application, see the [developer guid
 
 ----
 
-The API supports a search query that accepts a patient ICN
-and the patient's desired medical service type.
+The API supports a search query that accepts a patient's ICN
+and desired medical service type.
 
 The medical service type is one of:
 * Audiology
-* Nutrition
+* Cardiology
+* Dermatology
+* Gastroenterology
+* Gynecology
+* MentalHealthCare
+* Ophthalmology
 * Optometry
-* Podiatry
+* Orthopedics
 * PrimaryCare
+* Urology
+* WomensHealth
 
 The API combines data from two sources:
-1. Patient eligibility information, from E&E.
+1. Patient physical address and eligibility information, from E&E.
 2. VA health facilities in the state, from Facilities API.
 
 This data is used to compute an overall determination of community-care-eligibility
@@ -42,15 +49,16 @@ The objective criteria of the MISSION Act are:
 3. 40-mile legacy/grandfathered from the Choice program
 4. Access standards
 
-The other two criteria, *best medical interest* and *quality standards*, are subjective
-criteria outside the scope of this API. Because this API does not include subjective criteria,
-its eligibility decisions **are not final**. A user-facing message
+For this MVP, access standards are based only on drive-times, without appointment wait times.
+The last two criteria, *best medical interest* and *quality standards*, are subjective
+criteria outside the scope of this API. Because the subjective criteria are not included,
+this API's eligibility decisions **are not final**. A user-facing message
 based on the result of this API should stress that the patient is *probably* eligible or
 *probably not* eligible, and that no decision is final until they have consulted VA staff
 and scheduled their appointment.
 
-The response includes a description of the E&E eligibility codes and the IDs of any VA health
-facilities that satisfy the access standards.
+The response includes the overall eligibility decision and the individual details
+(patient address, eligibility codes, nearby facilities, etc.) that were used to compute it.
 
 Sample request:
 
@@ -64,12 +72,6 @@ Sample response:
 {
   "patientRequest" : {
     "patientIcn" : "011235813V213455",
-    "patientAddress" : {
-      "street" : "742 Evergeen Terrace",
-      "city" : "Springfield",
-      "state" : "KY",
-      "zip" : "89144"
-    },
     "serviceType" : "PrimaryCare",
     "timestamp" : "2019-05-09T13:17:58.250Z"
   },
@@ -81,6 +83,12 @@ Sample response:
   ],
   "grandfathered" : false,
   "noFullServiceVaMedicalFacility" : false,
+  "patientAddress" : {
+    "street" : "742 Evergeen Terrace",
+    "city" : "Springfield",
+    "state" : "KY",
+    "zip" : "89144"
+  },
   "nearbyFacilities" : [
     {
       "id" : "vha_1597XY",
@@ -96,7 +104,7 @@ Sample response:
         "longitude" : 67.65
       },
       "phoneNumber" : "177-112-8657 x",
-      "website" : "https://www.va.gov",
+      "website" : "https://www.va.gov"
     },
     {
       "id" : "vha_46368ZZ",
@@ -112,7 +120,7 @@ Sample response:
         "longitude" : 317.811
       },
       "phoneNumber" : "1-422-983-2040",
-      "website" : "https://www.va.gov",
+      "website" : "https://www.va.gov"
     }
   ],
   "eligible" : false
