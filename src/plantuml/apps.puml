@@ -8,11 +8,9 @@ actor consumer
 rectangle "community-care-eligibility" as cce
 rectangle "E&E" as ee
 rectangle "Facilities" as fac
-rectangle "VIA" as via
 
 consumer -(0- cce
 cce -(0- ee
 cce -(0- fac
-cce -(0- via
 
 @enduml
