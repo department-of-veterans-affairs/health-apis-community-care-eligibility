@@ -97,29 +97,24 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   }
 
   @SneakyThrows
-  private static AddressInfo patientResidentialAddressInfo(
-      GetEESummaryResponse response, String patientIcn) {
+  private static Optional<AddressInfo> patientResidentialAddressInfo(
+      GetEESummaryResponse response) {
     if (response == null
         || response.getSummary() == null
         || response.getSummary().getDemographics() == null
         || response.getSummary().getDemographics().getContactInfo() == null
         || response.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
-      return null;
+      return Optional.empty();
     }
-    Optional<AddressInfo> info =
-        response
-            .getSummary()
-            .getDemographics()
-            .getContactInfo()
-            .getAddresses()
-            .getAddress()
-            .stream()
-            .filter(a -> "Residential".equals(a.getAddressTypeCode()))
-            .findFirst();
-    if (info.isPresent()) {
-      return info.get();
-    }
-    throw new Exceptions.MissingResidentialAddressException(patientIcn);
+    return response
+        .getSummary()
+        .getDemographics()
+        .getContactInfo()
+        .getAddresses()
+        .getAddress()
+        .stream()
+        .filter(a -> "Residential".equals(a.getAddressTypeCode()))
+        .findFirst();
   }
 
   private static Map<String, String> servicesMap() {
@@ -211,8 +206,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .grandfathered(codeString.contains("G"))
           .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
-    Address patientAddress =
-        parsePatientAddress(patientResidentialAddressInfo(eeResponse, patientIcn.trim()));
+    Optional<AddressInfo> eeAddress = patientResidentialAddressInfo(eeResponse);
+    if (!eeAddress.isPresent()) {
+      throw new Exceptions.MissingResidentialAddressException(patientIcn);
+    }
+    Address patientAddress = parsePatientAddress(eeAddress.get());
     communityCareEligibilityResponse.patientAddress(patientAddress);
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
