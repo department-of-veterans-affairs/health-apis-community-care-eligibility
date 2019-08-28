@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
@@ -155,7 +156,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     BigDecimal lat = geocoding.getAddressLatitude();
     BigDecimal lng = geocoding.getAddressLongitude();
-    if (lat == null && lng == null) {
+    if (allBlank(lat, lng)) {
       return null;
     }
 
