@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -30,6 +31,8 @@ public final class CommunityCareEligibilityResponse {
   Boolean noFullServiceVaMedicalFacility;
 
   Address patientAddress;
+
+  Coordinates patientCoordinates;
 
   List<Facility> nearbyFacilities;
 
@@ -74,9 +77,9 @@ public final class CommunityCareEligibilityResponse {
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Coordinates {
 
-    Double latitude;
+    BigDecimal latitude;
 
-    Double longitude;
+    BigDecimal longitude;
   }
 
   @Data

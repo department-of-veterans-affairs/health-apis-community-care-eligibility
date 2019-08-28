@@ -5,11 +5,14 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
+import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +26,6 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -33,12 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @Validated
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
-
   private int maxDriveMinsPrimary;
 
   private int maxDriveMinsSpecialty;
@@ -60,61 +60,106 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     this.facilitiesClient = facilitiesClient;
   }
 
-  @SneakyThrows
-  private static Address parsePatientAddress(AddressInfo addressInfo) {
-    String zip = trimToEmpty(addressInfo.getZipCode());
+  private static List<VceEligibilityInfo> eligibilityInfos(GetEESummaryResponse response) {
+    return response == null
+            || response.getSummary() == null
+            || response.getSummary().getCommunityCareEligibilityInfo() == null
+            || response.getSummary().getCommunityCareEligibilityInfo().getEligibilities() == null
+            || response
+                    .getSummary()
+                    .getCommunityCareEligibilityInfo()
+                    .getEligibilities()
+                    .getEligibility()
+                == null
+        ? Collections.emptyList()
+        : response
+            .getSummary()
+            .getCommunityCareEligibilityInfo()
+            .getEligibilities()
+            .getEligibility();
+  }
+
+  private static Address patientAddress(String patientIcn, GetEESummaryResponse eeResponse) {
+    if (eeResponse == null
+        || eeResponse.getSummary() == null
+        || eeResponse.getSummary().getDemographics() == null
+        || eeResponse.getSummary().getDemographics().getContactInfo() == null
+        || eeResponse.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
+      throw new Exceptions.MissingResidentialAddressException(patientIcn);
+    }
+    Optional<AddressInfo> maybeEeAddress =
+        eeResponse
+            .getSummary()
+            .getDemographics()
+            .getContactInfo()
+            .getAddresses()
+            .getAddress()
+            .stream()
+            .filter(a -> "Residential".equals(a.getAddressTypeCode()))
+            .findFirst();
+    if (!maybeEeAddress.isPresent()) {
+      throw new Exceptions.MissingResidentialAddressException(patientIcn);
+    }
+
+    AddressInfo eeAddress = maybeEeAddress.get();
+
+    String zip = trimToEmpty(eeAddress.getZipCode());
     if (zip.isEmpty()) {
-      if (trimToEmpty(addressInfo.getPostalCode()).isEmpty()) {
-        zip = trimToEmpty(addressInfo.getZipcode());
+      if (trimToEmpty(eeAddress.getPostalCode()).isEmpty()) {
+        zip = trimToEmpty(eeAddress.getZipcode());
       } else {
-        zip = trimToEmpty(addressInfo.getPostalCode());
+        zip = trimToEmpty(eeAddress.getPostalCode());
       }
     }
-    String zipPlus4 = trimToEmpty(addressInfo.getZipPlus4());
+    String zipPlus4 = trimToEmpty(eeAddress.getZipPlus4());
     if (!zip.isEmpty() && !zipPlus4.isEmpty()) {
       zip = zip + "-" + zipPlus4;
     }
-    Address patientAddress =
+
+    Address address =
         Address.builder()
-            .city(trimToEmpty(addressInfo.getCity()))
-            .state(trimToEmpty(addressInfo.getState()).toUpperCase())
+            .city(trimToEmpty(eeAddress.getCity()))
+            .state(trimToEmpty(eeAddress.getState()).toUpperCase())
             .street(
                 trimToEmpty(
-                    trimToEmpty(addressInfo.getLine1())
+                    trimToEmpty(eeAddress.getLine1())
                         + " "
-                        + trimToEmpty(addressInfo.getLine2())
+                        + trimToEmpty(eeAddress.getLine2())
                         + " "
-                        + trimToEmpty(addressInfo.getLine3())))
+                        + trimToEmpty(eeAddress.getLine3())))
             .zip(zip)
             .build();
-    if (patientAddress.city().isEmpty()
-        || patientAddress.state().isEmpty()
-        || patientAddress.zip().isEmpty()
-        || patientAddress.street().isEmpty()) {
-      throw new Exceptions.IncompleteAddressException(patientAddress);
+
+    if (address.city().isEmpty()
+        || address.state().isEmpty()
+        || address.zip().isEmpty()
+        || address.street().isEmpty()) {
+      throw new Exceptions.IncompleteAddressException(patientIcn, address);
     }
-    return patientAddress;
+
+    return address;
   }
 
-  @SneakyThrows
-  private static Optional<AddressInfo> patientResidentialAddressInfo(
-      GetEESummaryResponse response) {
-    if (response == null
-        || response.getSummary() == null
-        || response.getSummary().getDemographics() == null
-        || response.getSummary().getDemographics().getContactInfo() == null
-        || response.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
-      return Optional.empty();
+  private static Coordinates patientCoordinates(GetEESummaryResponse eeResponse) {
+    if (eeResponse == null
+        || eeResponse.getSummary() == null
+        || eeResponse.getSummary().getCommunityCareEligibilityInfo() == null) {
+      return null;
     }
-    return response
-        .getSummary()
-        .getDemographics()
-        .getContactInfo()
-        .getAddresses()
-        .getAddress()
-        .stream()
-        .filter(a -> "Residential".equals(a.getAddressTypeCode()))
-        .findFirst();
+
+    GeocodingInfo geocoding =
+        eeResponse.getSummary().getCommunityCareEligibilityInfo().getGeocodingInfo();
+    if (geocoding == null) {
+      return null;
+    }
+
+    BigDecimal lat = geocoding.getAddressLatitude();
+    BigDecimal lng = geocoding.getAddressLongitude();
+    if (lat == null && lng == null) {
+      return null;
+    }
+
+    return Coordinates.builder().latitude(lat).longitude(lng).build();
   }
 
   private static Map<String, String> servicesMap() {
@@ -138,25 +183,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return map;
   }
 
-  private List<VceEligibilityInfo> eligibilityInfos(GetEESummaryResponse response) {
-    return response == null
-            || response.getSummary() == null
-            || response.getSummary().getCommunityCareEligibilityInfo() == null
-            || response.getSummary().getCommunityCareEligibilityInfo().getEligibilities() == null
-            || response
-                    .getSummary()
-                    .getCommunityCareEligibilityInfo()
-                    .getEligibilities()
-                    .getEligibility()
-                == null
-        ? Collections.emptyList()
-        : response
-            .getSummary()
-            .getCommunityCareEligibilityInfo()
-            .getEligibilities()
-            .getEligibility();
-  }
-
   /** Compute community care eligibility. */
   @Override
   @SneakyThrows
@@ -168,6 +194,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
+
     Instant timestamp = Instant.now();
     GetEESummaryResponse eeResponse = eeClient.requestEligibility(patientIcn.trim());
     List<VceEligibilityInfo> vceEligibilityCollection = eligibilityInfos(eeResponse);
@@ -184,10 +211,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         .toEligibility())
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+
     List<String> codeString = new ArrayList<>();
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
+
     CommunityCareEligibilityResponse communityCareEligibilityResponse =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -200,18 +229,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .build();
+
     if (CollectionUtils.containsAny(codeString, Arrays.asList("G", "N", "H", "X"))) {
       return communityCareEligibilityResponse
           .eligible(!codeString.contains("X"))
           .grandfathered(codeString.contains("G"))
           .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
-    Optional<AddressInfo> eeAddress = patientResidentialAddressInfo(eeResponse);
-    if (!eeAddress.isPresent()) {
-      throw new Exceptions.MissingResidentialAddressException(patientIcn);
-    }
-    Address patientAddress = parsePatientAddress(eeAddress.get());
-    communityCareEligibilityResponse.patientAddress(patientAddress);
+
+    Address patientAddress = patientAddress(patientIcn, eeResponse);
+    communityCareEligibilityResponse
+        .patientAddress(patientAddress)
+        .patientCoordinates(patientCoordinates(eeResponse));
+
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
     VaFacilitiesResponse nearbyResponse =

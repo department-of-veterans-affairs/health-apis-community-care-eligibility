@@ -7,6 +7,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
+import java.math.BigDecimal;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -26,6 +27,11 @@ class SwaggerCommunityCareEligibilityResponse {
                       .city("Springfield")
                       .state("KY")
                       .zip("89144")
+                      .build())
+              .patientCoordinates(
+                  Coordinates.builder()
+                      .latitude(new BigDecimal("40.758541"))
+                      .longitude(new BigDecimal("-73.982132"))
                       .build())
               .eligibilityCodes(
                   asList(
@@ -48,7 +54,10 @@ class SwaggerCommunityCareEligibilityResponse {
                                   .zip("10946")
                                   .build())
                           .coordinates(
-                              Coordinates.builder().latitude(41.81).longitude(67.65).build())
+                              Coordinates.builder()
+                                  .latitude(new BigDecimal("41.81"))
+                                  .longitude(new BigDecimal("67.65"))
+                                  .build())
                           .phoneNumber("177-112-8657 x")
                           .website("https://www.va.gov")
                           .build(),
@@ -63,7 +72,10 @@ class SwaggerCommunityCareEligibilityResponse {
                                   .zip("75025")
                                   .build())
                           .coordinates(
-                              Coordinates.builder().latitude(196.418).longitude(317.811).build())
+                              Coordinates.builder()
+                                  .latitude(new BigDecimal("196.418"))
+                                  .longitude(new BigDecimal("317.811"))
+                                  .build())
                           .phoneNumber("1-422-983-2040")
                           .website("https://www.va.gov")
                           .build()))
