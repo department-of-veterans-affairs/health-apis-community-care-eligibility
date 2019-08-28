@@ -87,7 +87,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         || eeResponse.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
       throw new Exceptions.MissingResidentialAddressException(patientIcn);
     }
-    Optional<AddressInfo> maybeEeAddress =
+    Optional<AddressInfo> eeAddress =
         eeResponse
             .getSummary()
             .getDemographics()
@@ -97,36 +97,36 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .stream()
             .filter(a -> "Residential".equals(a.getAddressTypeCode()))
             .findFirst();
-    if (!maybeEeAddress.isPresent()) {
+    if (!eeAddress.isPresent()) {
       throw new Exceptions.MissingResidentialAddressException(patientIcn);
     }
 
-    AddressInfo eeAddress = maybeEeAddress.get();
+    AddressInfo addressInfo = eeAddress.get();
 
-    String zip = trimToEmpty(eeAddress.getZipCode());
+    String zip = trimToEmpty(addressInfo.getZipCode());
     if (zip.isEmpty()) {
-      if (trimToEmpty(eeAddress.getPostalCode()).isEmpty()) {
-        zip = trimToEmpty(eeAddress.getZipcode());
+      if (trimToEmpty(addressInfo.getPostalCode()).isEmpty()) {
+        zip = trimToEmpty(addressInfo.getZipcode());
       } else {
-        zip = trimToEmpty(eeAddress.getPostalCode());
+        zip = trimToEmpty(addressInfo.getPostalCode());
       }
     }
-    String zipPlus4 = trimToEmpty(eeAddress.getZipPlus4());
+    String zipPlus4 = trimToEmpty(addressInfo.getZipPlus4());
     if (!zip.isEmpty() && !zipPlus4.isEmpty()) {
       zip = zip + "-" + zipPlus4;
     }
 
     Address address =
         Address.builder()
-            .city(trimToEmpty(eeAddress.getCity()))
-            .state(trimToEmpty(eeAddress.getState()).toUpperCase())
+            .city(trimToEmpty(addressInfo.getCity()))
+            .state(trimToEmpty(addressInfo.getState()).toUpperCase())
             .street(
                 trimToEmpty(
-                    trimToEmpty(eeAddress.getLine1())
+                    trimToEmpty(addressInfo.getLine1())
                         + " "
-                        + trimToEmpty(eeAddress.getLine2())
+                        + trimToEmpty(addressInfo.getLine2())
                         + " "
-                        + trimToEmpty(eeAddress.getLine3())))
+                        + trimToEmpty(addressInfo.getLine3())))
             .zip(zip)
             .build();
 
