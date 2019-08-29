@@ -1,9 +1,9 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,9 +18,11 @@ import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.ContactInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.DemographicInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummary;
+import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
@@ -42,7 +44,11 @@ public final class CommunityCareEligibilityTest {
   @Test
   @SneakyThrows
   public void audiology() {
-    Coordinates facilityCoordinates = Coordinates.builder().latitude(200D).longitude(100D).build();
+    Coordinates facilityCoordinates =
+        Coordinates.builder()
+            .latitude(new BigDecimal("200"))
+            .longitude(new BigDecimal("100"))
+            .build();
     Address patientAddress =
         Address.builder().city("Melbourne").state("FL").zip("12345").street("66 Main St").build();
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
@@ -55,8 +61,8 @@ public final class CommunityCareEligibilityTest {
                             .id("FAC123")
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
-                                    .lat(200D)
-                                    .lng(100D)
+                                    .lat(new BigDecimal("200"))
+                                    .lng(new BigDecimal("100"))
                                     .address(
                                         VaFacilitiesResponse.Address.builder()
                                             .physical(
@@ -94,6 +100,14 @@ public final class CommunityCareEligibilityTest {
                                                 .build())
                                         .build())
                                 .build())
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(new BigDecimal("-50"))
+                                        .addressLongitude(new BigDecimal("50"))
+                                        .build())
+                                .build())
                         .build())
                 .build());
     CommunityCareEligibilityV0ApiController controller =
@@ -118,6 +132,11 @@ public final class CommunityCareEligibilityTest {
                     .city("Melbourne")
                     .zip("12345")
                     .street("66 Main St")
+                    .build())
+            .patientCoordinates(
+                Coordinates.builder()
+                    .latitude(new BigDecimal("-50"))
+                    .longitude(new BigDecimal("50"))
                     .build())
             .eligible(false)
             .eligibilityCodes(emptyList())
@@ -301,8 +320,8 @@ public final class CommunityCareEligibilityTest {
                             .id(" FAC123 ")
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
-                                    .lat(200.00)
-                                    .lng(100.00)
+                                    .lat(new BigDecimal("200.00"))
+                                    .lng(new BigDecimal("100.00"))
                                     .name(" some facility ")
                                     .phone(
                                         VaFacilitiesResponse.Phone.builder()
@@ -578,8 +597,8 @@ public final class CommunityCareEligibilityTest {
                             .id("FAC123")
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
-                                    .lat(200D)
-                                    .lng(100D)
+                                    .lat(new BigDecimal("200"))
+                                    .lng(new BigDecimal("100"))
                                     .address(
                                         VaFacilitiesResponse.Address.builder()
                                             .physical(

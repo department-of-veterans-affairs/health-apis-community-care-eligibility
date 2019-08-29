@@ -3,6 +3,7 @@ package gov.va.api.health.communitycareeligibility.service;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -47,9 +48,9 @@ public final class VaFacilitiesResponse {
   public static final class Attributes {
     private String name;
 
-    private Double lat;
+    private BigDecimal lat;
 
-    private Double lng;
+    private BigDecimal lng;
 
     private Address address;
 

@@ -37,7 +37,7 @@ The medical service type is one of:
 * WomensHealth
 
 The API combines data from two sources:
-1. Patient physical address and eligibility information, from E&E.
+1. Patient physical address, latitude and longitude, and eligibility information, from E&E.
 2. VA health facilities in the state, from Facilities API.
 
 This data is used to compute an overall determination of community-care-eligibility
@@ -88,6 +88,10 @@ Sample response:
     "city" : "Springfield",
     "state" : "KY",
     "zip" : "89144"
+  },
+  "patientCoordinates" : {
+    "latitude" : 40.758541,
+    "longitude" : -73.982132
   },
   "nearbyFacilities" : [
     {
