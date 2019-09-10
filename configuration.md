@@ -60,22 +60,6 @@ va-facilities.url ...........................VA Facilities API URL
 community-care.max-drive-time-min-primary....Max drive time (minutes) criteria for primary care eligibility
 community-care.max-drive-time-min-specialty..Max drive time (minutes) criteria for specialty care eligibility
 
-# Server SSL
-server.ssl.key-store ....................Path to keystore, e.g. /opt/va/certs/<any>.jks
-server.ssl.key-alias ....................Alias for key in keystore
-server.ssl.key-store-password ...........Password for the keystore
-server.ssl.trust-store ..................Path to truststore
-server.ssl.trust-store-password .........Password for the truststore
-server.ssl.enabled ......................<true|false> If enabled, mutual TLS is configured
-
-# Client SSL
-ssl.key-store ...........................Path to keystore to use as a client
-ssl.key-store-password ..................Password for the keystore
-ssl.client-key-password .................Password for the client key
-ssl.use-trust-store .....................<true|false> If enabled, mutual TLS is configured
-ssl.trust-store .........................Path to truststore
-ssl.trust-store-password ................Password for the truststore
-
 #E&E Request Properties
 ee.endpoint.url .........................E&E Endpoint URL
 ee.header.username ......................E&E Username
