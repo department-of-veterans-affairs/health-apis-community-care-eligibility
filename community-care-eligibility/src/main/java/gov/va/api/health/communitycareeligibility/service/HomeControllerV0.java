@@ -4,10 +4,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,13 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeControllerV0 {
   private static final YAMLMapper MAPPER = new YAMLMapper();
 
-  private final Resource openApi;
-
-  @Autowired
-  public HomeControllerV0(@Value("classpath:/openapi.yaml") Resource openapi) {
-    this.openApi = openapi;
-  }
-
   /** REST endpoint for OpenAPI JSON + redirect. */
   @GetMapping(
     value = {"/", "/openapi.json", "/api/openapi.json"},
@@ -33,7 +24,7 @@ public class HomeControllerV0 {
   )
   @ResponseBody
   public Object openApiJson() throws IOException {
-    return HomeControllerV0.MAPPER.readValue(openApiYamlContent(), Object.class);
+    return MAPPER.readValue(openApiYamlContent(), Object.class);
   }
 
   /** REST endpoint OpenAPI YAML. */
@@ -49,7 +40,7 @@ public class HomeControllerV0 {
   /** OpenAPI content in YAML form. */
   @Bean
   private String openApiYamlContent() throws IOException {
-    try (InputStream is = openApi.getInputStream()) {
+    try (InputStream is = new ClassPathResource("openapi.yaml").getInputStream()) {
       return StreamUtils.copyToString(is, Charset.defaultCharset());
     }
   }
