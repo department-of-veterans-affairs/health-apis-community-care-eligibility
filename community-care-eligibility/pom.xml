@@ -13,7 +13,6 @@
   <properties>
     <ee-client.version>2.0.2</ee-client.version>
     <jacoco.coverage>0.86</jacoco.coverage>
-    <lighthouse-keystore.version>1.0.20</lighthouse-keystore.version>
   </properties>
   <dependencies>
     <dependency>
@@ -34,12 +33,6 @@
       <groupId>gov.va.api.health</groupId>
       <artifactId>ee-artifacts</artifactId>
       <version>${ee-client.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>gov.va.dvp</groupId>
-      <artifactId>lighthouse-keystore</artifactId>
-      <version>${lighthouse-keystore.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.rest-assured</groupId>
