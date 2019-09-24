@@ -44,7 +44,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
-
   private int maxDriveMinsPrimary;
 
   private int maxDriveMinsSpecialty;
@@ -106,7 +105,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (!eeAddress.isPresent()) {
       throw new Exceptions.MissingResidentialAddressException(patientIcn);
     }
+
     AddressInfo addressInfo = eeAddress.get();
+
     String zip = trimToEmpty(addressInfo.getZipCode());
     if (zip.isEmpty()) {
       if (trimToEmpty(addressInfo.getPostalCode()).isEmpty()) {
