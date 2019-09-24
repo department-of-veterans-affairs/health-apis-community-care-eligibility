@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
@@ -71,14 +70,13 @@ public interface CommunityCareEligibilityService {
         )
   )
   CommunityCareEligibilityResponse search(
-      String sessionIdHeader,
+      String optSessionIdHeader,
       @Parameter(
             in = ParameterIn.QUERY,
             required = true,
             name = "patient",
             description = "The patient ICN"
           )
-          @NotBlank
           String patientIcn,
       @Parameter(
             in = ParameterIn.QUERY,
@@ -103,6 +101,5 @@ public interface CommunityCareEligibilityService {
                   }
                 )
           )
-          @NotBlank
           String serviceType);
 }

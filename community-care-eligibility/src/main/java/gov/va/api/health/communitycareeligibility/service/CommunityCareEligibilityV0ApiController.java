@@ -190,13 +190,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   @SneakyThrows
   @GetMapping(value = "/search")
   public CommunityCareEligibilityResponse search(
-      @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String sessionIdHeader,
+      @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
-    if (isNotBlank(sessionIdHeader)) {
+    if (isNotBlank(optSessionIdHeader)) {
       log.info(
           "sessionId={}, patient={}, serviceType={}",
-          stripNewlines(sessionIdHeader),
+          stripNewlines(optSessionIdHeader),
           stripNewlines(patientIcn),
           stripNewlines(serviceType));
     }
