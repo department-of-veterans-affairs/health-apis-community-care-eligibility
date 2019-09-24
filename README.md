@@ -19,8 +19,8 @@ For details about building and running this application, see the [developer guid
 
 ----
 
-The API supports a search query that accepts a patient's ICN
-and desired medical service type.
+The API supports a search query that accepts a patient's ICN and desired medical service type.
+For auditing purposes, the API will log the `X-VA-SESSIONID` header, if it is provided.
 
 The medical service type is one of:
 * Audiology
