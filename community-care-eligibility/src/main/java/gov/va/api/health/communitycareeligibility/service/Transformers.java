@@ -11,7 +11,7 @@ public final class Transformers {
    * Return false if at least one value in the given list is a non-blank string, or a non-null
    * object.
    */
-  public static boolean allBlank(Object... values) {
+  static boolean allBlank(Object... values) {
     for (Object v : values) {
       if (!isBlank(v)) {
         return false;
@@ -21,7 +21,7 @@ public final class Transformers {
   }
 
   /** Return true if the value is a blank string, or any other object that is null. */
-  public static boolean isBlank(Object value) {
+  static boolean isBlank(Object value) {
     if (value instanceof CharSequence) {
       return StringUtils.isBlank((CharSequence) value);
     }

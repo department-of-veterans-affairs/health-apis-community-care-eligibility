@@ -1,8 +1,7 @@
-package gov.va.api.health.communitycareeligibility.service.client;
+package gov.va.api.health.communitycareeligibility.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import gov.va.api.health.communitycareeligibility.service.SteelThreadSystemCheckLedgerImpl;
 import org.junit.Test;
 
 public class SteelThreadSystemCheckLedgerImplTest {

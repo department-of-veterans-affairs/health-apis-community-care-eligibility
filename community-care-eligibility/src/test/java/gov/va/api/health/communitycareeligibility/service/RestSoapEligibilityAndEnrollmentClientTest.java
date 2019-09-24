@@ -1,11 +1,10 @@
-package gov.va.api.health.communitycareeligibility.service.client;
+package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import gov.va.api.health.communitycareeligibility.service.SoapEligibilityAndEnrollmentClient;
 import gov.va.api.health.queenelizabeth.ee.Eligibilities;
 import gov.va.api.health.queenelizabeth.ee.SoapMessageGenerator;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;

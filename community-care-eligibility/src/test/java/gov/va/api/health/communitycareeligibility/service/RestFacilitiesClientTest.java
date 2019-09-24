@@ -1,4 +1,4 @@
-package gov.va.api.health.communitycareeligibility.service.client;
+package gov.va.api.health.communitycareeligibility.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,8 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
-import gov.va.api.health.communitycareeligibility.service.RestFacilitiesClient;
-import gov.va.api.health.communitycareeligibility.service.VaFacilitiesResponse;
 import org.junit.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
