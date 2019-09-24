@@ -120,6 +120,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (!zip.isEmpty() && !zipPlus4.isEmpty()) {
       zip = zip + "-" + zipPlus4;
     }
+
     Address address =
         Address.builder()
             .city(trimToEmpty(addressInfo.getCity()))
@@ -133,12 +134,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         + trimToEmpty(addressInfo.getLine3())))
             .zip(zip)
             .build();
+
     if (address.city().isEmpty()
         || address.state().isEmpty()
         || address.zip().isEmpty()
         || address.street().isEmpty()) {
       throw new Exceptions.IncompleteAddressException(patientIcn, address);
     }
+
     return address;
   }
 
@@ -148,16 +151,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         || eeResponse.getSummary().getCommunityCareEligibilityInfo() == null) {
       return null;
     }
+
     GeocodingInfo geocoding =
         eeResponse.getSummary().getCommunityCareEligibilityInfo().getGeocodingInfo();
     if (geocoding == null) {
       return null;
     }
+
     BigDecimal lat = geocoding.getAddressLatitude();
     BigDecimal lng = geocoding.getAddressLongitude();
     if (allBlank(lat, lng)) {
       return null;
     }
+
     return Coordinates.builder().latitude(lat).longitude(lng).build();
   }
 
@@ -205,6 +211,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
+
     Instant timestamp = Instant.now();
     GetEESummaryResponse eeResponse = eeClient.requestEligibility(patientIcn.trim());
     List<VceEligibilityInfo> vceEligibilityCollection = eligibilityInfos(eeResponse);
@@ -221,10 +228,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         .toEligibility())
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+
     List<String> codeString = new ArrayList<>();
     for (int i = 0; i < eligibilityCodes.size(); i++) {
       codeString.add(eligibilityCodes.get(i).code());
     }
+
     CommunityCareEligibilityResponse communityCareEligibilityResponse =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -237,16 +246,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .build();
+
     if (CollectionUtils.containsAny(codeString, Arrays.asList("G", "N", "H", "X"))) {
       return communityCareEligibilityResponse
           .eligible(!codeString.contains("X"))
           .grandfathered(codeString.contains("G"))
           .noFullServiceVaMedicalFacility(codeString.contains("N"));
     }
+
     Address patientAddress = patientAddress(patientIcn, eeResponse);
     communityCareEligibilityResponse
         .patientAddress(patientAddress)
         .patientCoordinates(patientCoordinates(eeResponse));
+
     boolean isPrimary = equalsIgnoreCase(mappedServiceType, "primarycare");
     final int driveMins = isPrimary ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
     VaFacilitiesResponse nearbyResponse =
@@ -268,6 +280,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (nearbyFacilities.isEmpty()) {
       return communityCareEligibilityResponse.eligible(true);
     }
+
     return communityCareEligibilityResponse.eligible(false);
   }
 }
