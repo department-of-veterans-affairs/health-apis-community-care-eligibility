@@ -117,7 +117,7 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("123", "Audiology");
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -190,7 +190,7 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
             .build();
-    CommunityCareEligibilityResponse result = controller.search("123", "primarycare");
+    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare");
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -346,7 +346,7 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(1)
             .eeClient(eeClient)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("123", "primarycare");
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "primarycare");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -398,7 +398,7 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
             .build();
-    controller.search("123", "PrimaryCare");
+    controller.search("", "123", "PrimaryCare");
   }
 
   @SneakyThrows
@@ -437,7 +437,7 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
             .build();
-    controller.search("123", "PrimaryCare");
+    controller.search("", "123", "PrimaryCare");
   }
 
   @Test
@@ -495,7 +495,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
             .build();
-    CommunityCareEligibilityResponse result = controller.search("123", "primarycare");
+    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare");
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
@@ -536,7 +536,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(client)
             .maxDriveTimePrimary(1)
             .build();
-    controller.search("123", "Dentistry");
+    controller.search("", "123", "Dentistry");
   }
 
   @Test
@@ -616,7 +616,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("123", "optometry");
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "optometry");
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .grandfathered(false)

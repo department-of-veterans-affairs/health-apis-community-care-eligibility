@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
@@ -27,15 +28,18 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Validated
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
@@ -184,13 +188,25 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return map;
   }
 
+  static String stripNewlines(String str) {
+    return str.replaceAll("[\r\n]", "");
+  }
+
   /** Compute community care eligibility. */
   @Override
   @SneakyThrows
   @GetMapping(value = "/search")
   public CommunityCareEligibilityResponse search(
+      @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "serviceType") String serviceType) {
+    if (isNotBlank(optSessionIdHeader)) {
+      log.info(
+          "sessionId={}, patient={}, serviceType={}",
+          stripNewlines(optSessionIdHeader),
+          stripNewlines(patientIcn),
+          stripNewlines(serviceType));
+    }
     String mappedServiceType = servicesMap().get(serviceType);
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);

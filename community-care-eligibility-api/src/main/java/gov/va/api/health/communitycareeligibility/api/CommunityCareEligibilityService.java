@@ -71,6 +71,7 @@ public interface CommunityCareEligibilityService {
         )
   )
   CommunityCareEligibilityResponse search(
+      String optSessionIdHeader,
       @Parameter(
             in = ParameterIn.QUERY,
             required = true,
