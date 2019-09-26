@@ -11,6 +11,7 @@ import lombok.NonNull;
 @Builder
 final class EligibilityAndEnrollmentTransformer {
   @NonNull private final VceEligibilityInfo eligibilityInfo;
+
   @NonNull private final Instant timestamp;
 
   EligibilityCode toEligibility() {
@@ -21,13 +22,15 @@ final class EligibilityAndEnrollmentTransformer {
       return null;
     }
 
-    if (eligibilityInfo
-        .getVceEffectiveDate()
-        .toGregorianCalendar()
-        .toInstant()
-        .isAfter(timestamp)) {
+    if (eligibilityInfo.getVceEffectiveDate() != null
+        && eligibilityInfo
+            .getVceEffectiveDate()
+            .toGregorianCalendar()
+            .toInstant()
+            .isAfter(timestamp)) {
       return null;
     }
+
     return EligibilityCode.builder().code(code).description(description).build();
   }
 }
