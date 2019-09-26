@@ -33,7 +33,6 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
-
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
@@ -163,6 +162,14 @@ public final class CommunityCareEligibilityTest {
             GetEESummaryResponse.builder()
                 .summary(
                     EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(BigDecimal.ZERO)
+                                        .addressLongitude(BigDecimal.ONE)
+                                        .build())
+                                .build())
                         .demographics(
                             DemographicInfo.builder()
                                 .contactInfo(
@@ -206,6 +213,11 @@ public final class CommunityCareEligibilityTest {
                         .city("Melbourne")
                         .zip("12345")
                         .street("66 Main St")
+                        .build())
+                .patientCoordinates(
+                    Coordinates.builder()
+                        .latitude(BigDecimal.ZERO)
+                        .longitude(BigDecimal.ONE)
                         .build())
                 .eligibilityCodes(emptyList())
                 .grandfathered(false)
@@ -369,8 +381,8 @@ public final class CommunityCareEligibilityTest {
   }
 
   @SneakyThrows
-  @Test(expected = Exceptions.IncompleteAddressException.class)
-  public void missingAddressInfo() {
+  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
+  public void noGeocodingInfoFound() {
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
     when(client.requestEligibility("123"))
         .thenReturn(
@@ -386,40 +398,7 @@ public final class CommunityCareEligibilityTest {
                                                 .address(
                                                     asList(
                                                         AddressInfo.builder()
-                                                            .addressTypeCode("Residential")
-                                                            .build()))
-                                                .build())
-                                        .build())
-                                .build())
-                        .build())
-                .build());
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(client)
-            .build();
-    controller.search("", "123", "PrimaryCare");
-  }
-
-  @SneakyThrows
-  @Test(expected = Exceptions.MissingResidentialAddressException.class)
-  public void noResidentialFound() {
-    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
-    when(client.requestEligibility("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .demographics(
-                            DemographicInfo.builder()
-                                .contactInfo(
-                                    ContactInfo.builder()
-                                        .addresses(
-                                            AddressCollection.builder()
-                                                .address(
-                                                    asList(
-                                                        AddressInfo.builder()
-                                                            .addressTypeCode("NON_RESIDENTIAL")
+                                                            .addressTypeCode("RESIDENTIAL")
                                                             .state("FL")
                                                             .city("Melbourne")
                                                             .line1("66 Main St")
@@ -463,25 +442,10 @@ public final class CommunityCareEligibilityTest {
                                                             "2099-03-27T14:37:48Z"))
                                                     .build()))
                                         .build())
-                                .build())
-                        .demographics(
-                            DemographicInfo.builder()
-                                .contactInfo(
-                                    ContactInfo.builder()
-                                        .addresses(
-                                            AddressCollection.builder()
-                                                .address(
-                                                    asList(
-                                                        AddressInfo.builder()
-                                                            .addressTypeCode("Residential")
-                                                            .state("FL")
-                                                            .city("Melbourne")
-                                                            .line1("66 Main St")
-                                                            .line2("")
-                                                            .line3("")
-                                                            .zipCode("12345")
-                                                            .build()))
-                                                .build())
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(BigDecimal.ZERO)
+                                        .addressLongitude(BigDecimal.ONE)
                                         .build())
                                 .build())
                         .build())

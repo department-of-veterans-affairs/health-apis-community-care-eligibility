@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -17,15 +16,9 @@ final class Exceptions {
     }
   }
 
-  static final class IncompleteAddressException extends RuntimeException {
-    IncompleteAddressException(String patientIcn, Address patientAddress) {
-      super("Residential address for ICN " + patientIcn + " is incomplete: " + patientAddress);
-    }
-  }
-
-  static final class MissingResidentialAddressException extends RuntimeException {
-    MissingResidentialAddressException(String patientIcn) {
-      super("No residential address found for ICN: " + patientIcn);
+  static final class MissingGeocodingInfoException extends RuntimeException {
+	  MissingGeocodingInfoException(String patientIcn) {
+      super("No geocoding information found for ICN: " + patientIcn);
     }
   }
 
