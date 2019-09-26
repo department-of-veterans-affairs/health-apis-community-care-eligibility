@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.upperCase;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -159,7 +161,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     return Address.builder()
         .city(trimToNull(addressInfo.getCity()))
-        .state(trimToNull(addressInfo.getState()).toUpperCase())
+        .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
         .street(
             trimToNull(
                 trimToEmpty(addressInfo.getLine1())
@@ -237,7 +239,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     List<String> codeStrings =
         eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());
     if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
-      return response
+      // return
+      response
           .eligible(!codeStrings.contains("X"))
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
@@ -262,7 +265,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         && geocodeXgc
             .toGregorianCalendar()
             .toInstant()
-            .isAfter(eeAddressChangeXgc.toGregorianCalendar().toInstant())) {
+            .isBefore(eeAddressChangeXgc.toGregorianCalendar().toInstant())) {
       throw new Exceptions.OutdatedGeocodingInfoException(
           request.patientIcn(),
           geocodeXgc.toGregorianCalendar().toInstant(),

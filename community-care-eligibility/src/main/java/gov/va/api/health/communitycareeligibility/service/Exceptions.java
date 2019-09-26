@@ -28,7 +28,7 @@ final class Exceptions {
     OutdatedGeocodingInfoException(String patientIcn, Instant geocodeTime, Instant addressTime) {
       super(
           String.format(
-              "For patient ICN %s, geocoding information (last updated %s) is out of date against residential address (last updated %s)",
+              "For patient ICN %s, geocoding information (updated %s) is out of date against residential address (updated %s)",
               patientIcn, geocodeTime, addressTime));
     }
   }
