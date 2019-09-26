@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class WebExceptionHandler {
   @ExceptionHandler({
     ConstraintViolationException.class,
-    Exceptions.OutdatedGeocodingInfoException.class,
     Exceptions.UnknownServiceTypeException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -29,6 +28,7 @@ public class WebExceptionHandler {
 
   @ExceptionHandler({
     Exceptions.MissingGeocodingInfoException.class,
+    Exceptions.OutdatedGeocodingInfoException.class,
     Exceptions.UnknownPatientIcnException.class
   })
   @ResponseStatus(HttpStatus.NOT_FOUND)
