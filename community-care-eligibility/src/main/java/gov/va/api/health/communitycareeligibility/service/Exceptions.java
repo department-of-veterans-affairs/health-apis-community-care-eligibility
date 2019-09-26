@@ -1,5 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import java.time.Instant;
+
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -17,8 +19,17 @@ final class Exceptions {
   }
 
   static final class MissingGeocodingInfoException extends RuntimeException {
-	  MissingGeocodingInfoException(String patientIcn) {
+    MissingGeocodingInfoException(String patientIcn) {
       super("No geocoding information found for ICN: " + patientIcn);
+    }
+  }
+
+  static final class OutdatedGeocodingInfoException extends RuntimeException {
+    OutdatedGeocodingInfoException(String patientIcn, Instant geocodeTime, Instant addressTime) {
+      super(
+          String.format(
+              "For patient ICN %s, geocoding information (last updated %s) is out of date against residential address (last updated %s)",
+              patientIcn, geocodeTime, addressTime));
     }
   }
 
