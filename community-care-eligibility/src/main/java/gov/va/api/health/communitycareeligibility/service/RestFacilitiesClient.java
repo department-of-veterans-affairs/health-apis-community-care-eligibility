@@ -37,10 +37,6 @@ public class RestFacilitiesClient implements FacilitiesClient {
       Coordinates coordinates, int driveMins, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
-            //            .queryParam("state", address.state())
-            //            .queryParam("city", address.city())
-            //            .queryParam("street_address", address.street())
-            //            .queryParam("zip", address.zip())
             .queryParam("lat", coordinates.latitude())
             .queryParam("lng", coordinates.longitude())
             .queryParam("drive_time", driveMins)
