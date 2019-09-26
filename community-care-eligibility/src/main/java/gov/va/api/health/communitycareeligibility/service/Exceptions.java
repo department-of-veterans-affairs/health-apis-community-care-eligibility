@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import java.time.Instant;
-
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -28,7 +27,8 @@ final class Exceptions {
     OutdatedGeocodingInfoException(String patientIcn, Instant geocodeTime, Instant addressTime) {
       super(
           String.format(
-              "For patient ICN %s, geocoding information (updated %s) is out of date against residential address (updated %s)",
+              "For patient ICN %s, geocoding information (updated %s) is"
+                  + " out of date against residential address (updated %s)",
               patientIcn, geocodeTime, addressTime));
     }
   }

@@ -1,11 +1,9 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import java.math.BigDecimal;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import java.math.BigDecimal;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;

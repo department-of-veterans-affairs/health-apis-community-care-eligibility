@@ -30,7 +30,6 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.xml.datatype.XMLGregorianCalendar;
-
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -239,8 +238,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     List<String> codeStrings =
         eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());
     if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
-      // return
-      response
+      return response
           .eligible(!codeStrings.contains("X"))
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))

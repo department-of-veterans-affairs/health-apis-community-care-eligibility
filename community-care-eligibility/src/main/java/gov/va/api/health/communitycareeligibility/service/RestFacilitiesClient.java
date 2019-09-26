@@ -1,7 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
-
 import java.util.Collections;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
