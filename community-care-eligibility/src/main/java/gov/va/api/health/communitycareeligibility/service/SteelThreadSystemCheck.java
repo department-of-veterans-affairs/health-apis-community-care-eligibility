@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import java.math.BigDecimal;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +17,21 @@ import org.springframework.web.client.ResourceAccessException;
 @Component
 @Slf4j
 public class SteelThreadSystemCheck implements HealthIndicator {
+  private static final Coordinates COORDINATES =
+      Coordinates.builder()
+          .latitude(new BigDecimal("28.112506"))
+          .longitude(new BigDecimal("-80.7000423"))
+          .build();
+
+  private static final int DRIVE_MINS = 60;
+
+  private static final String SERVICE_TYPE = "PrimaryCare";
 
   private final EligibilityAndEnrollmentClient eeClient;
 
   private final FacilitiesClient facilitiesClient;
 
   private final String icn;
-
-  private final Address address;
-
-  private final int driveMinutes;
-
-  private final String serviceType;
 
   private final SteelThreadSystemCheckLedger ledger;
 
@@ -43,15 +47,6 @@ public class SteelThreadSystemCheck implements HealthIndicator {
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
     this.icn = icn;
-    this.address =
-        Address.builder()
-            .city("Melbourne")
-            .state("FL")
-            .zip("32934")
-            .street("505 N John Rodes Blvd")
-            .build();
-    this.driveMinutes = 60;
-    this.serviceType = "PrimaryCare";
     this.ledger = ledger;
     this.consecutiveFailureThreshold = consecutiveFailureThreshold;
   }
@@ -92,11 +87,12 @@ public class SteelThreadSystemCheck implements HealthIndicator {
     if ("skip".equals(icn)) {
       return;
     }
+
     log.info("Performing health check.");
+
     try {
       eeClient.requestEligibility(icn);
-      facilitiesClient.nearbyFacilities(address, driveMinutes, serviceType);
-
+      facilitiesClient.nearbyFacilities(COORDINATES, DRIVE_MINS, SERVICE_TYPE);
       ledger.recordSuccess();
     } catch (HttpServerErrorException
         | HttpClientErrorException

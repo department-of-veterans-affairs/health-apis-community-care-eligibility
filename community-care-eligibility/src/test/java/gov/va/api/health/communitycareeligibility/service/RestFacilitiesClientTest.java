@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
+import java.math.BigDecimal;
 import org.junit.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -24,7 +25,7 @@ public final class RestFacilitiesClientTest {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
             eq(
-                "http://foo/bar/v1/nearby?state=FL&city=Melbourne&street_address=123 Main&zip=12345&drive_time=30&type=health&services[]=PrimaryCare&page=1&per_page=500"),
+                "http://foo/bar/v1/nearby?lat=0&lng=0&drive_time=30&type=health&services[]=PrimaryCare&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaFacilitiesResponse.class)))
@@ -34,11 +35,9 @@ public final class RestFacilitiesClientTest {
         new RestFacilitiesClient("fakeApiKey", "http://foo/bar", restTemplate);
     assertThat(
             client.nearbyFacilities(
-                CommunityCareEligibilityResponse.Address.builder()
-                    .state("FL")
-                    .city("Melbourne")
-                    .street("123 Main")
-                    .zip("12345")
+                CommunityCareEligibilityResponse.Coordinates.builder()
+                    .latitude(BigDecimal.ZERO)
+                    .longitude(BigDecimal.ZERO)
                     .build(),
                 30,
                 "PrimaryCare"))

@@ -1,6 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import java.util.Collections;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +33,12 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse nearbyFacilities(Address address, int driveMins, String serviceType) {
+  public VaFacilitiesResponse nearbyFacilities(
+      Coordinates coordinates, int driveMins, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
-            .queryParam("state", address.state())
-            .queryParam("city", address.city())
-            .queryParam("street_address", address.street())
-            .queryParam("zip", address.zip())
+            .queryParam("lat", coordinates.latitude())
+            .queryParam("lng", coordinates.longitude())
             .queryParam("drive_time", driveMins)
             .queryParam("type", "health")
             .queryParam("services[]", serviceType)
@@ -51,11 +50,9 @@ public class RestFacilitiesClient implements FacilitiesClient {
     headers.add("apiKey", vaFacilitiesApiKey);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     try {
-      VaFacilitiesResponse responseObject =
-          restTemplate
-              .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
-              .getBody();
-      return responseObject;
+      return restTemplate
+          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+          .getBody();
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
     }
