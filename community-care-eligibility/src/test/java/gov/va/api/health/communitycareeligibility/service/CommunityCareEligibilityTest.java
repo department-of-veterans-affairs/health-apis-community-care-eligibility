@@ -59,6 +59,8 @@ public final class CommunityCareEligibilityTest {
                             .id("FAC123")
                             .attributes(
                                 VaFacilitiesResponse.Attributes.builder()
+                                    .mobile(true)
+                                    .active("A")
                                     .lat(new BigDecimal("200"))
                                     .lng(new BigDecimal("100"))
                                     .address(
@@ -143,6 +145,8 @@ public final class CommunityCareEligibilityTest {
             .nearbyFacilities(
                 singletonList(
                     Facility.builder()
+                        .mobile(true)
+                        .active(true)
                         .id("FAC123")
                         .physicalAddress(Address.builder().street("911 fac st").state("FL").build())
                         .coordinates(
@@ -163,14 +167,14 @@ public final class CommunityCareEligibilityTest {
     assertThat(transformer.toFacility(null)).isNull();
 
     assertThat(transformer.toFacility(VaFacilitiesResponse.Facility.builder().build()))
-        .isEqualTo(Facility.builder().build());
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
 
     assertThat(
             transformer.toFacility(
                 VaFacilitiesResponse.Facility.builder()
                     .attributes(VaFacilitiesResponse.Attributes.builder().build())
                     .build()))
-        .isEqualTo(Facility.builder().build());
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
 
     assertThat(
             transformer.toFacility(
@@ -180,7 +184,7 @@ public final class CommunityCareEligibilityTest {
                             .address(VaFacilitiesResponse.Address.builder().build())
                             .build())
                     .build()))
-        .isEqualTo(Facility.builder().build());
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
 
     assertThat(
             transformer.toFacility(
@@ -194,7 +198,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build())
                     .build()))
-        .isEqualTo(Facility.builder().build());
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
   }
 
   @Test

@@ -13,7 +13,15 @@ import org.apache.commons.lang3.StringUtils;
 
 @Builder
 public class FacilityTransformer {
+
   @NonNull private final String serviceType;
+
+  private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility.attributes() == null || vaFacility.attributes().active() == null) {
+      return false;
+    }
+    return trimToNull(vaFacility.attributes().active()).equals("A");
+  }
 
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {
     VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
@@ -58,6 +66,13 @@ public class FacilityTransformer {
         .build();
   }
 
+  private static Boolean mobile(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility.attributes() == null || vaFacility.attributes().mobile() == null) {
+      return false;
+    }
+    return vaFacility.attributes().mobile();
+  }
+
   private static String name(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
@@ -94,6 +109,8 @@ public class FacilityTransformer {
         .coordinates(coordinates(vaFacility))
         .phoneNumber(phoneNumber(vaFacility))
         .website(website(vaFacility))
+        .mobile(mobile(vaFacility))
+        .active(active(vaFacility))
         .build();
   }
 }
