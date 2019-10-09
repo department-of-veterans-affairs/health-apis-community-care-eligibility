@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
@@ -17,10 +18,11 @@ public class FacilityTransformer {
   @NonNull private final String serviceType;
 
   private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility.attributes() == null || vaFacility.attributes().active() == null) {
+
+    if (vaFacility.attributes() == null) {
       return false;
     }
-    return trimToNull(vaFacility.attributes().active()).equals("A");
+    return equalsIgnoreCase(trimToNull(vaFacility.attributes().active()), "A");
   }
 
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {
