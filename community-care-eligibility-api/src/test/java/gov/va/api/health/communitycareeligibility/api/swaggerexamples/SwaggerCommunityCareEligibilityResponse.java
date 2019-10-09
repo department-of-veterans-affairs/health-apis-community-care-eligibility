@@ -76,6 +76,8 @@ class SwaggerCommunityCareEligibilityResponse {
                                   .latitude(new BigDecimal("196.418"))
                                   .longitude(new BigDecimal("317.811"))
                                   .build())
+                          .active(true)
+                          .mobile(false)
                           .phoneNumber("1-422-983-2040")
                           .website("https://www.va.gov")
                           .build()))
