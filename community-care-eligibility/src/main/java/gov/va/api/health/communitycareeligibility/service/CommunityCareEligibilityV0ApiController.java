@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.Builder;
@@ -188,7 +189,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   public CommunityCareEligibilityResponse search(
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
-      @NotBlank @RequestParam(value = "serviceType") String serviceType) {
+      @NotBlank @RequestParam(value = "serviceType") String serviceType,
+      @Max(value = 90) @RequestParam(value = "driveMin", defaultValue = "0") int extendedDriveMin) {
     if (isNotBlank(optSessionIdHeader)) {
       // Strip newlines for Spotbugs
       log.info(
@@ -197,7 +199,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(patientIcn),
           stripNewlines(serviceType));
     }
-
     String mappedServiceType = SERVICES_MAP.get(serviceType.trim());
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
@@ -208,10 +209,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .patientIcn(patientIcn.trim())
             .serviceType(mappedServiceType)
             .timestamp(Instant.now().toString())
-            .build());
+            .build(),
+        extendedDriveMin);
   }
 
-  private CommunityCareEligibilityResponse search(PatientRequest request) {
+  private CommunityCareEligibilityResponse search(PatientRequest request, int extendedDriveMin) {
     GetEESummaryResponse eeResponse = eeClient.requestEligibility(request.patientIcn());
     Instant timestamp = Instant.parse(request.timestamp());
     List<EligibilityCode> eligibilityCodes =
@@ -288,9 +290,27 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                             .build()
                             .toFacility(vaFacility))
                 .collect(Collectors.toList());
-    response.nearbyFacilities(nearbyFacilities);
-
     response.eligible(nearbyFacilities.isEmpty());
+
+    if (extendedDriveMin > 0) {
+      nearbyResponse =
+          facilitiesClient.nearbyFacilities(patientCoordinates, extendedDriveMin, serviceType);
+      nearbyFacilities =
+          nearbyResponse == null
+              ? Collections.emptyList()
+              : nearbyResponse
+                  .data()
+                  .stream()
+                  .map(
+                      vaFacility ->
+                          FacilityTransformer.builder()
+                              .serviceType(serviceType)
+                              .build()
+                              .toFacility(vaFacility))
+                  .collect(Collectors.toList());
+    }
+
+    response.nearbyFacilities(nearbyFacilities);
 
     return response.build();
   }

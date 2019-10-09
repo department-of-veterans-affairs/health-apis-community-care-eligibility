@@ -74,6 +74,36 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
+    when(facilitiesClient.nearbyFacilities(
+            Coordinates.builder()
+                .latitude(new BigDecimal("28.112506"))
+                .longitude(new BigDecimal("-80.7000423"))
+                .build(),
+            90,
+            "Audiology"))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC123")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .mobile(true)
+                                    .active("A")
+                                    .lat(new BigDecimal("200"))
+                                    .lng(new BigDecimal("100"))
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("911 fac st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
     when(client.requestEligibility("123"))
         .thenReturn(
@@ -117,7 +147,7 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology");
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology", 90);
     CommunityCareEligibilityResponse expected =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(
@@ -234,7 +264,8 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(1)
             .eeClient(eeClient)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("session-id", "123", "primarycare");
+    CommunityCareEligibilityResponse actual =
+        controller.search("session-id", "123", "primarycare", 0);
     assertThat(actual)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -277,7 +308,7 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController.builder()
         .eeClient(eeClient)
         .build()
-        .search("", "123", "PrimaryCare");
+        .search("", "123", "PrimaryCare", 0);
   }
 
   @Test(expected = Exceptions.MissingGeocodingInfoException.class)
@@ -285,7 +316,7 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController.builder()
         .eeClient(mock(EligibilityAndEnrollmentClient.class))
         .build()
-        .search("", "123", "PrimaryCare");
+        .search("", "123", "PrimaryCare", 0);
   }
 
   @Test
@@ -313,7 +344,7 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
             .build()
-            .search("", "123", "primarycare");
+            .search("", "123", "primarycare", 0);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -375,7 +406,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
             .build();
-    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare");
+    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare", 0);
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
@@ -421,7 +452,7 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController.builder()
         .eeClient(eeClient)
         .build()
-        .search("", "123", "PrimaryCare");
+        .search("", "123", "PrimaryCare", 0);
   }
 
   @SneakyThrows
@@ -461,7 +492,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(client)
             .maxDriveTimePrimary(1)
             .build();
-    controller.search("", "123", "Dentistry");
+    controller.search("", "123", "Dentistry", 0);
   }
 
   @Test
@@ -494,7 +525,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("", "123", "optometry");
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "optometry", 0);
     assertThat(actual)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
