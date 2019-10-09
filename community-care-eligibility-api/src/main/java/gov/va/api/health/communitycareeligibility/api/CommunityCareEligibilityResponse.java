@@ -107,6 +107,10 @@ public final class CommunityCareEligibilityResponse {
 
     Address physicalAddress;
 
+    Boolean mobile;
+
+    Boolean active;
+
     Coordinates coordinates;
 
     String phoneNumber;

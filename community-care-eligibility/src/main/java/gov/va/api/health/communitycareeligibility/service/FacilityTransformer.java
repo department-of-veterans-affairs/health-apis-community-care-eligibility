@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
@@ -13,7 +14,15 @@ import org.apache.commons.lang3.StringUtils;
 
 @Builder
 public class FacilityTransformer {
+
   @NonNull private final String serviceType;
+
+  private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility.attributes() == null) {
+      return false;
+    }
+    return equalsIgnoreCase(trimToNull(vaFacility.attributes().active()), "A");
+  }
 
   private static Address address(VaFacilitiesResponse.Facility vaFacility) {
     VaFacilitiesResponse.Attributes attributes = vaFacility.attributes();
@@ -58,6 +67,13 @@ public class FacilityTransformer {
         .build();
   }
 
+  private static Boolean mobile(VaFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility.attributes() == null || vaFacility.attributes().mobile() == null) {
+      return false;
+    }
+    return vaFacility.attributes().mobile();
+  }
+
   private static String name(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return null;
@@ -94,6 +110,8 @@ public class FacilityTransformer {
         .coordinates(coordinates(vaFacility))
         .phoneNumber(phoneNumber(vaFacility))
         .website(website(vaFacility))
+        .mobile(mobile(vaFacility))
+        .active(active(vaFacility))
         .build();
   }
 }

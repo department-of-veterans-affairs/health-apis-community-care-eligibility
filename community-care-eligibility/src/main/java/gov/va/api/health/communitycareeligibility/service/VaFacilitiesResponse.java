@@ -57,6 +57,11 @@ public final class VaFacilitiesResponse {
     private Phone phone;
 
     private String website;
+
+    private Boolean mobile;
+
+    @JsonProperty("active_status")
+    private String active;
   }
 
   @Data
