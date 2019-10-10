@@ -33,6 +33,7 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
+
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
@@ -74,6 +75,271 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state(" fL")
+                                                            .city("Melbourne ")
+                                                            .line1(" 66 pat St ")
+                                                            .line3("   ")
+                                                            .postalCode(" 12345 ")
+                                                            .zipPlus4(" 6789 ")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(new BigDecimal("28.112506"))
+                                        .addressLongitude(new BigDecimal("-80.7000423"))
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(facilitiesClient)
+            .eeClient(client)
+            .maxDriveTimePrimary(60)
+            .maxDriveTimeSpecialty(60)
+            .build();
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology", null);
+    CommunityCareEligibilityResponse expected =
+        CommunityCareEligibilityResponse.builder()
+            .patientRequest(
+                CommunityCareEligibilityResponse.PatientRequest.builder()
+                    .patientIcn("123")
+                    .timestamp(actual.patientRequest().timestamp())
+                    .serviceType("Audiology")
+                    .build())
+            .patientAddress(
+                Address.builder()
+                    .state("FL")
+                    .city("Melbourne")
+                    .zip("12345-6789")
+                    .street("66 pat St")
+                    .build())
+            .patientCoordinates(
+                Coordinates.builder()
+                    .latitude(new BigDecimal("28.112506"))
+                    .longitude(new BigDecimal("-80.7000423"))
+                    .build())
+            .eligible(false)
+            .eligibilityCodes(emptyList())
+            .grandfathered(false)
+            .noFullServiceVaMedicalFacility(false)
+            .nearbyFacilities(
+                singletonList(
+                    Facility.builder()
+                        .mobile(true)
+                        .active(true)
+                        .id("FAC123")
+                        .physicalAddress(Address.builder().street("911 fac st").state("FL").build())
+                        .coordinates(
+                            Coordinates.builder()
+                                .latitude(new BigDecimal("200"))
+                                .longitude(new BigDecimal("100"))
+                                .build())
+                        .build()))
+            .build();
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  @SneakyThrows
+  public void facilityTransformerNullChecks() {
+    FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
+    assertThat(transformer.toFacility(null)).isNull();
+    assertThat(transformer.toFacility(VaFacilitiesResponse.Facility.builder().build()))
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
+                    .build()))
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(
+                        VaFacilitiesResponse.Attributes.builder()
+                            .address(VaFacilitiesResponse.Address.builder().build())
+                            .build())
+                    .build()))
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder()
+                    .attributes(
+                        VaFacilitiesResponse.Attributes.builder()
+                            .address(
+                                VaFacilitiesResponse.Address.builder()
+                                    .physical(
+                                        VaFacilitiesResponse.PhysicalAddress.builder().build())
+                                    .build())
+                            .build())
+                    .build()))
+        .isEqualTo(Facility.builder().mobile(false).active(false).build());
+  }
+
+  @Test
+  @SneakyThrows
+  public void hardship() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .eligibilities(
+                                    VceEligibilityCollection.builder()
+                                        .eligibility(
+                                            singletonList(
+                                                VceEligibilityInfo.builder()
+                                                    .vceCode("H")
+                                                    .vceDescription("Hardship")
+                                                    .vceEffectiveDate(
+                                                        parseXmlGregorianCalendar(
+                                                            "2019-03-27T14:37:48Z"))
+                                                    .build()))
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .maxDriveTimePrimary(1)
+            .eeClient(eeClient)
+            .build();
+    CommunityCareEligibilityResponse actual =
+        controller.search("session-id", "123", "primarycare", null);
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .timestamp(actual.patientRequest().timestamp())
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .eligible(true)
+                .eligibilityCodes(
+                    Collections.singletonList(
+                        CommunityCareEligibilityResponse.EligibilityCode.builder()
+                            .description("Hardship")
+                            .code("H")
+                            .build()))
+                .build());
+  }
+
+  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
+  public void incompleteGeocodingInfo() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(BigDecimal.ZERO)
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityV0ApiController.builder()
+        .eeClient(eeClient)
+        .build()
+        .search("", "123", "PrimaryCare", null);
+  }
+
+  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
+  public void missingGeocodingInfo() {
+    CommunityCareEligibilityV0ApiController.builder()
+        .eeClient(mock(EligibilityAndEnrollmentClient.class))
+        .build()
+        .search("", "123", "PrimaryCare", null);
+  }
+
+  @Test
+  @SneakyThrows
+  public void noFacilities() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(BigDecimal.ZERO)
+                                        .addressLongitude(BigDecimal.ONE)
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .build()
+            .search("", "123", "primarycare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .timestamp(result.patientRequest().timestamp())
+                        .serviceType("PrimaryCare")
+                        .build())
+                .patientCoordinates(
+                    Coordinates.builder()
+                        .latitude(BigDecimal.ZERO)
+                        .longitude(BigDecimal.ONE)
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .eligible(true)
+                .build());
+  }
+
+  @Test
+  @SneakyThrows
+  public void noFacilityWithinDefaultRangeButPopulateWithExtendedRange() {
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    when(facilitiesClient.nearbyFacilities(
+            Coordinates.builder()
+                .latitude(new BigDecimal("28.112506"))
+                .longitude(new BigDecimal("-80.7000423"))
+                .build(),
+            60,
+            "Audiology"))
+        .thenReturn(VaFacilitiesResponse.builder().build());
     when(facilitiesClient.nearbyFacilities(
             Coordinates.builder()
                 .latitude(new BigDecimal("28.112506"))
@@ -155,6 +421,7 @@ public final class CommunityCareEligibilityTest {
                     .patientIcn("123")
                     .timestamp(actual.patientRequest().timestamp())
                     .serviceType("Audiology")
+                    .extendedDriveMin(90)
                     .build())
             .patientAddress(
                 Address.builder()
@@ -168,7 +435,7 @@ public final class CommunityCareEligibilityTest {
                     .latitude(new BigDecimal("28.112506"))
                     .longitude(new BigDecimal("-80.7000423"))
                     .build())
-            .eligible(false)
+            .eligible(true)
             .eligibilityCodes(emptyList())
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
@@ -187,182 +454,6 @@ public final class CommunityCareEligibilityTest {
                         .build()))
             .build();
     assertThat(actual).isEqualTo(expected);
-  }
-
-  @Test
-  @SneakyThrows
-  public void facilityTransformerNullChecks() {
-    FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
-
-    assertThat(transformer.toFacility(null)).isNull();
-
-    assertThat(transformer.toFacility(VaFacilitiesResponse.Facility.builder().build()))
-        .isEqualTo(Facility.builder().mobile(false).active(false).build());
-
-    assertThat(
-            transformer.toFacility(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(VaFacilitiesResponse.Attributes.builder().build())
-                    .build()))
-        .isEqualTo(Facility.builder().mobile(false).active(false).build());
-
-    assertThat(
-            transformer.toFacility(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(
-                        VaFacilitiesResponse.Attributes.builder()
-                            .address(VaFacilitiesResponse.Address.builder().build())
-                            .build())
-                    .build()))
-        .isEqualTo(Facility.builder().mobile(false).active(false).build());
-
-    assertThat(
-            transformer.toFacility(
-                VaFacilitiesResponse.Facility.builder()
-                    .attributes(
-                        VaFacilitiesResponse.Attributes.builder()
-                            .address(
-                                VaFacilitiesResponse.Address.builder()
-                                    .physical(
-                                        VaFacilitiesResponse.PhysicalAddress.builder().build())
-                                    .build())
-                            .build())
-                    .build()))
-        .isEqualTo(Facility.builder().mobile(false).active(false).build());
-  }
-
-  @Test
-  @SneakyThrows
-  public void hardship() {
-    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    when(eeClient.requestEligibility("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .communityCareEligibilityInfo(
-                            CommunityCareEligibilityInfo.builder()
-                                .eligibilities(
-                                    VceEligibilityCollection.builder()
-                                        .eligibility(
-                                            singletonList(
-                                                VceEligibilityInfo.builder()
-                                                    .vceCode("H")
-                                                    .vceDescription("Hardship")
-                                                    .vceEffectiveDate(
-                                                        parseXmlGregorianCalendar(
-                                                            "2019-03-27T14:37:48Z"))
-                                                    .build()))
-                                        .build())
-                                .build())
-                        .build())
-                .build());
-
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(mock(FacilitiesClient.class))
-            .maxDriveTimePrimary(1)
-            .eeClient(eeClient)
-            .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("session-id", "123", "primarycare", 0);
-    assertThat(actual)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .patientRequest(
-                    CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .timestamp(actual.patientRequest().timestamp())
-                        .patientIcn("123")
-                        .serviceType("PrimaryCare")
-                        .build())
-                .grandfathered(false)
-                .noFullServiceVaMedicalFacility(false)
-                .eligible(true)
-                .eligibilityCodes(
-                    Collections.singletonList(
-                        CommunityCareEligibilityResponse.EligibilityCode.builder()
-                            .description("Hardship")
-                            .code("H")
-                            .build()))
-                .build());
-  }
-
-  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
-  public void incompleteGeocodingInfo() {
-    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    when(eeClient.requestEligibility("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .communityCareEligibilityInfo(
-                            CommunityCareEligibilityInfo.builder()
-                                .geocodingInfo(
-                                    GeocodingInfo.builder()
-                                        .addressLatitude(BigDecimal.ZERO)
-                                        .build())
-                                .build())
-                        .build())
-                .build());
-
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(eeClient)
-        .build()
-        .search("", "123", "PrimaryCare", 0);
-  }
-
-  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
-  public void missingGeocodingInfo() {
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(mock(EligibilityAndEnrollmentClient.class))
-        .build()
-        .search("", "123", "PrimaryCare", 0);
-  }
-
-  @Test
-  @SneakyThrows
-  public void noFacilities() {
-    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
-    when(client.requestEligibility("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .communityCareEligibilityInfo(
-                            CommunityCareEligibilityInfo.builder()
-                                .geocodingInfo(
-                                    GeocodingInfo.builder()
-                                        .addressLatitude(BigDecimal.ZERO)
-                                        .addressLongitude(BigDecimal.ONE)
-                                        .build())
-                                .build())
-                        .build())
-                .build());
-
-    CommunityCareEligibilityResponse result =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(client)
-            .build()
-            .search("", "123", "primarycare", 0);
-    assertThat(result)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .patientRequest(
-                    CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .patientIcn("123")
-                        .timestamp(result.patientRequest().timestamp())
-                        .serviceType("PrimaryCare")
-                        .build())
-                .patientCoordinates(
-                    Coordinates.builder()
-                        .latitude(BigDecimal.ZERO)
-                        .longitude(BigDecimal.ONE)
-                        .build())
-                .grandfathered(false)
-                .noFullServiceVaMedicalFacility(false)
-                .eligible(true)
-                .build());
   }
 
   @Test
@@ -406,7 +497,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
             .build();
-    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare", 0);
+    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare", null);
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
@@ -448,11 +539,10 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     CommunityCareEligibilityV0ApiController.builder()
         .eeClient(eeClient)
         .build()
-        .search("", "123", "PrimaryCare", 0);
+        .search("", "123", "PrimaryCare", null);
   }
 
   @SneakyThrows
@@ -492,7 +582,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(client)
             .maxDriveTimePrimary(1)
             .build();
-    controller.search("", "123", "Dentistry", 0);
+    controller.search("", "123", "Dentistry", null);
   }
 
   @Test
@@ -518,14 +608,13 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(eeClient)
             .maxDriveTimePrimary(60)
             .build();
-    CommunityCareEligibilityResponse actual = controller.search("", "123", "optometry", 0);
+    CommunityCareEligibilityResponse actual = controller.search("", "123", "optometry", null);
     assertThat(actual)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()

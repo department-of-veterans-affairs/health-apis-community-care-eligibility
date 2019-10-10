@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -108,11 +109,12 @@ public interface CommunityCareEligibilityService {
           String serviceType,
       @Parameter(
             in = ParameterIn.QUERY,
-            name = "driveMin",
+            name = "extendedDriveMin",
             description =
                 "Optional field user provided drive radius for VA Facilities;"
                     + " does not impact eligibility"
           )
+          @Min(0)
           @Max(90)
-          int driveMin);
+          Integer driveMin);
 }

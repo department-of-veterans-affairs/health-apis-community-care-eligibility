@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.Builder;
@@ -190,7 +191,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
-      @Max(value = 90) @RequestParam(value = "driveMin", defaultValue = "0") int extendedDriveMin) {
+      @Max(value = 90) @Min(value = 0) @RequestParam(value = "extendedDriveMin", required = false)
+          Integer extendedDriveMin) {
     if (isNotBlank(optSessionIdHeader)) {
       // Strip newlines for Spotbugs
       log.info(
@@ -209,11 +211,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .patientIcn(patientIcn.trim())
             .serviceType(mappedServiceType)
             .timestamp(Instant.now().toString())
-            .build(),
-        extendedDriveMin);
+            .extendedDriveMin(extendedDriveMin)
+            .build());
   }
 
-  private CommunityCareEligibilityResponse search(PatientRequest request, int extendedDriveMin) {
+  private CommunityCareEligibilityResponse search(PatientRequest request) {
     GetEESummaryResponse eeResponse = eeClient.requestEligibility(request.patientIcn());
     Instant timestamp = Instant.parse(request.timestamp());
     List<EligibilityCode> eligibilityCodes =
@@ -292,9 +294,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 .collect(Collectors.toList());
     response.eligible(nearbyFacilities.isEmpty());
 
-    if (extendedDriveMin > 0) {
+    if (request.extendedDriveMin() != null && request.extendedDriveMin().intValue() > driveMins) {
       nearbyResponse =
-          facilitiesClient.nearbyFacilities(patientCoordinates, extendedDriveMin, serviceType);
+          facilitiesClient.nearbyFacilities(
+              patientCoordinates, request.extendedDriveMin(), serviceType);
       nearbyFacilities =
           nearbyResponse == null
               ? Collections.emptyList()

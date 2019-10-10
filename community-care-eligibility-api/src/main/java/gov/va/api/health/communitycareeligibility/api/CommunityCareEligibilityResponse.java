@@ -130,5 +130,7 @@ public final class CommunityCareEligibilityResponse {
     String serviceType;
 
     String timestamp;
+
+    Integer extendedDriveMin;
   }
 }
