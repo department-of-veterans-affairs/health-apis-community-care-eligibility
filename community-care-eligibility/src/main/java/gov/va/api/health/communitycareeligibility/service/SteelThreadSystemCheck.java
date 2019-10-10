@@ -1,6 +1,8 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
+import gov.va.api.health.queenelizabeth.ee.QueenElizabethService;
+import gov.va.api.health.queenelizabeth.ee.exceptions.EligibilitiesException;
 import java.math.BigDecimal;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,7 @@ public class SteelThreadSystemCheck implements HealthIndicator {
 
   private static final String SERVICE_TYPE = "PrimaryCare";
 
-  private final EligibilityAndEnrollmentClient eeClient;
+  private final QueenElizabethService eeClient;
 
   private final FacilitiesClient facilitiesClient;
 
@@ -39,7 +41,7 @@ public class SteelThreadSystemCheck implements HealthIndicator {
 
   /** 'By hand' all args constructor is required to inject non-string values from our properties. */
   public SteelThreadSystemCheck(
-      @Autowired EligibilityAndEnrollmentClient eeClient,
+      @Autowired QueenElizabethService eeClient,
       @Autowired FacilitiesClient facilitiesClient,
       @Value("${health-check.icn}") String icn,
       @Autowired SteelThreadSystemCheckLedger ledger,
@@ -91,13 +93,13 @@ public class SteelThreadSystemCheck implements HealthIndicator {
     log.info("Performing health check.");
 
     try {
-      eeClient.requestEligibility(icn);
+      eeClient.getEeSummary(icn);
       facilitiesClient.nearbyFacilities(COORDINATES, DRIVE_MINS, SERVICE_TYPE);
       ledger.recordSuccess();
     } catch (HttpServerErrorException
         | HttpClientErrorException
         | ResourceAccessException
-        | Exceptions.EeUnavailableException
+        | EligibilitiesException
         | Exceptions.FacilitiesUnavailableException e) {
       int consecutiveFailures = ledger.recordFailure();
       log.error("Failed to complete health check. Failure count is " + consecutiveFailures);

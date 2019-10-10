@@ -11,7 +11,7 @@
   <version>2.0.7-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
-    <ee-client.version>2.0.6</ee-client.version>
+    <ee-client.version>3.0.0-SNAPSHOT</ee-client.version>
     <jacoco.coverage>0.89</jacoco.coverage>
   </properties>
   <dependencies>
@@ -27,11 +27,6 @@
     <dependency>
       <groupId>gov.va.api.health</groupId>
       <artifactId>hand-of-queen-elizabeth</artifactId>
-      <version>${ee-client.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>gov.va.api.health</groupId>
-      <artifactId>ee-artifacts</artifactId>
       <version>${ee-client.version}</version>
     </dependency>
     <dependency>

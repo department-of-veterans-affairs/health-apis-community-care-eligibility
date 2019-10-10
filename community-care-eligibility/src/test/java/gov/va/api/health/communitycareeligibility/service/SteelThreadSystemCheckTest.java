@@ -5,6 +5,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gov.va.api.health.queenelizabeth.ee.QueenElizabethService;
+import gov.va.api.health.queenelizabeth.ee.exceptions.RequestFailed;
+import gov.va.api.health.queenelizabeth.ee.handlers.BaseFaultSoapHandler;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,9 +18,11 @@ import org.springframework.boot.actuate.health.Status;
 
 public class SteelThreadSystemCheckTest {
 
+  private static final String TEST_ICN = "123";
+
   private final int failureThresholdForTests = 5;
 
-  @Mock EligibilityAndEnrollmentClient eeClient;
+  @Mock QueenElizabethService eeClient;
 
   @Mock FacilitiesClient facilitiesClient;
 
@@ -32,7 +37,7 @@ public class SteelThreadSystemCheckTest {
   public void healthCheckHappyPath() {
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
+            eeClient, facilitiesClient, TEST_ICN, ledger, failureThresholdForTests);
     when(ledger.getConsecutiveFailureCount()).thenReturn(failureThresholdForTests - 1);
     assertThat(test.health().getStatus()).isEqualTo(Status.UP);
   }
@@ -41,7 +46,7 @@ public class SteelThreadSystemCheckTest {
   public void healthCheckSadPath() {
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
+            eeClient, facilitiesClient, TEST_ICN, ledger, failureThresholdForTests);
     when(ledger.getConsecutiveFailureCount()).thenReturn(failureThresholdForTests);
     assertThat(test.health().getStatus()).isEqualTo(Status.DOWN);
   }
@@ -61,8 +66,8 @@ public class SteelThreadSystemCheckTest {
     GetEESummaryResponse root = new GetEESummaryResponse();
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
-    when(eeClient.requestEligibility(Mockito.any())).thenReturn(root);
+            eeClient, facilitiesClient, TEST_ICN, ledger, failureThresholdForTests);
+    when(eeClient.getEeSummary(TEST_ICN)).thenReturn(root);
     test.runSteelThreadCheckAsynchronously();
     verify(ledger, times(1)).recordSuccess();
   }
@@ -75,7 +80,7 @@ public class SteelThreadSystemCheckTest {
   public void runSteelThreadHappyPathFacilities() {
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
+            eeClient, facilitiesClient, TEST_ICN, ledger, failureThresholdForTests);
     when(facilitiesClient.nearbyFacilities(Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
         .thenReturn(VaFacilitiesResponse.builder().build());
     test.runSteelThreadCheckAsynchronously();
@@ -90,9 +95,9 @@ public class SteelThreadSystemCheckTest {
   public void runSteelThreadSadPathEe() {
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
-    when(eeClient.requestEligibility(Mockito.any()))
-        .thenThrow(new Exceptions.EeUnavailableException(new Throwable()));
+            eeClient, facilitiesClient, TEST_ICN, ledger, failureThresholdForTests);
+    when(eeClient.getEeSummary(TEST_ICN))
+        .thenThrow(new RequestFailed(BaseFaultSoapHandler.FAULT_UNKNOWN_MESSAGE));
     when(ledger.recordFailure()).thenReturn(failureThresholdForTests);
     test.runSteelThreadCheckAsynchronously();
     verify(ledger, times(1)).recordFailure();
@@ -106,7 +111,7 @@ public class SteelThreadSystemCheckTest {
   public void runSteelThreadSadPathFacilities() {
     SteelThreadSystemCheck test =
         new SteelThreadSystemCheck(
-            eeClient, facilitiesClient, "123", ledger, failureThresholdForTests);
+            eeClient, facilitiesClient, TEST_ICN, ledger, failureThresholdForTests);
     when(facilitiesClient.nearbyFacilities(Mockito.any(), Mockito.anyInt(), Mockito.anyString()))
         .thenThrow(new Exceptions.FacilitiesUnavailableException(new Throwable()));
     when(ledger.recordFailure()).thenReturn(failureThresholdForTests);
