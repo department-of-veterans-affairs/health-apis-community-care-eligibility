@@ -29,7 +29,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.Builder;
@@ -191,8 +190,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
-      @Max(value = 90) @Min(value = 0) @RequestParam(value = "extendedDriveMin", required = false)
+      @Max(value = 90) @RequestParam(value = "extendedDriveMin", required = false)
           Integer extendedDriveMin) {
+
+    if (serviceType.equalsIgnoreCase("primarycare")) {
+      if (extendedDriveMin != null && maxDriveMinsPrimary > extendedDriveMin.intValue()) {
+        throw new Exceptions.InvalidExtendedDriveMin(maxDriveMinsPrimary);
+      }
+    } else {
+      if (extendedDriveMin != null && maxDriveMinsSpecialty > extendedDriveMin.intValue()) {
+        throw new Exceptions.InvalidExtendedDriveMin(maxDriveMinsSpecialty);
+      }
+    }
+
     if (isNotBlank(optSessionIdHeader)) {
       // Strip newlines for Spotbugs
       log.info(
@@ -294,7 +304,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 .collect(Collectors.toList());
     response.eligible(nearbyFacilities.isEmpty());
 
-    if (request.extendedDriveMin() != null && request.extendedDriveMin().intValue() > driveMins) {
+    if (request.extendedDriveMin() != null) {
       nearbyResponse =
           facilitiesClient.nearbyFacilities(
               patientCoordinates, request.extendedDriveMin(), serviceType);

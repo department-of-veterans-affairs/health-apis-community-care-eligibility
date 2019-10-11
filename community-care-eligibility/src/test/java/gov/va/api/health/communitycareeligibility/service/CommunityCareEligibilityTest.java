@@ -275,6 +275,46 @@ public final class CommunityCareEligibilityTest {
         .search("", "123", "PrimaryCare", null);
   }
 
+  @SneakyThrows
+  @Test(expected = Exceptions.InvalidExtendedDriveMin.class)
+  public void invalidDriveMin() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state("FL")
+                                                            .city("Melbourne")
+                                                            .line1("66 Main St")
+                                                            .line2("")
+                                                            .line3("")
+                                                            .zipcode("12345")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .maxDriveTimePrimary(30)
+            .build();
+    controller.search("", "123", "PrimaryCare", 20);
+  }
+
   @Test(expected = Exceptions.MissingGeocodingInfoException.class)
   public void missingGeocodingInfo() {
     CommunityCareEligibilityV0ApiController.builder()

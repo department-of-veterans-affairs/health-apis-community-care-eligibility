@@ -39,6 +39,12 @@ final class Exceptions {
     }
   }
 
+  static final class InvalidExtendedDriveMin extends RuntimeException {
+    InvalidExtendedDriveMin(int defaultDriveTime) {
+      super("extendedDriveMin value must be greater than the default value of " + defaultDriveTime);
+    }
+  }
+
   static final class UnknownServiceTypeException extends RuntimeException {
     UnknownServiceTypeException(String serviceType) {
       super("Unknown service type: " + serviceType);
