@@ -77,7 +77,7 @@ smokeTest() {
   doCurl 200 $TOKEN
 
   # extendedDriveMin parameter greater than 90
-  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT&extendedDriveMin=91"
+  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT&extendedDriveMin=100"
   doCurl 400 $TOKEN
 
   # extendedDriveMin parameter negative value
