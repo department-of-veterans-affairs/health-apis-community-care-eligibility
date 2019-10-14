@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 )
 @Schema(example = "SWAGGER_EXAMPLE_COMMUNITY_CARE_ELIGIBILITY_RESPONSE")
 public final class CommunityCareEligibilityResponse {
-
   PatientRequest patientRequest;
 
   List<EligibilityCode> eligibilityCodes;
@@ -60,7 +59,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
-
     String street;
 
     String city;
@@ -76,7 +74,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Coordinates {
-
     BigDecimal latitude;
 
     BigDecimal longitude;
@@ -88,7 +85,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class EligibilityCode {
-
     String description;
 
     String code;
@@ -100,7 +96,6 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Facility {
-
     String id;
 
     String name;
@@ -124,10 +119,11 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class PatientRequest {
-
     String patientIcn;
 
     String serviceType;
+
+    Integer extendedDriveMin;
 
     String timestamp;
   }

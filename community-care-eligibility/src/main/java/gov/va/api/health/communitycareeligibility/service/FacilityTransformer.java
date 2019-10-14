@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 
 @Builder
 public class FacilityTransformer {
-
   @NonNull private final String serviceType;
 
   private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {

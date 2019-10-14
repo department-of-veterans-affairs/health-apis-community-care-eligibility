@@ -76,6 +76,14 @@ smokeTest() {
   path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 200 $TOKEN
 
+  # extendedDriveMin parameter greater than 90
+  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT&extendedDriveMin=100"
+  doCurl 400 $TOKEN
+
+  # extendedDriveMin parameter negative value
+  path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT&extendedDriveMin=-1"
+  doCurl 400 $TOKEN
+
   # Token validation
   path="/search?serviceType=$SERVICE_TYPE&patient=$PATIENT"
   doCurl 401 "BADTOKEN"
