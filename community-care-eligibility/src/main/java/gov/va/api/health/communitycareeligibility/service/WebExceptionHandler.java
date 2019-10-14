@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class WebExceptionHandler {
   @ExceptionHandler({
     ConstraintViolationException.class,
-    Exceptions.UnknownServiceTypeException.class,
-    Exceptions.InvalidExtendedDriveMin.class
+    Exceptions.InvalidExtendedDriveMin.class,
+    Exceptions.UnknownServiceTypeException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorResponse.BadRequest handleBadRequest(Exception e) {

@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 public final class RestFacilitiesClientTest {
-
   @Test
   @SuppressWarnings("unchecked")
   public void nearbyFacilities() {

@@ -110,8 +110,9 @@ public interface CommunityCareEligibilityService {
             in = ParameterIn.QUERY,
             name = "extendedDriveMin",
             description =
-                "Provided drive radius for VA Facilities does not impact eligibility;"
-                    + " must be greater than configured drive time for service type"
+                "Optional extended drive-radius to include more VA medical facilities in response"
+                    + " (Does not change overall eligibility."
+                    + " Must exceed standard drive time for service-type.)"
           )
           @Max(90)
           Integer driveMin);

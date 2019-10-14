@@ -33,7 +33,6 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
-
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
@@ -277,39 +276,11 @@ public final class CommunityCareEligibilityTest {
 
   @SneakyThrows
   @Test(expected = Exceptions.InvalidExtendedDriveMin.class)
-  public void invalidDriveMin() {
-    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
-    when(client.requestEligibility("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .demographics(
-                            DemographicInfo.builder()
-                                .contactInfo(
-                                    ContactInfo.builder()
-                                        .addresses(
-                                            AddressCollection.builder()
-                                                .address(
-                                                    asList(
-                                                        AddressInfo.builder()
-                                                            .addressTypeCode("Residential")
-                                                            .state("FL")
-                                                            .city("Melbourne")
-                                                            .line1("66 Main St")
-                                                            .line2("")
-                                                            .line3("")
-                                                            .zipcode("12345")
-                                                            .build()))
-                                                .build())
-                                        .build())
-                                .build())
-                        .build())
-                .build());
+  public void invalidExtendedDriveMin() {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(client)
+            .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .maxDriveTimePrimary(30)
             .build();
     controller.search("", "123", "PrimaryCare", 20);
@@ -410,32 +381,13 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
+
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
     when(client.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
                     EeSummary.builder()
-                        .demographics(
-                            DemographicInfo.builder()
-                                .contactInfo(
-                                    ContactInfo.builder()
-                                        .addresses(
-                                            AddressCollection.builder()
-                                                .address(
-                                                    asList(
-                                                        AddressInfo.builder()
-                                                            .addressTypeCode("Residential")
-                                                            .state(" fL")
-                                                            .city("Melbourne ")
-                                                            .line1(" 66 pat St ")
-                                                            .line3("   ")
-                                                            .postalCode(" 12345 ")
-                                                            .zipPlus4(" 6789 ")
-                                                            .build()))
-                                                .build())
-                                        .build())
-                                .build())
                         .communityCareEligibilityInfo(
                             CommunityCareEligibilityInfo.builder()
                                 .geocodingInfo(
@@ -446,6 +398,7 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
+
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -453,47 +406,41 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
             .build();
+
     CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology", 90);
-    CommunityCareEligibilityResponse expected =
-        CommunityCareEligibilityResponse.builder()
-            .patientRequest(
-                CommunityCareEligibilityResponse.PatientRequest.builder()
-                    .patientIcn("123")
-                    .timestamp(actual.patientRequest().timestamp())
-                    .serviceType("Audiology")
-                    .extendedDriveMin(90)
-                    .build())
-            .patientAddress(
-                Address.builder()
-                    .state("FL")
-                    .city("Melbourne")
-                    .zip("12345-6789")
-                    .street("66 pat St")
-                    .build())
-            .patientCoordinates(
-                Coordinates.builder()
-                    .latitude(new BigDecimal("28.112506"))
-                    .longitude(new BigDecimal("-80.7000423"))
-                    .build())
-            .eligible(true)
-            .eligibilityCodes(emptyList())
-            .grandfathered(false)
-            .noFullServiceVaMedicalFacility(false)
-            .nearbyFacilities(
-                singletonList(
-                    Facility.builder()
-                        .mobile(true)
-                        .active(true)
-                        .id("FAC123")
-                        .physicalAddress(Address.builder().street("911 fac st").state("FL").build())
-                        .coordinates(
-                            Coordinates.builder()
-                                .latitude(new BigDecimal("200"))
-                                .longitude(new BigDecimal("100"))
-                                .build())
-                        .build()))
-            .build();
-    assertThat(actual).isEqualTo(expected);
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("Audiology")
+                        .extendedDriveMin(90)
+                        .timestamp(actual.patientRequest().timestamp())
+                        .build())
+                .patientCoordinates(
+                    Coordinates.builder()
+                        .latitude(new BigDecimal("28.112506"))
+                        .longitude(new BigDecimal("-80.7000423"))
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .nearbyFacilities(
+                    singletonList(
+                        Facility.builder()
+                            .mobile(true)
+                            .active(true)
+                            .id("FAC123")
+                            .physicalAddress(
+                                Address.builder().street("911 fac st").state("FL").build())
+                            .coordinates(
+                                Coordinates.builder()
+                                    .latitude(new BigDecimal("200"))
+                                    .longitude(new BigDecimal("100"))
+                                    .build())
+                            .build()))
+                .eligible(true)
+                .build());
   }
 
   @Test

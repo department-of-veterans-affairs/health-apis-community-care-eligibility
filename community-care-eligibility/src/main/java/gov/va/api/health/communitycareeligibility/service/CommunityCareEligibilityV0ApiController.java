@@ -192,17 +192,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @Max(value = 90) @RequestParam(value = "extendedDriveMin", required = false)
           Integer extendedDriveMin) {
-
-    if (serviceType.equalsIgnoreCase("primarycare")) {
-      if (extendedDriveMin != null && maxDriveMinsPrimary > extendedDriveMin.intValue()) {
-        throw new Exceptions.InvalidExtendedDriveMin(maxDriveMinsPrimary);
-      }
-    } else {
-      if (extendedDriveMin != null && maxDriveMinsSpecialty > extendedDriveMin.intValue()) {
-        throw new Exceptions.InvalidExtendedDriveMin(maxDriveMinsSpecialty);
-      }
-    }
-
     if (isNotBlank(optSessionIdHeader)) {
       // Strip newlines for Spotbugs
       log.info(
@@ -211,6 +200,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(patientIcn),
           stripNewlines(serviceType));
     }
+
+    final int driveMins =
+        equalsIgnoreCase(serviceType, "primarycare") ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
+    if (extendedDriveMin != null && extendedDriveMin <= driveMins) {
+      throw new Exceptions.InvalidExtendedDriveMin(serviceType, extendedDriveMin, driveMins);
+    }
+
     String mappedServiceType = SERVICES_MAP.get(serviceType.trim());
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
@@ -220,8 +216,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
             .serviceType(mappedServiceType)
-            .timestamp(Instant.now().toString())
             .extendedDriveMin(extendedDriveMin)
+            .timestamp(Instant.now().toString())
             .build());
   }
 
@@ -302,16 +298,17 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                             .build()
                             .toFacility(vaFacility))
                 .collect(Collectors.toList());
+    response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
 
     if (request.extendedDriveMin() != null) {
-      nearbyResponse =
+      VaFacilitiesResponse extendedResponse =
           facilitiesClient.nearbyFacilities(
               patientCoordinates, request.extendedDriveMin(), serviceType);
-      nearbyFacilities =
-          nearbyResponse == null
+      List<Facility> extendedFacilities =
+          extendedResponse == null
               ? Collections.emptyList()
-              : nearbyResponse
+              : extendedResponse
                   .data()
                   .stream()
                   .map(
@@ -321,9 +318,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                               .build()
                               .toFacility(vaFacility))
                   .collect(Collectors.toList());
+      response.nearbyFacilities(extendedFacilities);
     }
-
-    response.nearbyFacilities(nearbyFacilities);
 
     return response.build();
   }
