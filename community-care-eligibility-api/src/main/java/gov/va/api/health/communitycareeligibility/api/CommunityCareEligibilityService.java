@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -104,5 +105,15 @@ public interface CommunityCareEligibilityService {
                 )
           )
           @NotBlank
-          String serviceType);
+          String serviceType,
+      @Parameter(
+            in = ParameterIn.QUERY,
+            name = "extendedDriveMin",
+            description =
+                "Optional extended drive-radius to include more VA medical facilities in response"
+                    + " (Does not change overall eligibility."
+                    + " Must exceed standard drive time for service-type.)"
+          )
+          @Max(90)
+          Integer driveMin);
 }

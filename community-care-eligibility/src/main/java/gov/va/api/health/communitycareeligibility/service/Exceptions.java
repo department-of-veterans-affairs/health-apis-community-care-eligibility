@@ -17,6 +17,16 @@ final class Exceptions {
     }
   }
 
+  static final class InvalidExtendedDriveMin extends RuntimeException {
+    InvalidExtendedDriveMin(String serviceType, int extendedDriveMins, int driveMins) {
+      super(
+          String.format(
+              "Extended drive-radius (%s mins) does not exceed"
+                  + " standard drive-radius (%s mins) for service-type '%s'",
+              extendedDriveMins, driveMins, serviceType));
+    }
+  }
+
   static final class MissingGeocodingInfoException extends RuntimeException {
     MissingGeocodingInfoException(String patientIcn) {
       super("No geocoding information found for ICN: " + patientIcn);
