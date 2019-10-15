@@ -11,7 +11,7 @@
   <version>2.0.7-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
-    <ee-client.version>3.0.0-SNAPSHOT</ee-client.version>
+    <ee-client.version>3.0.1</ee-client.version>
     <jacoco.coverage>0.89</jacoco.coverage>
   </properties>
   <dependencies>
