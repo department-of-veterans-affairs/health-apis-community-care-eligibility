@@ -15,7 +15,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService;
 import gov.va.api.health.queenelizabeth.ee.QueenElizabethService;
-import gov.va.api.health.queenelizabeth.ee.exceptions.EligibilitiesException;
 import gov.va.api.health.queenelizabeth.ee.exceptions.PersonNotFound;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
@@ -193,7 +192,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       return eeClient.getEeSummary(icn);
     } catch (PersonNotFound e) {
       throw new Exceptions.UnknownPatientIcnException(icn, e);
-    } catch (EligibilitiesException e) {
+    } catch (Exception e) {
       throw new Exceptions.EeUnavailableException(e);
     }
   }
