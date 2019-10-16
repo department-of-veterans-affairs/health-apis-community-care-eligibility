@@ -14,11 +14,6 @@ Options
 
 Secrets Configuration
  This bash file is sourced and expected to set the following variables
- - EE_ENDPOINT_URL
- - EE_HEADER_PASSWORD
- - EE_HEADER_USERNAME
- - EE_TRUSTSTORE_PASSWORD
- - KEYSTORE_PASSWORD
  - VA_FACILITIES_API_KEY
  - VA_FACILITIES_URL
 
@@ -52,11 +47,6 @@ echo "Loading secrets: $SECRETS"
 . $SECRETS
 
 MISSING_SECRETS=false
-[ -z "$EE_ENDPOINT_URL" ] && echo "Missing configuration: EE_ENDPOINT_URL" && MISSING_SECRETS=true
-[ -z "$EE_HEADER_PASSWORD" ] && echo "Missing configuration: EE_HEADER_PASSWORD" && MISSING_SECRETS=true
-[ -z "$EE_HEADER_USERNAME" ] && echo "Missing configuration: EE_HEADER_USERNAME" && MISSING_SECRETS=true
-[ -z "$EE_TRUSTSTORE_PASSWORD" ] && echo "Missing configuration: EE_TRUSTSTORE_PASSWORD" && MISSING_SECRETS=true
-[ -z "$KEYSTORE_PASSWORD" ] && echo "Missing configuration: KEYSTORE_PASSWORD" && MISSING_SECRETS=true
 [ -z "$VA_FACILITIES_API_KEY" ] && echo "Missing configuration: VA_FACILITIES_API_KEY" && MISSING_SECRETS=true
 [ -z "$VA_FACILITIES_URL" ] && echo "Missing configuration: VA_FACILITIES_URL" && MISSING_SECRETS=true
 [ $MISSING_SECRETS == true ] && usage "Missing configuration secrets, please update $SECRETS"
@@ -104,11 +94,9 @@ sendMoarSpams() {
 }
 
 makeConfig community-care-eligibility $PROFILE
-configValue community-care-eligibility $PROFILE ee.endpoint.url "$EE_ENDPOINT_URL"
-configValue community-care-eligibility $PROFILE ee.header.password "$EE_HEADER_PASSWORD"
-configValue community-care-eligibility $PROFILE ee.header.username "$EE_HEADER_USERNAME"
-configValue community-care-eligibility $PROFILE ee.truststore.password "$EE_TRUSTSTORE_PASSWORD"
-configValue community-care-eligibility $PROFILE ee.truststore.path "eligibilityandenrollment-nonprod-truststore.jks"
+configValue community-care-eligibility $PROFILE ee.endpoint.url "http://localhost:9090/v0/ws"
+configValue community-care-eligibility $PROFILE ee.header.password "MockEEPassword"
+configValue community-care-eligibility $PROFILE ee.header.username "MockEEUsername"
 configValue community-care-eligibility $PROFILE va-facilities.api-key "$VA_FACILITIES_API_KEY"
 configValue community-care-eligibility $PROFILE va-facilities.url "$VA_FACILITIES_URL"
 
