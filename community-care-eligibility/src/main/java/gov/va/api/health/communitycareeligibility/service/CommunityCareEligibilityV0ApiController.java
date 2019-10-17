@@ -216,16 +216,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(serviceType));
     }
 
-    final int driveMins =
-        equalsIgnoreCase(serviceType, "primarycare") ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    if (extendedDriveMin != null && extendedDriveMin <= driveMins) {
-      throw new Exceptions.InvalidExtendedDriveMin(serviceType, extendedDriveMin, driveMins);
-    }
-
     String mappedServiceType = SERVICES_MAP.get(serviceType.trim());
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
+
+    int driveMins =
+        equalsIgnoreCase(mappedServiceType, "primarycare")
+            ? maxDriveMinsPrimary
+            : maxDriveMinsSpecialty;
+    if (extendedDriveMin != null && extendedDriveMin <= driveMins) {
+      throw new Exceptions.InvalidExtendedDriveMin(mappedServiceType, extendedDriveMin, driveMins);
+    }
+
     return search(
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
