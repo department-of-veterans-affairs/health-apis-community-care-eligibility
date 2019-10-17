@@ -15,7 +15,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.queenelizabeth.ee.QueenElizabethService;
 import gov.va.api.health.queenelizabeth.ee.exceptions.PersonNotFound;
 import gov.va.api.health.queenelizabeth.ee.exceptions.RequestFailed;
-import gov.va.api.health.queenelizabeth.ee.handlers.BaseFaultSoapHandler;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
@@ -169,8 +168,7 @@ public final class CommunityCareEligibilityTest {
   @Test(expected = Exceptions.EeUnavailableException.class)
   public void eeUnknownFault() {
     QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123"))
-        .thenThrow(new RequestFailed(BaseFaultSoapHandler.FAULT_UNKNOWN_MESSAGE));
+    when(client.getEeSummary("123")).thenThrow(new RequestFailed(null));
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
@@ -181,11 +179,10 @@ public final class CommunityCareEligibilityTest {
   }
 
   /** Test condition when QueenElizabethService does not find person. */
-  @SneakyThrows
   @Test(expected = Exceptions.UnknownPatientIcnException.class)
   public void eeUnknownPatient() {
     QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123")).thenThrow(new PersonNotFound("Test fault message."));
+    when(client.getEeSummary("123")).thenThrow(new PersonNotFound(null));
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
@@ -319,7 +316,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(mock(QueenElizabethService.class))
             .maxDriveTimePrimary(30)
             .build();
-    controller.search("", "123", "PrimaryCare", 20);
+    controller.search("", "123", "primarycare", 20);
   }
 
   @Test(expected = Exceptions.MissingGeocodingInfoException.class)
@@ -603,9 +600,10 @@ public final class CommunityCareEligibilityTest {
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
-            .maxDriveTimePrimary(1)
+            .maxDriveTimePrimary(30)
+            .maxDriveTimeSpecialty(30)
             .build();
-    controller.search("", "123", "Dentistry", null);
+    controller.search("", "123", "Dentistry", 20);
   }
 
   @Test
