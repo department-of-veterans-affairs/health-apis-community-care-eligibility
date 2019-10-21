@@ -37,7 +37,7 @@ public final class CommunityCareEligibilityResponse {
 
   Boolean eligible;
 
-  /** Lazy getter. */
+  /** Lazy getter. Trigger PR.*/
   public List<EligibilityCode> eligibilityCodes() {
     if (eligibilityCodes == null) {
       eligibilityCodes = new ArrayList<>();

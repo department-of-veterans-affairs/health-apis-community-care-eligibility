@@ -103,6 +103,8 @@ Sample response:
         "state" : "KY",
         "zip" : "10946"
       },
+      "mobile": false,
+      "active": true,
       "coordinates" : {
         "latitude" : 41.81,
         "longitude" : 67.65
