@@ -52,6 +52,29 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>gov.va.plugin.maven</groupId>
+        <artifactId>swagger-maven-plugin</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>inject-examples</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>inject</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file file="${project.build.directory}/swagger/openapi.json" format="JSON"/>
+                <file file="${project.build.directory}/swagger/openapi.yaml" format="YAML"/>
+              </files>
+              <examples>
+                <example key="errorResponseNotFound" source="gov.va.api.health.communitycareeligibility.api.swaggerexamples.SwaggerErrorResponse#overrideErrorResponseNotFound"/>
+              </examples>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
