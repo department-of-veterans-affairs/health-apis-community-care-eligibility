@@ -21,11 +21,13 @@ class SwaggerErrorResponse {
         .build();
   }
 
-  public static ErrorResponse.NotFound overrideErrorResponseNotFound() {
-    return ErrorResponse.NotFound.builder()
-        .timestamp(1557407878250L)
-        .type("UnknownPatientIcnException")
-        .message("[OVERRIDE] Unknown patient ICN: 011235813V213455")
-        .build();
+  static class Awesome {
+    public static ErrorResponse.NotFound overrideErrorResponseNotFound() {
+      return ErrorResponse.NotFound.builder()
+          .timestamp(1557407878250L)
+          .type("UnknownPatientIcnException")
+          .message("[OVERRIDE] Unknown patient ICN: 011235813V213455")
+          .build();
+    }
   }
 }
