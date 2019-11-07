@@ -5,16 +5,26 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 @OpenAPIDefinition(
+  security =
+      @SecurityRequirement(
+          name = "BasicAuth"
+      ),
   info =
       @Info(
         title = "Community Care Eligibility",
@@ -35,6 +45,12 @@ import javax.ws.rs.Path;
         url =
             "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
       )
+)
+@SecurityScheme(
+    type = SecuritySchemeType.HTTP,
+    description = "Community care eligibility",
+    name = "BasicAuth",
+    in = SecuritySchemeIn.HEADER
 )
 @Path("/")
 public interface CommunityCareEligibilityService {
