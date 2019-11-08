@@ -11,9 +11,11 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.OAuthFlow;
+import io.swagger.v3.oas.annotations.security.OAuthFlows;
+import io.swagger.v3.oas.annotations.security.OAuthScope;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
@@ -23,7 +25,21 @@ import javax.ws.rs.Path;
 @OpenAPIDefinition(
   security =
       @SecurityRequirement(
-          name = "BasicAuth"
+          name = "OauthFlow",
+              scopes = {
+                      "patient/Audiology",
+                      "patient/Cardiology",
+                      "patient/Dermatology",
+                      "patient/Gastroenterology",
+                      "patient/Gynecology",
+                      "patient/MentalHealthCare",
+                      "patient/Ophthalmology",
+                      "patient/Optometry",
+                      "patient/Orthopedics",
+                      "patient/PrimaryCare",
+                      "patient/Urology",
+                      "patient/WomensHealth"
+              }
       ),
   info =
       @Info(
@@ -46,12 +62,35 @@ import javax.ws.rs.Path;
             "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
       )
 )
+
 @SecurityScheme(
-    type = SecuritySchemeType.HTTP,
-    description = "Community care eligibility",
-    name = "BasicAuth",
-    in = SecuritySchemeIn.HEADER
+    type = SecuritySchemeType.OAUTH2,
+    name = "OauthFlow",
+    in = SecuritySchemeIn.HEADER,
+        flows =
+                @OAuthFlows(
+                        implicit =
+                                @OAuthFlow(
+                        authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
+                        tokenUrl = "https://dev-api.va.gov/services/fhir/v0/dstu2/token",
+                        scopes = {
+                                @OAuthScope(name = "patient/Audiology", description = "Eligibility for Audiology"),
+                                @OAuthScope(name = "patient/Cardiology", description = "Eligibility for Cardiology"),
+                                @OAuthScope(name = "patient/Dermatology", description = "Eligibility for Dermatology"),
+                                @OAuthScope(name = "patient/Gastroenterology", description = "Eligibility for Gastroenterology"),
+                                @OAuthScope(name = "patient/Gynecology", description = "Eligibility for Gynecology"),
+                                @OAuthScope(name = "patient/MentalHealthCare", description = "Eligibility for MentalHealthCare"),
+                                @OAuthScope(name = "patient/Ophthalmology", description = "Eligibility for Ophthalmology"),
+                                @OAuthScope(name = "patient/Optometry", description = "Eligibility for Optometry"),
+                                @OAuthScope(name = "patient/Orthopedics", description = "Eligibility for Orthopedics"),
+                                @OAuthScope(name = "patient/PrimaryCare", description = "Eligibility for PrimaryCare"),
+                                @OAuthScope(name = "patient/Urology", description = "Eligibility for Urology"),
+                                @OAuthScope(name = "patient/WomensHealth", description = "Eligibility for WomensHealth")
+                        }
+                    )
+                )
 )
+
 @Path("/")
 public interface CommunityCareEligibilityService {
   @Operation(
