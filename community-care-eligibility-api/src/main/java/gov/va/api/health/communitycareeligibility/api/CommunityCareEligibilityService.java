@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.security.OAuthFlows;
 import io.swagger.v3.oas.annotations.security.OAuthScope;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
@@ -25,10 +24,8 @@ import javax.ws.rs.Path;
 @OpenAPIDefinition(
   security =
       @SecurityRequirement(
-          name = "OauthFlow",
-              scopes = {
-                      "patient/search"
-              }
+        name = "OauthFlow",
+        scopes = {"patient/search"}
       ),
   info =
       @Info(
@@ -51,24 +48,22 @@ import javax.ws.rs.Path;
             "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
       )
 )
-
 @SecurityScheme(
-    type = SecuritySchemeType.OAUTH2,
-    name = "OauthFlow",
-    in = SecuritySchemeIn.HEADER,
-        flows =
-                @OAuthFlows(
-                        implicit =
-                                @OAuthFlow(
-                        authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
-                        tokenUrl = "https://dev-api.va.gov/services/fhir/v0/dstu2/token",
-                        scopes = {
-                                @OAuthScope(name = "patient/search", description = "Community Care Eligibility")
-                        }
-                    )
-                )
+  type = SecuritySchemeType.OAUTH2,
+  name = "OauthFlow",
+  in = SecuritySchemeIn.HEADER,
+  flows =
+      @OAuthFlows(
+        implicit =
+            @OAuthFlow(
+              authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
+              tokenUrl = "https://dev-api.va.gov/services/fhir/v0/dstu2/token",
+              scopes = {
+                @OAuthScope(name = "patient/search", description = "Community Care Eligibility")
+              }
+            )
+      )
 )
-
 @Path("/")
 public interface CommunityCareEligibilityService {
   @Operation(
