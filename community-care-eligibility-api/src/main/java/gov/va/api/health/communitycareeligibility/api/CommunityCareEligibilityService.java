@@ -59,7 +59,10 @@ import javax.ws.rs.Path;
               authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
               tokenUrl = "https://dev-api.va.gov/oauth2/token",
               scopes = {
-                @OAuthScope(name = "patient/CommunityCareEligibility.read", description = "Community Care Eligibility")
+                @OAuthScope(
+                  name = "patient/CommunityCareEligibility.read",
+                  description = "Community Care Eligibility"
+                )
               }
             )
       )
