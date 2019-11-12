@@ -27,18 +27,7 @@ import javax.ws.rs.Path;
       @SecurityRequirement(
           name = "OauthFlow",
               scopes = {
-                      "patient/Audiology",
-                      "patient/Cardiology",
-                      "patient/Dermatology",
-                      "patient/Gastroenterology",
-                      "patient/Gynecology",
-                      "patient/MentalHealthCare",
-                      "patient/Ophthalmology",
-                      "patient/Optometry",
-                      "patient/Orthopedics",
-                      "patient/PrimaryCare",
-                      "patient/Urology",
-                      "patient/WomensHealth"
+                      "patient/search"
               }
       ),
   info =
@@ -74,18 +63,7 @@ import javax.ws.rs.Path;
                         authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
                         tokenUrl = "https://dev-api.va.gov/services/fhir/v0/dstu2/token",
                         scopes = {
-                                @OAuthScope(name = "patient/Audiology", description = "Eligibility for Audiology"),
-                                @OAuthScope(name = "patient/Cardiology", description = "Eligibility for Cardiology"),
-                                @OAuthScope(name = "patient/Dermatology", description = "Eligibility for Dermatology"),
-                                @OAuthScope(name = "patient/Gastroenterology", description = "Eligibility for Gastroenterology"),
-                                @OAuthScope(name = "patient/Gynecology", description = "Eligibility for Gynecology"),
-                                @OAuthScope(name = "patient/MentalHealthCare", description = "Eligibility for MentalHealthCare"),
-                                @OAuthScope(name = "patient/Ophthalmology", description = "Eligibility for Ophthalmology"),
-                                @OAuthScope(name = "patient/Optometry", description = "Eligibility for Optometry"),
-                                @OAuthScope(name = "patient/Orthopedics", description = "Eligibility for Orthopedics"),
-                                @OAuthScope(name = "patient/PrimaryCare", description = "Eligibility for PrimaryCare"),
-                                @OAuthScope(name = "patient/Urology", description = "Eligibility for Urology"),
-                                @OAuthScope(name = "patient/WomensHealth", description = "Eligibility for WomensHealth")
+                                @OAuthScope(name = "patient/search", description = "Community Care Eligibility")
                         }
                     )
                 )
