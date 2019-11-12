@@ -36,7 +36,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
   public VaFacilitiesResponse nearbyFacilities(
       Coordinates coordinates, int driveMins, String serviceType) {
     String url =
-        UriComponentsBuilder.fromHttpUrl(baseUrl + "v1/nearby")
+        UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/nearby")
             .queryParam("lat", coordinates.latitude())
             .queryParam("lng", coordinates.longitude())
             .queryParam("drive_time", driveMins)
