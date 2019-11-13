@@ -5,16 +5,28 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.OAuthFlow;
+import io.swagger.v3.oas.annotations.security.OAuthFlows;
+import io.swagger.v3.oas.annotations.security.OAuthScope;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 @OpenAPIDefinition(
+  security =
+      @SecurityRequirement(
+        name = "OauthFlow",
+        scopes = {"patient/CommunityCareEligibility.read"}
+      ),
   info =
       @Info(
         title = "Community Care Eligibility",
@@ -34,6 +46,25 @@ import javax.ws.rs.Path;
         description = "GitHub",
         url =
             "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
+      )
+)
+@SecurityScheme(
+  type = SecuritySchemeType.OAUTH2,
+  name = "OauthFlow",
+  in = SecuritySchemeIn.HEADER,
+  flows =
+      @OAuthFlows(
+        implicit =
+            @OAuthFlow(
+              authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
+              tokenUrl = "https://dev-api.va.gov/oauth2/token",
+              scopes = {
+                @OAuthScope(
+                  name = "patient/CommunityCareEligibility.read",
+                  description = "Community Care Eligibility"
+                )
+              }
+            )
       )
 )
 @Path("/")
