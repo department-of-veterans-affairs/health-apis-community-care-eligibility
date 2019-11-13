@@ -1,8 +1,8 @@
 # Developer Guide
 
 ## Building
-- [Java Development Kit](https://openjdk.java.net/) 8
-- [Maven](http://maven.apache.org/) 3.5
+- [Java Development Kit](https://openjdk.java.net/) 12
+- [Maven](http://maven.apache.org/) 3.6
 - [PlantUml](http://plantuml.com/) for diagrams
 - Recommended [IntelliJ](https://www.jetbrains.com/idea/)
   or [Eclipse](https://www.eclipse.org/downloads/packages/installer)
