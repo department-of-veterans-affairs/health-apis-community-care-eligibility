@@ -204,7 +204,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   public CommunityCareEligibilityResponse search(
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
-      @NotBlank @RequestParam(value = "serviceType") String serviceType,
+      @RequestParam(value = "serviceType", required = false) String serviceType,
       @Max(value = 90) @RequestParam(value = "extendedDriveMin", required = false)
           Integer extendedDriveMin) {
     if (isNotBlank(optSessionIdHeader)) {
@@ -216,8 +216,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(serviceType));
     }
 
-    String mappedServiceType = SERVICES_MAP.get(serviceType.trim());
-    if (mappedServiceType == null) {
+    String mappedServiceType = serviceType == null ? null : SERVICES_MAP.get(serviceType.trim());
+    if (serviceType != null && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
 
@@ -267,6 +267,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .eligible(!codeStrings.contains("X"))
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
+          .build();
+    }
+    if (request.serviceType() == null) {
+      return response
+          .patientRequest(request)
+          .grandfathered(false)
+          .noFullServiceVaMedicalFacility(false)
           .build();
     }
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
