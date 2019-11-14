@@ -36,7 +36,6 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 
 public final class CommunityCareEligibilityTest {
-
   @SneakyThrows
   private static XMLGregorianCalendar parseXmlGregorianCalendar(String timestamp) {
     GregorianCalendar gCal = new GregorianCalendar();
@@ -45,7 +44,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
   public void audiology() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(
@@ -164,7 +162,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   /** Test condition when QueenElizabethService has unknown fault condition. */
-  @SneakyThrows
   @Test(expected = Exceptions.EeUnavailableException.class)
   public void eeUnknownFault() {
     QueenElizabethService client = mock(QueenElizabethService.class);
@@ -193,7 +190,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
   public void facilityTransformerNullChecks() {
     FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
     assertThat(transformer.toFacility(null)).isNull();
@@ -230,7 +226,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
   public void hardship() {
     QueenElizabethService eeClient = mock(QueenElizabethService.class);
     when(eeClient.getEeSummary("123"))
@@ -307,7 +302,6 @@ public final class CommunityCareEligibilityTest {
         .search("", "123", "PrimaryCare", null);
   }
 
-  @SneakyThrows
   @Test(expected = Exceptions.InvalidExtendedDriveMin.class)
   public void invalidExtendedDriveMin() {
     CommunityCareEligibilityV0ApiController controller =
@@ -328,7 +322,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
   public void noFacilities() {
     QueenElizabethService client = mock(QueenElizabethService.class);
     when(client.getEeSummary("123"))
@@ -373,7 +366,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
   public void noFacilityWithinDefaultRangeButPopulateWithExtendedRange() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(
@@ -477,7 +469,56 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
+  public void noService() {
+    QueenElizabethService eeClient = mock(QueenElizabethService.class);
+    when(eeClient.getEeSummary("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .eligibilities(
+                                    VceEligibilityCollection.builder()
+                                        .eligibility(
+                                            singletonList(
+                                                VceEligibilityInfo.builder()
+                                                    .vceCode("H")
+                                                    .vceDescription("Hardship")
+                                                    .vceEffectiveDate(
+                                                        parseXmlGregorianCalendar(
+                                                            "2019-03-27T14:37:48Z"))
+                                                    .build()))
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityResponse actual =
+        CommunityCareEligibilityV0ApiController.builder()
+            .eeClient(eeClient)
+            .build()
+            .search(null, "123", "", null);
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .timestamp(actual.patientRequest().timestamp())
+                        .patientIcn("123")
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .eligible(true)
+                .eligibilityCodes(
+                    Collections.singletonList(
+                        CommunityCareEligibilityResponse.EligibilityCode.builder()
+                            .description("Hardship")
+                            .code("H")
+                            .build()))
+                .build());
+  }
+
+  @Test
   public void notYetEligibleDate() {
     QueenElizabethService eeClient = mock(QueenElizabethService.class);
     when(eeClient.getEeSummary("123"))
@@ -565,7 +606,6 @@ public final class CommunityCareEligibilityTest {
         .search("", "123", "PrimaryCare", null);
   }
 
-  @SneakyThrows
   @Test(expected = Exceptions.UnknownServiceTypeException.class)
   public void unknownServiceType() {
     QueenElizabethService client = mock(QueenElizabethService.class);
@@ -607,7 +647,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  @SneakyThrows
   public void xIsIneligible() {
     QueenElizabethService eeClient = mock(QueenElizabethService.class);
     when(eeClient.getEeSummary("123"))
