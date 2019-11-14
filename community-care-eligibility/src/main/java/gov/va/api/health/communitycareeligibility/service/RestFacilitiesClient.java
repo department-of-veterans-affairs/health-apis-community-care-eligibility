@@ -40,9 +40,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .queryParam("ids", String.join(",", ids))
             .build()
             .toUriString();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("apiKey", vaFacilitiesApiKey);
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    HttpHeaders headers = headers();
     try {
       return restTemplate
           .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
@@ -50,6 +48,13 @@ public class RestFacilitiesClient implements FacilitiesClient {
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
     }
+  }
+
+  private HttpHeaders headers() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("apiKey", vaFacilitiesApiKey);
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    return headers;
   }
 
   @Override
@@ -67,9 +72,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .queryParam("per_page", 500)
             .build()
             .toUriString();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("apiKey", vaFacilitiesApiKey);
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    HttpHeaders headers = headers();
     try {
       return restTemplate
           .exchange(
