@@ -299,11 +299,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         nearbyResponse == null
             ? VaFacilitiesResponse.builder().build()
             : facilitiesClient.facilitiesByIds(
-                nearbyResponse
-                    .data()
-                    .stream()
-                    .map(fac -> fac.id())
-                    .collect(Collectors.joining(",")));
+                nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
 
     List<Facility> nearbyFacilities =
         vaFacilitiesResponse == null
@@ -333,7 +329,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                       .data()
                       .stream()
                       .map(fac -> fac.id())
-                      .collect(Collectors.joining(",")));
+                      .collect(Collectors.toList()));
       List<Facility> extendedFacilities =
           extendedVaFacilitiesResponse == null
               ? Collections.emptyList()

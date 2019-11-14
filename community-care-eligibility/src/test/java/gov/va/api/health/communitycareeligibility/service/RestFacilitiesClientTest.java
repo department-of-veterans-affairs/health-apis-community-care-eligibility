@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -30,7 +31,7 @@ public final class RestFacilitiesClientTest {
         .thenReturn(response);
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "http://foo/bar", restTemplate);
-    assertThat(client.facilitiesByIds("vha_675GD"))
+    assertThat(client.facilitiesByIds(asList("vha_675GD")))
         .isEqualTo(VaFacilitiesResponse.builder().build());
   }
 

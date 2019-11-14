@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import java.util.Collections;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,10 +34,10 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse facilitiesByIds(String ids) {
+  public VaFacilitiesResponse facilitiesByIds(List<String> ids) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
-            .queryParam("ids", ids)
+            .queryParam("ids", String.join(",", ids))
             .build()
             .toUriString();
     HttpHeaders headers = new HttpHeaders();

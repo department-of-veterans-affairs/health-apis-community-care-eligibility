@@ -50,6 +50,7 @@ public final class VaFacilitiesResponse {
 
     private BigDecimal lat;
 
+    @JsonProperty("long")
     private BigDecimal lng;
 
     private Address address;
