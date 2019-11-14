@@ -54,9 +54,17 @@ public final class CommunityCareEligibilityTest {
             60,
             "Audiology"))
         .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    asList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC456").build(),
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilitiesByIds(asList("FAC456", "FAC123")))
+        .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
-                    singletonList(
+                    asList(
                         VaFacilitiesResponse.Facility.builder()
                             .id("FAC123")
                             .attributes(
@@ -70,6 +78,24 @@ public final class CommunityCareEligibilityTest {
                                             .physical(
                                                 VaFacilitiesResponse.PhysicalAddress.builder()
                                                     .address1("911 fac st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build(),
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC456")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .mobile(true)
+                                    .active("A")
+                                    .lat(new BigDecimal("100"))
+                                    .lng(new BigDecimal("300"))
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("123 who cares drive")
                                                     .state("FL")
                                                     .build())
                                             .build())
@@ -145,7 +171,7 @@ public final class CommunityCareEligibilityTest {
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .nearbyFacilities(
-                singletonList(
+                asList(
                     Facility.builder()
                         .mobile(true)
                         .active(true)
@@ -155,6 +181,18 @@ public final class CommunityCareEligibilityTest {
                             Coordinates.builder()
                                 .latitude(new BigDecimal("200"))
                                 .longitude(new BigDecimal("100"))
+                                .build())
+                        .build(),
+                    Facility.builder()
+                        .mobile(true)
+                        .active(true)
+                        .id("FAC456")
+                        .physicalAddress(
+                            Address.builder().street("123 who cares drive").state("FL").build())
+                        .coordinates(
+                            Coordinates.builder()
+                                .latitude(new BigDecimal("100"))
+                                .longitude(new BigDecimal("300"))
                                 .build())
                         .build()))
             .build();
@@ -375,7 +413,7 @@ public final class CommunityCareEligibilityTest {
                 .build(),
             60,
             "Audiology"))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     when(facilitiesClient.nearbyFacilities(
             Coordinates.builder()
                 .latitude(new BigDecimal("28.112506"))
@@ -383,6 +421,13 @@ public final class CommunityCareEligibilityTest {
                 .build(),
             90,
             "Audiology"))
+        .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilitiesByIds(asList("FAC123")))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -551,7 +596,7 @@ public final class CommunityCareEligibilityTest {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(
             any(Coordinates.class), any(int.class), any(String.class)))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)

@@ -292,12 +292,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
     String serviceType = request.serviceType();
-    VaFacilitiesResponse nearbyResponse =
+
+    VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
+    VaFacilitiesResponse vaFacilitiesResponse =
+        facilitiesClient.facilitiesByIds(
+            nearbyResponse == null
+                ? Collections.emptyList()
+                : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
+
     List<Facility> nearbyFacilities =
-        nearbyResponse == null
+        vaFacilitiesResponse == null
             ? Collections.emptyList()
-            : nearbyResponse
+            : vaFacilitiesResponse
                 .data()
                 .stream()
                 .map(
@@ -309,15 +316,24 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 .collect(Collectors.toList());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
-
     if (request.extendedDriveMin() != null) {
-      VaFacilitiesResponse extendedResponse =
+      VaNearbyFacilitiesResponse extendedResponse =
           facilitiesClient.nearbyFacilities(
               patientCoordinates, request.extendedDriveMin(), serviceType);
+
+      VaFacilitiesResponse extendedVaFacilitiesResponse =
+          facilitiesClient.facilitiesByIds(
+              extendedResponse == null
+                  ? Collections.emptyList()
+                  : extendedResponse
+                      .data()
+                      .stream()
+                      .map(fac -> fac.id())
+                      .collect(Collectors.toList()));
       List<Facility> extendedFacilities =
-          extendedResponse == null
+          extendedVaFacilitiesResponse == null
               ? Collections.emptyList()
-              : extendedResponse
+              : extendedVaFacilitiesResponse
                   .data()
                   .stream()
                   .map(
@@ -329,7 +345,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                   .collect(Collectors.toList());
       response.nearbyFacilities(extendedFacilities);
     }
-
     return response.build();
   }
 }

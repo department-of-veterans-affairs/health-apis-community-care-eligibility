@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import java.util.Collections;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +34,34 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse nearbyFacilities(
+  public VaFacilitiesResponse facilitiesByIds(List<String> ids) {
+    if (ids.isEmpty()) {
+      return VaFacilitiesResponse.builder().build();
+    }
+    String url =
+        UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
+            .queryParam("ids", String.join(",", ids))
+            .build()
+            .toUriString();
+    try {
+      return restTemplate
+          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), VaFacilitiesResponse.class)
+          .getBody();
+    } catch (Exception e) {
+      throw new Exceptions.FacilitiesUnavailableException(e);
+    }
+  }
+
+  private HttpHeaders headers() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("apiKey", vaFacilitiesApiKey);
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    return headers;
+  }
+
+  @Override
+  @SneakyThrows
+  public VaNearbyFacilitiesResponse nearbyFacilities(
       Coordinates coordinates, int driveMins, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/nearby")
@@ -46,12 +74,11 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .queryParam("per_page", 500)
             .build()
             .toUriString();
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("apiKey", vaFacilitiesApiKey);
-    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
     try {
       return restTemplate
-          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+          .exchange(
+              url, HttpMethod.GET, new HttpEntity<>(headers()), VaNearbyFacilitiesResponse.class)
           .getBody();
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
