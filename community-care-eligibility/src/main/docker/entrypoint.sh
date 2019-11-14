@@ -136,9 +136,6 @@ regressionTest() {
   path="/search?serviceType=$SERVICE_TYPE"
   doCurl 500 $TOKEN
 
-  path="/search?patient=$PATIENT"
-  doCurl 500 $TOKEN
-
   printResults
 }
 
