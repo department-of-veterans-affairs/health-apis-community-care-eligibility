@@ -216,7 +216,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(serviceType));
     }
 
-    String mappedServiceType = serviceType == null ? null : SERVICES_MAP.get(serviceType.trim());
+    String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
     if (serviceType != null && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
@@ -270,11 +270,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .build();
     }
     if (request.serviceType() == null) {
-      return response
-          .patientRequest(request)
-          .grandfathered(false)
-          .noFullServiceVaMedicalFacility(false)
-          .build();
+      return response.build();
     }
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
