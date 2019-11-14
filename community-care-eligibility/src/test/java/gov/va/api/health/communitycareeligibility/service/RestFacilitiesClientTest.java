@@ -15,21 +15,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 public final class RestFacilitiesClientTest {
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void facilitiesByIdTest() {
+    ResponseEntity<VaFacilitiesResponse> response = mock(ResponseEntity.class);
+    when(response.getBody()).thenReturn(VaFacilitiesResponse.builder().build());
+    RestTemplate restTemplate = mock(RestTemplate.class);
+    when(restTemplate.exchange(
+            eq("http://foo/bar/v0/facilities?ids=vha_675GD"),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(VaFacilitiesResponse.class)))
+        .thenReturn(response);
+    RestFacilitiesClient client =
+        new RestFacilitiesClient("fakeApiKey", "http://foo/bar", restTemplate);
+    assertThat(client.facilitiesById("vha_675GD"))
+        .isEqualTo(VaFacilitiesResponse.builder().build());
+  }
+
   @Test
   @SuppressWarnings("unchecked")
   public void nearbyFacilities() {
-    ResponseEntity<VaFacilitiesResponse> response = mock(ResponseEntity.class);
-    when(response.getBody()).thenReturn(VaFacilitiesResponse.builder().build());
-
+    ResponseEntity<VaNearbyFacilitiesResponse> response = mock(ResponseEntity.class);
+    when(response.getBody()).thenReturn(VaNearbyFacilitiesResponse.builder().build());
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
             eq(
                 "http://foo/bar/v0/nearby?lat=0&lng=0&drive_time=30&type=health&services[]=PrimaryCare&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
-            eq(VaFacilitiesResponse.class)))
+            eq(VaNearbyFacilitiesResponse.class)))
         .thenReturn(response);
-
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "http://foo/bar", restTemplate);
     assertThat(
@@ -40,6 +57,6 @@ public final class RestFacilitiesClientTest {
                     .build(),
                 30,
                 "PrimaryCare"))
-        .isEqualTo(VaFacilitiesResponse.builder().build());
+        .isEqualTo(VaNearbyFacilitiesResponse.builder().build());
   }
 }

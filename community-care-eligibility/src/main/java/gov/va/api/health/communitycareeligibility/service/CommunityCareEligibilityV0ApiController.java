@@ -181,6 +181,18 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return Coordinates.builder().latitude(lat).longitude(lng).build();
   }
 
+  private String convertToCommaDelimitedString(VaNearbyFacilitiesResponse nearbyResponse) {
+    String ids = "";
+    for (int i = 0; i < nearbyResponse.data().size(); i++) {
+      if (i == 0) {
+        ids += nearbyResponse.data().get(i).id();
+      } else {
+        ids += "," + nearbyResponse.data().get(i).id();
+      }
+    }
+    return ids;
+  }
+
   /**
    * Wrap the QueenElizabethService call to encapsulate any exceptions into CCE specific exceptions.
    *
@@ -216,11 +228,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(serviceType));
     }
 
-    String mappedServiceType = SERVICES_MAP.get(serviceType.trim());
-    if (mappedServiceType == null) {
+    String mappedServiceType = serviceType == null ? null : SERVICES_MAP.get(serviceType.trim());
+    if (serviceType != null && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
-
     int driveMins =
         equalsIgnoreCase(mappedServiceType, "primarycare")
             ? maxDriveMinsPrimary
@@ -228,7 +239,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (extendedDriveMin != null && extendedDriveMin <= driveMins) {
       throw new Exceptions.InvalidExtendedDriveMin(mappedServiceType, extendedDriveMin, driveMins);
     }
-
     return search(
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
@@ -294,12 +304,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     String serviceType = request.serviceType();
     final int driveMins =
         equalsIgnoreCase(serviceType, "primarycare") ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
-    VaFacilitiesResponse nearbyResponse =
+    VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientCoordinates, driveMins, serviceType);
+    String ids = nearbyResponse == null ? "" : convertToCommaDelimitedString(nearbyResponse);
+    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilitiesById(ids);
     List<Facility> nearbyFacilities =
-        nearbyResponse == null
+        vaFacilitiesResponse == null
             ? Collections.emptyList()
-            : nearbyResponse
+            : vaFacilitiesResponse
                 .data()
                 .stream()
                 .map(
@@ -311,15 +323,16 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 .collect(Collectors.toList());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
-
     if (request.extendedDriveMin() != null) {
-      VaFacilitiesResponse extendedResponse =
+      VaNearbyFacilitiesResponse extendedResponse =
           facilitiesClient.nearbyFacilities(
               patientCoordinates, request.extendedDriveMin(), serviceType);
+      ids = convertToCommaDelimitedString(extendedResponse);
+      VaFacilitiesResponse extendedVaFacilitiesResponse = facilitiesClient.facilitiesById(ids);
       List<Facility> extendedFacilities =
-          extendedResponse == null
+          extendedVaFacilitiesResponse == null
               ? Collections.emptyList()
-              : extendedResponse
+              : extendedVaFacilitiesResponse
                   .data()
                   .stream()
                   .map(
@@ -331,7 +344,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                   .collect(Collectors.toList());
       response.nearbyFacilities(extendedFacilities);
     }
-
     return response.build();
   }
 }

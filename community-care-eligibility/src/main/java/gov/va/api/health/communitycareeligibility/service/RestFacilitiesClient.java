@@ -33,7 +33,27 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse nearbyFacilities(
+  public VaFacilitiesResponse facilitiesById(String ids) {
+    String url =
+        UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
+            .queryParam("ids", ids)
+            .build()
+            .toUriString();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("apiKey", vaFacilitiesApiKey);
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    try {
+      return restTemplate
+          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+          .getBody();
+    } catch (Exception e) {
+      throw new Exceptions.FacilitiesUnavailableException(e);
+    }
+  }
+
+  @Override
+  @SneakyThrows
+  public VaNearbyFacilitiesResponse nearbyFacilities(
       Coordinates coordinates, int driveMins, String serviceType) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/nearby")
@@ -51,7 +71,8 @@ public class RestFacilitiesClient implements FacilitiesClient {
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     try {
       return restTemplate
-          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+          .exchange(
+              url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
           .getBody();
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);

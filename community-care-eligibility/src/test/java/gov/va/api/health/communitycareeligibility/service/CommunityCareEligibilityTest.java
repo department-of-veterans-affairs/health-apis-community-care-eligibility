@@ -56,6 +56,13 @@ public final class CommunityCareEligibilityTest {
             60,
             "Audiology"))
         .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilitiesById("FAC123"))
+        .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
                     singletonList(
@@ -383,7 +390,7 @@ public final class CommunityCareEligibilityTest {
                 .build(),
             60,
             "Audiology"))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     when(facilitiesClient.nearbyFacilities(
             Coordinates.builder()
                 .latitude(new BigDecimal("28.112506"))
@@ -391,6 +398,13 @@ public final class CommunityCareEligibilityTest {
                 .build(),
             90,
             "Audiology"))
+        .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    singletonList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilitiesById("FAC123"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -510,7 +524,7 @@ public final class CommunityCareEligibilityTest {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(
             any(Coordinates.class), any(int.class), any(String.class)))
-        .thenReturn(VaFacilitiesResponse.builder().build());
+        .thenReturn(VaNearbyFacilitiesResponse.builder().build());
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
