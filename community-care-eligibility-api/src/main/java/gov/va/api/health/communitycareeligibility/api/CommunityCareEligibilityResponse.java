@@ -110,7 +110,20 @@ public final class CommunityCareEligibilityResponse {
 
     String phoneNumber;
 
+    DriveMinutes driveMinutes;
+
     String website;
+  }
+
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class DriveMinutes {
+    Integer min;
+    Integer max;
   }
 
   @Data
