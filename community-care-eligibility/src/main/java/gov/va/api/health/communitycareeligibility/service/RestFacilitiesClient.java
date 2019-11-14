@@ -35,15 +35,17 @@ public class RestFacilitiesClient implements FacilitiesClient {
   @Override
   @SneakyThrows
   public VaFacilitiesResponse facilitiesByIds(List<String> ids) {
+    if (ids.isEmpty()) {
+      return VaFacilitiesResponse.builder().build();
+    }
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
             .queryParam("ids", String.join(",", ids))
             .build()
             .toUriString();
-    HttpHeaders headers = headers();
     try {
       return restTemplate
-          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), VaFacilitiesResponse.class)
+          .exchange(url, HttpMethod.GET, new HttpEntity<>(headers()), VaFacilitiesResponse.class)
           .getBody();
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);
@@ -72,11 +74,11 @@ public class RestFacilitiesClient implements FacilitiesClient {
             .queryParam("per_page", 500)
             .build()
             .toUriString();
-    HttpHeaders headers = headers();
+
     try {
       return restTemplate
           .exchange(
-              url, HttpMethod.GET, new HttpEntity<>(headers), VaNearbyFacilitiesResponse.class)
+              url, HttpMethod.GET, new HttpEntity<>(headers()), VaNearbyFacilitiesResponse.class)
           .getBody();
     } catch (Exception e) {
       throw new Exceptions.FacilitiesUnavailableException(e);

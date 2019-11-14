@@ -64,7 +64,7 @@ public final class CommunityCareEligibilityTest {
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
-                    singletonList(
+                    asList(
                         VaFacilitiesResponse.Facility.builder()
                             .id("FAC123")
                             .attributes(
@@ -78,6 +78,24 @@ public final class CommunityCareEligibilityTest {
                                             .physical(
                                                 VaFacilitiesResponse.PhysicalAddress.builder()
                                                     .address1("911 fac st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build(),
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC456")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .mobile(true)
+                                    .active("A")
+                                    .lat(new BigDecimal("100"))
+                                    .lng(new BigDecimal("300"))
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("123 who cares drive")
                                                     .state("FL")
                                                     .build())
                                             .build())
@@ -153,7 +171,7 @@ public final class CommunityCareEligibilityTest {
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .nearbyFacilities(
-                singletonList(
+                asList(
                     Facility.builder()
                         .mobile(true)
                         .active(true)
@@ -163,6 +181,18 @@ public final class CommunityCareEligibilityTest {
                             Coordinates.builder()
                                 .latitude(new BigDecimal("200"))
                                 .longitude(new BigDecimal("100"))
+                                .build())
+                        .build(),
+                    Facility.builder()
+                        .mobile(true)
+                        .active(true)
+                        .id("FAC456")
+                        .physicalAddress(
+                            Address.builder().street("123 who cares drive").state("FL").build())
+                        .coordinates(
+                            Coordinates.builder()
+                                .latitude(new BigDecimal("100"))
+                                .longitude(new BigDecimal("300"))
                                 .build())
                         .build()))
             .build();
