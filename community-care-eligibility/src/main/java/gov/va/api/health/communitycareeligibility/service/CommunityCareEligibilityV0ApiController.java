@@ -181,12 +181,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return Coordinates.builder().latitude(lat).longitude(lng).build();
   }
 
-  /**
-   * Wrap the QueenElizabethService call to encapsulate any exceptions into CCE specific exceptions.
-   *
-   * @param icn ICN to request.
-   * @return GetEESummaryResponse.
-   */
+  private int driveMins(String serviceType) {
+    return equalsIgnoreCase(serviceType, "primarycare")
+        ? maxDriveMinsPrimary
+        : maxDriveMinsSpecialty;
+  }
+
   private GetEESummaryResponse requestEligibility(final String icn) {
     try {
       return eeClient.getEeSummary(icn);
@@ -217,16 +217,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     }
 
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
-    if (serviceType != null && mappedServiceType == null) {
+    if (isNotBlank(serviceType) && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
 
-    int driveMins =
-        equalsIgnoreCase(mappedServiceType, "primarycare")
-            ? maxDriveMinsPrimary
-            : maxDriveMinsSpecialty;
-    if (extendedDriveMin != null && extendedDriveMin <= driveMins) {
-      throw new Exceptions.InvalidExtendedDriveMin(mappedServiceType, extendedDriveMin, driveMins);
+    if (extendedDriveMin != null && extendedDriveMin <= driveMins(mappedServiceType)) {
+      throw new Exceptions.InvalidExtendedDriveMin(
+          mappedServiceType, extendedDriveMin, driveMins(mappedServiceType));
     }
 
     return search(
@@ -295,10 +292,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
     String serviceType = request.serviceType();
-    final int driveMins =
-        equalsIgnoreCase(serviceType, "primarycare") ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
     VaFacilitiesResponse nearbyResponse =
-        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins, serviceType);
+        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
     List<Facility> nearbyFacilities =
         nearbyResponse == null
             ? Collections.emptyList()
