@@ -56,10 +56,11 @@ public final class CommunityCareEligibilityTest {
         .thenReturn(
             VaNearbyFacilitiesResponse.builder()
                 .data(
-                    singletonList(
+                    asList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC456").build(),
                         VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
                 .build());
-    when(facilitiesClient.facilitiesById("FAC123"))
+    when(facilitiesClient.facilitiesByIds("FAC456,FAC123"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(
@@ -396,7 +397,7 @@ public final class CommunityCareEligibilityTest {
                     singletonList(
                         VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
                 .build());
-    when(facilitiesClient.facilitiesById("FAC123"))
+    when(facilitiesClient.facilitiesByIds("FAC123"))
         .thenReturn(
             VaFacilitiesResponse.builder()
                 .data(

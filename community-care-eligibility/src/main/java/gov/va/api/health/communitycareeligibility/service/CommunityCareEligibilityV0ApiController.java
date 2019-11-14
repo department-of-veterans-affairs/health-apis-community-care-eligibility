@@ -181,18 +181,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return Coordinates.builder().latitude(lat).longitude(lng).build();
   }
 
-  private String convertToCommaDelimitedString(VaNearbyFacilitiesResponse nearbyResponse) {
-    String ids = "";
-    for (int i = 0; i < nearbyResponse.data().size(); i++) {
-      if (i == 0) {
-        ids += nearbyResponse.data().get(i).id();
-      } else {
-        ids += "," + nearbyResponse.data().get(i).id();
-      }
-    }
-    return ids;
-  }
-
   private int driveMins(String serviceType) {
     return equalsIgnoreCase(serviceType, "primarycare")
         ? maxDriveMinsPrimary
@@ -307,8 +295,15 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
-    String ids = nearbyResponse == null ? "" : convertToCommaDelimitedString(nearbyResponse);
-    VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilitiesById(ids);
+    VaFacilitiesResponse vaFacilitiesResponse =
+        nearbyResponse == null
+            ? VaFacilitiesResponse.builder().build()
+            : facilitiesClient.facilitiesByIds(
+                nearbyResponse
+                    .data()
+                    .stream()
+                    .map(fac -> fac.id())
+                    .collect(Collectors.joining(",")));
 
     List<Facility> nearbyFacilities =
         vaFacilitiesResponse == null
@@ -329,8 +324,16 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       VaNearbyFacilitiesResponse extendedResponse =
           facilitiesClient.nearbyFacilities(
               patientCoordinates, request.extendedDriveMin(), serviceType);
-      ids = convertToCommaDelimitedString(extendedResponse);
-      VaFacilitiesResponse extendedVaFacilitiesResponse = facilitiesClient.facilitiesById(ids);
+
+      VaFacilitiesResponse extendedVaFacilitiesResponse =
+          extendedResponse == null
+              ? VaFacilitiesResponse.builder().build()
+              : facilitiesClient.facilitiesByIds(
+                  extendedResponse
+                      .data()
+                      .stream()
+                      .map(fac -> fac.id())
+                      .collect(Collectors.joining(",")));
       List<Facility> extendedFacilities =
           extendedVaFacilitiesResponse == null
               ? Collections.emptyList()

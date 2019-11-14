@@ -33,7 +33,7 @@ public class RestFacilitiesClient implements FacilitiesClient {
 
   @Override
   @SneakyThrows
-  public VaFacilitiesResponse facilitiesById(String ids) {
+  public VaFacilitiesResponse facilitiesByIds(String ids) {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
             .queryParam("ids", ids)
