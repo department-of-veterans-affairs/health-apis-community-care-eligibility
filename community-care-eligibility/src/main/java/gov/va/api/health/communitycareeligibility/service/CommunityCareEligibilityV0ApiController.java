@@ -193,12 +193,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     return ids;
   }
 
-  /**
-   * Wrap the QueenElizabethService call to encapsulate any exceptions into CCE specific exceptions.
-   *
-   * @param icn ICN to request.
-   * @return GetEESummaryResponse.
-   */
+  private int driveMins(String serviceType) {
+    return equalsIgnoreCase(serviceType, "primarycare")
+        ? maxDriveMinsPrimary
+        : maxDriveMinsSpecialty;
+  }
+
   private GetEESummaryResponse requestEligibility(final String icn) {
     try {
       return eeClient.getEeSummary(icn);
@@ -216,7 +216,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   public CommunityCareEligibilityResponse search(
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
-      @NotBlank @RequestParam(value = "serviceType") String serviceType,
+      @RequestParam(value = "serviceType", required = false) String serviceType,
       @Max(value = 90) @RequestParam(value = "extendedDriveMin", required = false)
           Integer extendedDriveMin) {
     if (isNotBlank(optSessionIdHeader)) {
@@ -228,17 +228,16 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(serviceType));
     }
 
-    String mappedServiceType = serviceType == null ? null : SERVICES_MAP.get(serviceType.trim());
-    if (serviceType != null && mappedServiceType == null) {
+    String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
+    if (isNotBlank(serviceType) && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
-    int driveMins =
-        equalsIgnoreCase(mappedServiceType, "primarycare")
-            ? maxDriveMinsPrimary
-            : maxDriveMinsSpecialty;
-    if (extendedDriveMin != null && extendedDriveMin <= driveMins) {
-      throw new Exceptions.InvalidExtendedDriveMin(mappedServiceType, extendedDriveMin, driveMins);
+
+    if (extendedDriveMin != null && extendedDriveMin <= driveMins(mappedServiceType)) {
+      throw new Exceptions.InvalidExtendedDriveMin(
+          mappedServiceType, extendedDriveMin, driveMins(mappedServiceType));
     }
+
     return search(
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
@@ -279,6 +278,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
     }
+    if (request.serviceType() == null) {
+      return response.build();
+    }
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
@@ -302,12 +304,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
     String serviceType = request.serviceType();
-    final int driveMins =
-        equalsIgnoreCase(serviceType, "primarycare") ? maxDriveMinsPrimary : maxDriveMinsSpecialty;
+
     VaNearbyFacilitiesResponse nearbyResponse =
-        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins, serviceType);
+        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
     String ids = nearbyResponse == null ? "" : convertToCommaDelimitedString(nearbyResponse);
     VaFacilitiesResponse vaFacilitiesResponse = facilitiesClient.facilitiesById(ids);
+
     List<Facility> nearbyFacilities =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
