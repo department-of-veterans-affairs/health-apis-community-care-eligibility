@@ -296,10 +296,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
     VaFacilitiesResponse vaFacilitiesResponse =
-        nearbyResponse == null
-            ? VaFacilitiesResponse.builder().build()
-            : facilitiesClient.facilitiesByIds(
-                nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
+        facilitiesClient.facilitiesByIds(
+            nearbyResponse == null
+                ? Collections.emptyList()
+                : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
 
     List<Facility> nearbyFacilities =
         vaFacilitiesResponse == null
@@ -322,10 +322,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
               patientCoordinates, request.extendedDriveMin(), serviceType);
 
       VaFacilitiesResponse extendedVaFacilitiesResponse =
-          extendedResponse == null
-              ? VaFacilitiesResponse.builder().build()
-              : facilitiesClient.facilitiesByIds(
-                  extendedResponse
+          facilitiesClient.facilitiesByIds(
+              extendedResponse == null
+                  ? Collections.emptyList()
+                  : extendedResponse
                       .data()
                       .stream()
                       .map(fac -> fac.id())
