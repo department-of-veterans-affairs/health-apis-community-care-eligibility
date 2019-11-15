@@ -341,7 +341,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                           FacilityTransformer.builder()
                               .serviceType(serviceType)
                               .build()
-                              .toFacility(vaFacility))
+                              .toFacility(vaFacility ))
                   .collect(Collectors.toList());
       response.nearbyFacilities(extendedFacilities);
     }

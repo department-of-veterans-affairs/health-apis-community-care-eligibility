@@ -4,6 +4,7 @@ import static gov.va.api.health.communitycareeligibility.service.Transformers.al
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
@@ -97,8 +98,14 @@ public class FacilityTransformer {
     return trimToNull(vaFacility.attributes().website());
   }
 
+  private static CommunityCareEligibilityResponse.DriveMinutes driveMinutes(VaNearbyFacilitiesResponse.Facility vaFacility){
+    return CommunityCareEligibilityResponse.DriveMinutes.builder().min(vaFacility.attributes().min()).max(vaFacility.attributes().max()).build();
+  }
+
+
+
   /** Check for Facility. */
-  public Facility toFacility(VaFacilitiesResponse.Facility vaFacility) {
+  public Facility toFacility(VaFacilitiesResponse.Facility vaFacility, VaNearbyFacilitiesResponse.Facility nearbyFacility) {
     if (vaFacility == null) {
       return null;
     }
@@ -107,6 +114,7 @@ public class FacilityTransformer {
         .name(name(vaFacility))
         .physicalAddress(address(vaFacility))
         .coordinates(coordinates(vaFacility))
+        .driveMinutes(driveMinutes(nearbyFacility))
         .phoneNumber(phoneNumber(vaFacility))
         .website(website(vaFacility))
         .mobile(mobile(vaFacility))
