@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Builder
 public class FacilityTransformer {
+
   @NonNull private final String serviceType;
 
   private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {
@@ -67,6 +68,17 @@ public class FacilityTransformer {
         .build();
   }
 
+  private static CommunityCareEligibilityResponse.DriveMinutes driveMinutes(
+      VaNearbyFacilitiesResponse.Facility vaFacility) {
+    if (vaFacility.attributes() == null) {
+      return null;
+    }
+    return CommunityCareEligibilityResponse.DriveMinutes.builder()
+        .min(vaFacility.attributes().min())
+        .max(vaFacility.attributes().max())
+        .build();
+  }
+
   private static Boolean mobile(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null || vaFacility.attributes().mobile() == null) {
       return false;
@@ -98,14 +110,10 @@ public class FacilityTransformer {
     return trimToNull(vaFacility.attributes().website());
   }
 
-  private static CommunityCareEligibilityResponse.DriveMinutes driveMinutes(VaNearbyFacilitiesResponse.Facility vaFacility){
-    return CommunityCareEligibilityResponse.DriveMinutes.builder().min(vaFacility.attributes().min()).max(vaFacility.attributes().max()).build();
-  }
-
-
-
   /** Check for Facility. */
-  public Facility toFacility(VaFacilitiesResponse.Facility vaFacility, VaNearbyFacilitiesResponse.Facility nearbyFacility) {
+  public Facility toFacility(
+      VaFacilitiesResponse.Facility vaFacility,
+      VaNearbyFacilitiesResponse.Facility nearbyFacility) {
     if (vaFacility == null) {
       return null;
     }

@@ -2,10 +2,9 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +38,6 @@ public final class VaNearbyFacilitiesResponse {
     private String id;
 
     private Attributes attributes;
-
   }
 
   @Data
@@ -49,12 +47,10 @@ public final class VaNearbyFacilitiesResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Attributes {
-     @JsonProperty("min_time")
-     Integer min;
+    @JsonProperty("min_time")
+    Integer min;
 
-     @JsonProperty("max_time")
-     Integer max;
+    @JsonProperty("max_time")
+    Integer max;
   }
-
-
 }

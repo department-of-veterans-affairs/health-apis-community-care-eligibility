@@ -187,6 +187,18 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         : maxDriveMinsSpecialty;
   }
 
+  private VaNearbyFacilitiesResponse.Facility getCorrespondingFacility(
+      VaFacilitiesResponse.Facility vaFacility,
+      VaNearbyFacilitiesResponse nearbyFacilitiesResponse) {
+    VaNearbyFacilitiesResponse.Facility verifiedMatch = null;
+    for (int i = 0; i < nearbyFacilitiesResponse.data().size(); i++) {
+      if (vaFacility.id().equals(nearbyFacilitiesResponse.data().get(i).id())) {
+        verifiedMatch = nearbyFacilitiesResponse.data().get(i);
+      }
+    }
+    return verifiedMatch;
+  }
+
   private GetEESummaryResponse requestEligibility(final String icn) {
     try {
       return eeClient.getEeSummary(icn);
@@ -215,17 +227,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(patientIcn),
           stripNewlines(serviceType));
     }
-
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
     if (isNotBlank(serviceType) && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
-
     if (extendedDriveMin != null && extendedDriveMin <= driveMins(mappedServiceType)) {
       throw new Exceptions.InvalidExtendedDriveMin(
           mappedServiceType, extendedDriveMin, driveMins(mappedServiceType));
     }
-
     return search(
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
@@ -292,7 +301,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
     String serviceType = request.serviceType();
-
     VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
     VaFacilitiesResponse vaFacilitiesResponse =
@@ -300,7 +308,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             nearbyResponse == null
                 ? Collections.emptyList()
                 : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
-
     List<Facility> nearbyFacilities =
         vaFacilitiesResponse == null
             ? Collections.emptyList()
@@ -312,7 +319,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         FacilityTransformer.builder()
                             .serviceType(serviceType)
                             .build()
-                            .toFacility(vaFacility))
+                            .toFacility(
+                                vaFacility, getCorrespondingFacility(vaFacility, nearbyResponse)))
                 .collect(Collectors.toList());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
@@ -320,7 +328,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       VaNearbyFacilitiesResponse extendedResponse =
           facilitiesClient.nearbyFacilities(
               patientCoordinates, request.extendedDriveMin(), serviceType);
-
       VaFacilitiesResponse extendedVaFacilitiesResponse =
           facilitiesClient.facilitiesByIds(
               extendedResponse == null
@@ -341,7 +348,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                           FacilityTransformer.builder()
                               .serviceType(serviceType)
                               .build()
-                              .toFacility(vaFacility ))
+                              .toFacility(
+                                  vaFacility,
+                                  getCorrespondingFacility(vaFacility, extendedResponse)))
                   .collect(Collectors.toList());
       response.nearbyFacilities(extendedFacilities);
     }

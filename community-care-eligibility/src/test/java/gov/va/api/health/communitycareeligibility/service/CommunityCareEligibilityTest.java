@@ -230,14 +230,18 @@ public final class CommunityCareEligibilityTest {
   @Test
   public void facilityTransformerNullChecks() {
     FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
-    assertThat(transformer.toFacility(null)).isNull();
-    assertThat(transformer.toFacility(VaFacilitiesResponse.Facility.builder().build()))
+    assertThat(transformer.toFacility(null, null)).isNull();
+    assertThat(
+            transformer.toFacility(
+                VaFacilitiesResponse.Facility.builder().build(),
+                VaNearbyFacilitiesResponse.Facility.builder().build()))
         .isEqualTo(Facility.builder().mobile(false).active(false).build());
     assertThat(
             transformer.toFacility(
                 VaFacilitiesResponse.Facility.builder()
                     .attributes(VaFacilitiesResponse.Attributes.builder().build())
-                    .build()))
+                    .build(),
+                VaNearbyFacilitiesResponse.Facility.builder().build()))
         .isEqualTo(Facility.builder().mobile(false).active(false).build());
     assertThat(
             transformer.toFacility(
@@ -246,7 +250,8 @@ public final class CommunityCareEligibilityTest {
                         VaFacilitiesResponse.Attributes.builder()
                             .address(VaFacilitiesResponse.Address.builder().build())
                             .build())
-                    .build()))
+                    .build(),
+                VaNearbyFacilitiesResponse.Facility.builder().build()))
         .isEqualTo(Facility.builder().mobile(false).active(false).build());
     assertThat(
             transformer.toFacility(
@@ -259,7 +264,8 @@ public final class CommunityCareEligibilityTest {
                                         VaFacilitiesResponse.PhysicalAddress.builder().build())
                                     .build())
                             .build())
-                    .build()))
+                    .build(),
+                VaNearbyFacilitiesResponse.Facility.builder().build()))
         .isEqualTo(Facility.builder().mobile(false).active(false).build());
   }
 

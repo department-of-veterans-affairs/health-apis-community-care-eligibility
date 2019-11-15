@@ -115,7 +115,6 @@ public final class CommunityCareEligibilityResponse {
     String website;
   }
 
-
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
