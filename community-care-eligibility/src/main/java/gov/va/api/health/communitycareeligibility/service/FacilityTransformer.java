@@ -69,13 +69,13 @@ public class FacilityTransformer {
   }
 
   private static CommunityCareEligibilityResponse.DriveMinutes driveMinutes(
-      VaNearbyFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility.attributes() == null) {
+      VaNearbyFacilitiesResponse.Facility nearbyFacility) {
+    if (nearbyFacility.attributes() == null) {
       return null;
     }
     return CommunityCareEligibilityResponse.DriveMinutes.builder()
-        .min(vaFacility.attributes().min())
-        .max(vaFacility.attributes().max())
+        .min(nearbyFacility.attributes().minTime())
+        .max(nearbyFacility.attributes().maxTime())
         .build();
   }
 
@@ -114,7 +114,7 @@ public class FacilityTransformer {
   public Facility toFacility(
       VaFacilitiesResponse.Facility vaFacility,
       VaNearbyFacilitiesResponse.Facility nearbyFacility) {
-    if (vaFacility == null) {
+    if (vaFacility == null || nearbyFacility == null) {
       return null;
     }
     return Facility.builder()

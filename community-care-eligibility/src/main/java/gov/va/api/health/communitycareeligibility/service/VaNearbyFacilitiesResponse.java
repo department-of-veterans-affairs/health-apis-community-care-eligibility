@@ -48,9 +48,9 @@ public final class VaNearbyFacilitiesResponse {
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Attributes {
     @JsonProperty("min_time")
-    Integer min;
+    Integer minTime;
 
     @JsonProperty("max_time")
-    Integer max;
+    Integer maxTime;
   }
 }
