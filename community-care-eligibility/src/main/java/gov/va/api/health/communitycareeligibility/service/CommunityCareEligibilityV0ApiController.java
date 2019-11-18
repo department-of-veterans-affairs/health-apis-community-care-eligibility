@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
@@ -22,7 +23,6 @@ import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             || response.getSummary() == null
             || response.getSummary().getCommunityCareEligibilityInfo() == null
             || response.getSummary().getCommunityCareEligibilityInfo().getEligibilities() == null
-        ? Collections.emptyList()
+        ? emptyList()
         : response
             .getSummary()
             .getCommunityCareEligibilityInfo()
@@ -314,17 +314,18 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                 .data()
                 .stream()
                 .collect(Collectors.toMap(fac -> fac.id(), Function.identity()));
-
+    if (nearbyResponse == null) {
+      return emptyList();
+    }
     VaFacilitiesResponse vaFacilitiesResponse =
         facilitiesClient.facilitiesByIds(
-            nearbyResponse == null
-                ? Collections.emptyList()
-                : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
+            nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
     return vaFacilitiesResponse == null
-        ? Collections.emptyList()
+        ? emptyList()
         : vaFacilitiesResponse
             .data()
             .stream()
+            .filter(Objects::nonNull)
             .map(
                 vaFacility ->
                     FacilityTransformer.builder()
