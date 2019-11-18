@@ -59,6 +59,8 @@ public final class CommunityCareEligibilityResponse {
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class Address {
+    String country;
+
     String street;
 
     String city;

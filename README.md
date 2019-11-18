@@ -88,6 +88,7 @@ Sample response:
   "grandfathered" : false,
   "noFullServiceVaMedicalFacility" : false,
   "patientAddress" : {
+    "country" : "USA",
     "street" : "742 Evergeen Terrace",
     "city" : "Springfield",
     "state" : "KY",

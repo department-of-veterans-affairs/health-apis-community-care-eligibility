@@ -159,6 +159,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       zip = zip + "-" + zipPlus4;
     }
     return Address.builder()
+        .country(trimToNull(addressInfo.getCountry()))
         .city(trimToNull(addressInfo.getCity()))
         .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
         .street(
