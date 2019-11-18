@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
@@ -187,18 +188,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         : maxDriveMinsSpecialty;
   }
 
-  private VaNearbyFacilitiesResponse.Facility getCorrespondingFacility(
-      VaFacilitiesResponse.Facility vaFacility,
-      VaNearbyFacilitiesResponse nearbyFacilitiesResponse) {
-    VaNearbyFacilitiesResponse.Facility verifiedMatch = null;
-    for (int i = 0; i < nearbyFacilitiesResponse.data().size(); i++) {
-      if (vaFacility.id().equals(nearbyFacilitiesResponse.data().get(i).id())) {
-        verifiedMatch = nearbyFacilitiesResponse.data().get(i);
-      }
-    }
-    return verifiedMatch;
-  }
-
   private GetEESummaryResponse requestEligibility(final String icn) {
     try {
       return eeClient.getEeSummary(icn);
@@ -318,6 +307,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       Coordinates coordinates, int driveMins, String serviceType) {
     VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(coordinates, driveMins, serviceType);
+    Map<String, VaNearbyFacilitiesResponse.Facility> facilityMap =
+        nearbyResponse == null
+            ? null
+            : nearbyResponse
+                .data()
+                .stream()
+                .collect(Collectors.toMap(fac -> fac.id(), Function.identity()));
+
     VaFacilitiesResponse vaFacilitiesResponse =
         facilitiesClient.facilitiesByIds(
             nearbyResponse == null
@@ -333,8 +330,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                     FacilityTransformer.builder()
                         .serviceType(serviceType)
                         .build()
-                        .toFacility(
-                            vaFacility, getCorrespondingFacility(vaFacility, nearbyResponse)))
+                        .toFacility(vaFacility, facilityMap.get(vaFacility.id())))
             .collect(Collectors.toList());
   }
 }
