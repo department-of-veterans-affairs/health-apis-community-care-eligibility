@@ -301,59 +301,40 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
     String serviceType = request.serviceType();
+
+    List<Facility> nearbyFacilities =
+        transformFacilitiesCalls(patientCoordinates, driveMins(serviceType), serviceType);
+    response.nearbyFacilities(nearbyFacilities);
+    response.eligible(nearbyFacilities.isEmpty());
+    if (request.extendedDriveMin() != null) {
+      List<Facility> extendedFacilities =
+          transformFacilitiesCalls(patientCoordinates, request.extendedDriveMin(), serviceType);
+      response.nearbyFacilities(extendedFacilities);
+    }
+    return response.build();
+  }
+
+  private List<Facility> transformFacilitiesCalls(
+      Coordinates coordinates, int driveMins, String serviceType) {
     VaNearbyFacilitiesResponse nearbyResponse =
-        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
+        facilitiesClient.nearbyFacilities(coordinates, driveMins, serviceType);
     VaFacilitiesResponse vaFacilitiesResponse =
         facilitiesClient.facilitiesByIds(
             nearbyResponse == null
                 ? Collections.emptyList()
                 : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
-    List<Facility> nearbyFacilities =
-        vaFacilitiesResponse == null
-            ? Collections.emptyList()
-            : vaFacilitiesResponse
-                .data()
-                .stream()
-                .map(
-                    vaFacility ->
-                        FacilityTransformer.builder()
-                            .serviceType(serviceType)
-                            .build()
-                            .toFacility(
-                                vaFacility, getCorrespondingFacility(vaFacility, nearbyResponse)))
-                .collect(Collectors.toList());
-    response.nearbyFacilities(nearbyFacilities);
-    response.eligible(nearbyFacilities.isEmpty());
-    if (request.extendedDriveMin() != null) {
-      VaNearbyFacilitiesResponse extendedResponse =
-          facilitiesClient.nearbyFacilities(
-              patientCoordinates, request.extendedDriveMin(), serviceType);
-      VaFacilitiesResponse extendedVaFacilitiesResponse =
-          facilitiesClient.facilitiesByIds(
-              extendedResponse == null
-                  ? Collections.emptyList()
-                  : extendedResponse
-                      .data()
-                      .stream()
-                      .map(fac -> fac.id())
-                      .collect(Collectors.toList()));
-      List<Facility> extendedFacilities =
-          extendedVaFacilitiesResponse == null
-              ? Collections.emptyList()
-              : extendedVaFacilitiesResponse
-                  .data()
-                  .stream()
-                  .map(
-                      vaFacility ->
-                          FacilityTransformer.builder()
-                              .serviceType(serviceType)
-                              .build()
-                              .toFacility(
-                                  vaFacility,
-                                  getCorrespondingFacility(vaFacility, extendedResponse)))
-                  .collect(Collectors.toList());
-      response.nearbyFacilities(extendedFacilities);
-    }
-    return response.build();
+    return vaFacilitiesResponse == null
+        ? Collections.emptyList()
+        : vaFacilitiesResponse
+            .data()
+            .stream()
+            .map(
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(serviceType)
+                        .build()
+                        .toFacility(
+                            vaFacility, getCorrespondingFacility(vaFacility, nearbyResponse)))
+            .collect(Collectors.toList());
   }
 }
