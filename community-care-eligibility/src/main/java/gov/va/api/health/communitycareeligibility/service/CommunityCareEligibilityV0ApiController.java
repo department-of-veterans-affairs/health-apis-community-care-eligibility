@@ -269,12 +269,15 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
+
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
       throw new Exceptions.MissingGeocodingInfoException(request.patientIcn());
     }
+
     Coordinates patientCoordinates = toCoordinates(request.patientIcn(), geocoding.get());
     response.patientCoordinates(patientCoordinates);
+
     XMLGregorianCalendar eeAddressChangeXgc =
         eeAddress.isPresent() ? eeAddress.get().getAddressChangeDateTime() : null;
     XMLGregorianCalendar geocodeXgc = geocoding.get().getGeocodeDate();
@@ -290,24 +293,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
 
-    String serviceType = request.serviceType();
-    VaNearbyFacilitiesResponse nearbyResponse =
-        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
-    VaFacilitiesResponse vaFacilitiesResponse =
-        facilitiesClient.facilitiesByIds(
-            nearbyResponse == null
-                ? emptyList()
-                : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
-
     List<Facility> nearbyFacilities =
-        transformFacilitiesCalls(patientCoordinates, driveMins(serviceType), serviceType);
+        transformFacilitiesCalls(
+            patientCoordinates, driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
+
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
-          transformFacilitiesCalls(patientCoordinates, request.extendedDriveMin(), serviceType);
+          transformFacilitiesCalls(
+              patientCoordinates, request.extendedDriveMin(), request.serviceType());
       response.nearbyFacilities(extendedFacilities);
     }
+
     return response.build();
   }
 
