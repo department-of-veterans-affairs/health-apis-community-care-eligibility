@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
@@ -22,13 +23,13 @@ import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
@@ -80,7 +81,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             || response.getSummary() == null
             || response.getSummary().getCommunityCareEligibilityInfo() == null
             || response.getSummary().getCommunityCareEligibilityInfo().getEligibilities() == null
-        ? Collections.emptyList()
+        ? emptyList()
         : response
             .getSummary()
             .getCommunityCareEligibilityInfo()
@@ -216,17 +217,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(patientIcn),
           stripNewlines(serviceType));
     }
-
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
     if (isNotBlank(serviceType) && mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
-
     if (extendedDriveMin != null && extendedDriveMin <= driveMins(mappedServiceType)) {
       throw new Exceptions.InvalidExtendedDriveMin(
           mappedServiceType, extendedDriveMin, driveMins(mappedServiceType));
     }
-
     return search(
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
@@ -294,58 +292,47 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     }
     String serviceType = request.serviceType();
 
-    VaNearbyFacilitiesResponse nearbyResponse =
-        facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
-    VaFacilitiesResponse vaFacilitiesResponse =
-        facilitiesClient.facilitiesByIds(
-            nearbyResponse == null
-                ? Collections.emptyList()
-                : nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
-
     List<Facility> nearbyFacilities =
-        vaFacilitiesResponse == null
-            ? Collections.emptyList()
-            : vaFacilitiesResponse
-                .data()
-                .stream()
-                .map(
-                    vaFacility ->
-                        FacilityTransformer.builder()
-                            .serviceType(serviceType)
-                            .build()
-                            .toFacility(vaFacility))
-                .collect(Collectors.toList());
+        transformFacilitiesCalls(patientCoordinates, driveMins(serviceType), serviceType);
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
     if (request.extendedDriveMin() != null) {
-      VaNearbyFacilitiesResponse extendedResponse =
-          facilitiesClient.nearbyFacilities(
-              patientCoordinates, request.extendedDriveMin(), serviceType);
-
-      VaFacilitiesResponse extendedVaFacilitiesResponse =
-          facilitiesClient.facilitiesByIds(
-              extendedResponse == null
-                  ? Collections.emptyList()
-                  : extendedResponse
-                      .data()
-                      .stream()
-                      .map(fac -> fac.id())
-                      .collect(Collectors.toList()));
       List<Facility> extendedFacilities =
-          extendedVaFacilitiesResponse == null
-              ? Collections.emptyList()
-              : extendedVaFacilitiesResponse
-                  .data()
-                  .stream()
-                  .map(
-                      vaFacility ->
-                          FacilityTransformer.builder()
-                              .serviceType(serviceType)
-                              .build()
-                              .toFacility(vaFacility))
-                  .collect(Collectors.toList());
+          transformFacilitiesCalls(patientCoordinates, request.extendedDriveMin(), serviceType);
       response.nearbyFacilities(extendedFacilities);
     }
     return response.build();
+  }
+
+  private List<Facility> transformFacilitiesCalls(
+      Coordinates coordinates, int driveMins, String serviceType) {
+    VaNearbyFacilitiesResponse nearbyResponse =
+        facilitiesClient.nearbyFacilities(coordinates, driveMins, serviceType);
+    Map<String, VaNearbyFacilitiesResponse.Facility> facilityMap =
+        nearbyResponse == null
+            ? null
+            : nearbyResponse
+                .data()
+                .stream()
+                .collect(Collectors.toMap(fac -> fac.id(), Function.identity()));
+    if (nearbyResponse == null) {
+      return emptyList();
+    }
+    VaFacilitiesResponse vaFacilitiesResponse =
+        facilitiesClient.facilitiesByIds(
+            nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
+    return vaFacilitiesResponse == null
+        ? emptyList()
+        : vaFacilitiesResponse
+            .data()
+            .stream()
+            .filter(Objects::nonNull)
+            .map(
+                vaFacility ->
+                    FacilityTransformer.builder()
+                        .serviceType(serviceType)
+                        .build()
+                        .toFacility(vaFacility, facilityMap.get(vaFacility.id())))
+            .collect(Collectors.toList());
   }
 }
