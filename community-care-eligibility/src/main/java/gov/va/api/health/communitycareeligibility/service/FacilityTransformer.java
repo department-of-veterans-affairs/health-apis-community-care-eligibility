@@ -4,6 +4,7 @@ import static gov.va.api.health.communitycareeligibility.service.Transformers.al
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
+import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Builder
 public class FacilityTransformer {
+
   @NonNull private final String serviceType;
 
   private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {
@@ -66,6 +68,17 @@ public class FacilityTransformer {
         .build();
   }
 
+  private static CommunityCareEligibilityResponse.DriveMinutes driveMinutes(
+      VaNearbyFacilitiesResponse.Facility nearbyFacility) {
+    if (nearbyFacility.attributes() == null) {
+      return null;
+    }
+    return CommunityCareEligibilityResponse.DriveMinutes.builder()
+        .min(nearbyFacility.attributes().minTime())
+        .max(nearbyFacility.attributes().maxTime())
+        .build();
+  }
+
   private static Boolean mobile(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null || vaFacility.attributes().mobile() == null) {
       return false;
@@ -98,8 +111,10 @@ public class FacilityTransformer {
   }
 
   /** Check for Facility. */
-  public Facility toFacility(VaFacilitiesResponse.Facility vaFacility) {
-    if (vaFacility == null) {
+  public Facility toFacility(
+      VaFacilitiesResponse.Facility vaFacility,
+      VaNearbyFacilitiesResponse.Facility nearbyFacility) {
+    if (vaFacility == null || nearbyFacility == null) {
       return null;
     }
     return Facility.builder()
@@ -107,6 +122,7 @@ public class FacilityTransformer {
         .name(name(vaFacility))
         .physicalAddress(address(vaFacility))
         .coordinates(coordinates(vaFacility))
+        .driveMinutes(driveMinutes(nearbyFacility))
         .phoneNumber(phoneNumber(vaFacility))
         .website(website(vaFacility))
         .mobile(mobile(vaFacility))

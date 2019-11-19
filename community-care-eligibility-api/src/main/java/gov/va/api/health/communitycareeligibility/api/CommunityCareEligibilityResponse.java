@@ -86,6 +86,16 @@ public final class CommunityCareEligibilityResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+  public static final class DriveMinutes {
+    Integer min;
+    Integer max;
+  }
+
+  @Data
+  @Builder
+  @NoArgsConstructor(access = AccessLevel.PRIVATE)
+  @AllArgsConstructor(access = AccessLevel.PRIVATE)
+  @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class EligibilityCode {
     String description;
 
@@ -104,15 +114,16 @@ public final class CommunityCareEligibilityResponse {
 
     Address physicalAddress;
 
-    Boolean mobile;
-
-    Boolean active;
-
     Coordinates coordinates;
+
+    DriveMinutes driveMinutes;
 
     String phoneNumber;
 
     String website;
+    Boolean mobile;
+
+    Boolean active;
   }
 
   @Data
