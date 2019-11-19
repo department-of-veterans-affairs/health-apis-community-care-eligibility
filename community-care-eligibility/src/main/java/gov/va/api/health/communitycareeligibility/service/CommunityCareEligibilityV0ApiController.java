@@ -52,7 +52,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
-
   private static final Map<String, String> SERVICES_MAP = initServicesMap();
 
   private int maxDriveMinsPrimary;
@@ -109,9 +108,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             "Gastroenterology",
             "Gynecology",
             "MentalHealthCare",
+            "Nutrition",
             "Ophthalmology",
             "Optometry",
             "Orthopedics",
+            "Podiatry",
             "PrimaryCare",
             "Urology",
             "WomensHealth")) {
@@ -206,7 +207,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   public CommunityCareEligibilityResponse search(
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
-      @RequestParam(value = "serviceType", required = false) String serviceType,
+      @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @Max(value = 90) @RequestParam(value = "extendedDriveMin", required = false)
           Integer extendedDriveMin) {
     if (isNotBlank(optSessionIdHeader)) {
@@ -218,7 +219,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(serviceType));
     }
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
-    if (isNotBlank(serviceType) && mappedServiceType == null) {
+    if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
     if (extendedDriveMin != null && extendedDriveMin <= driveMins(mappedServiceType)) {
@@ -265,17 +266,18 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
     }
-    if (request.serviceType() == null) {
-      return response.build();
-    }
+
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
+
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
       throw new Exceptions.MissingGeocodingInfoException(request.patientIcn());
     }
+
     Coordinates patientCoordinates = toCoordinates(request.patientIcn(), geocoding.get());
     response.patientCoordinates(patientCoordinates);
+
     XMLGregorianCalendar eeAddressChangeXgc =
         eeAddress.isPresent() ? eeAddress.get().getAddressChangeDateTime() : null;
     XMLGregorianCalendar geocodeXgc = geocoding.get().getGeocodeDate();
@@ -290,17 +292,20 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
-    String serviceType = request.serviceType();
 
     List<Facility> nearbyFacilities =
-        transformFacilitiesCalls(patientCoordinates, driveMins(serviceType), serviceType);
+        transformFacilitiesCalls(
+            patientCoordinates, driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
+
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
-          transformFacilitiesCalls(patientCoordinates, request.extendedDriveMin(), serviceType);
+          transformFacilitiesCalls(
+              patientCoordinates, request.extendedDriveMin(), request.serviceType());
       response.nearbyFacilities(extendedFacilities);
     }
+
     return response.build();
   }
 

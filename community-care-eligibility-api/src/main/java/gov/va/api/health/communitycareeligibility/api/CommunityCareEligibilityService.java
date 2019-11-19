@@ -126,15 +126,18 @@ public interface CommunityCareEligibilityService {
                     "Gastroenterology",
                     "Gynecology",
                     "MentalHealthCare",
+                    "Nutrition",
                     "Ophthalmology",
                     "Optometry",
                     "Orthopedics",
+                    "Podiatry",
                     "PrimaryCare",
                     "Urology",
                     "WomensHealth"
                   }
                 )
           )
+          @NotBlank
           String serviceType,
       @Parameter(
             in = ParameterIn.QUERY,
