@@ -514,56 +514,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  public void noService() {
-    QueenElizabethService eeClient = mock(QueenElizabethService.class);
-    when(eeClient.getEeSummary("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .communityCareEligibilityInfo(
-                            CommunityCareEligibilityInfo.builder()
-                                .eligibilities(
-                                    VceEligibilityCollection.builder()
-                                        .eligibility(
-                                            singletonList(
-                                                VceEligibilityInfo.builder()
-                                                    .vceCode("H")
-                                                    .vceDescription("Hardship")
-                                                    .vceEffectiveDate(
-                                                        parseXmlGregorianCalendar(
-                                                            "2019-03-27T14:37:48Z"))
-                                                    .build()))
-                                        .build())
-                                .build())
-                        .build())
-                .build());
-    CommunityCareEligibilityResponse actual =
-        CommunityCareEligibilityV0ApiController.builder()
-            .eeClient(eeClient)
-            .build()
-            .search(null, "123", "", null);
-    assertThat(actual)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .patientRequest(
-                    CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .timestamp(actual.patientRequest().timestamp())
-                        .patientIcn("123")
-                        .build())
-                .grandfathered(false)
-                .noFullServiceVaMedicalFacility(false)
-                .eligible(true)
-                .eligibilityCodes(
-                    Collections.singletonList(
-                        CommunityCareEligibilityResponse.EligibilityCode.builder()
-                            .description("Hardship")
-                            .code("H")
-                            .build()))
-                .build());
-  }
-
-  @Test
   public void notYetEligibleDate() {
     QueenElizabethService eeClient = mock(QueenElizabethService.class);
     when(eeClient.getEeSummary("123"))

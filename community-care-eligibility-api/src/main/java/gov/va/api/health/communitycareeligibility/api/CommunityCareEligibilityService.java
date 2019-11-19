@@ -137,6 +137,7 @@ public interface CommunityCareEligibilityService {
                   }
                 )
           )
+          @NotBlank
           String serviceType,
       @Parameter(
             in = ParameterIn.QUERY,

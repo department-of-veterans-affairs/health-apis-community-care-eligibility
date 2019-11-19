@@ -51,7 +51,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
-
   private static final Map<String, String> SERVICES_MAP = initServicesMap();
 
   private int maxDriveMinsPrimary;
@@ -207,7 +206,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   public CommunityCareEligibilityResponse search(
       @RequestHeader(value = "X-VA-SESSIONID", defaultValue = "") String optSessionIdHeader,
       @NotBlank @RequestParam(value = "patient") String patientIcn,
-      @RequestParam(value = "serviceType", required = false) String serviceType,
+      @NotBlank @RequestParam(value = "serviceType") String serviceType,
       @Max(value = 90) @RequestParam(value = "extendedDriveMin", required = false)
           Integer extendedDriveMin) {
     if (isNotBlank(optSessionIdHeader)) {
@@ -220,7 +219,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     }
 
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
-    if (isNotBlank(serviceType) && mappedServiceType == null) {
+    if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
 
@@ -269,9 +268,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
     }
-    if (request.serviceType() == null) {
-      return response.build();
-    }
+
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
@@ -294,8 +291,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
     }
-    String serviceType = request.serviceType();
 
+    String serviceType = request.serviceType();
     VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(patientCoordinates, driveMins(serviceType), serviceType);
     VaFacilitiesResponse vaFacilitiesResponse =
