@@ -108,9 +108,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             "Gastroenterology",
             "Gynecology",
             "MentalHealthCare",
+            "Nutrition",
             "Ophthalmology",
             "Optometry",
             "Orthopedics",
+            "Podiatry",
             "PrimaryCare",
             "Urology",
             "WomensHealth")) {

@@ -126,9 +126,11 @@ public interface CommunityCareEligibilityService {
                     "Gastroenterology",
                     "Gynecology",
                     "MentalHealthCare",
+                    "Nutrition",
                     "Ophthalmology",
                     "Optometry",
                     "Orthopedics",
+                    "Podiatry",
                     "PrimaryCare",
                     "Urology",
                     "WomensHealth"
