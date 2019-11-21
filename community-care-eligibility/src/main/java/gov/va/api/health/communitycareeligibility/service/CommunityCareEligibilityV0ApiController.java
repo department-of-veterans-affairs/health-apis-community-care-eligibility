@@ -200,14 +200,18 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     List<GetEESummaryResponse> responses = new ArrayList<>();
     List<Throwable> errors = new ArrayList<>();
     try {
-      responses.add(requestEligibilityInner(icn));
+      GetEESummaryResponse response = requestEligibilityInner(icn);
+      log.info("QueenElizabethService response: " + response);
+      responses.add(response);
     } catch (Throwable t) {
       errors.add(t);
       log.error("QueenElizabethService exception", t);
     }
 
     try {
-      responses.add(eeClient2.requestEligibility(icn));
+      GetEESummaryResponse response = eeClient2.requestEligibility(icn);
+      log.info("EligibilityAndEnrollmentClient response: " + response);
+      responses.add(response);
     } catch (Throwable t) {
       errors.add(t);
       log.error("EligibilityAndEnrollmentClient exception", t);
