@@ -98,12 +98,14 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     // final StopWatch watch = StopWatch.createStarted();
     EeSummaryPort port =
         new EeSummaryPortService(new URL(endpointUrl + "eeSummary.wsdl")).getEeSummaryPortSoap11();
-    Binding binding = ((BindingProvider) port).getBinding();
+    BindingProvider bindingProvider = (BindingProvider) port;
+    bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointUrl);
     @SuppressWarnings("rawtypes")
-    List<Handler> handlers = binding.getHandlerChain();
-    System.out.println("initial handlers: " + handlers);
+    List<Handler> handlers = bindingProvider.getBinding().getHandlerChain();
+    // System.out.println("initial handlers: " + handlers);
     handlers.add(SecurityHandler.builder().username(username).password(password).build());
-    binding.setHandlerChain(handlers);
+    bindingProvider.getBinding().setHandlerChain(handlers);
+
     // watch.stop();
     // System.out.println("took " + watch.getTime(TimeUnit.MILLISECONDS));
 
