@@ -35,7 +35,9 @@ Example
 $1
 EOF
 exit 1
-}doCurl () {
+}
+
+doCurl () {
   if [[ -n "$2" ]]
   then
     REQUEST_URL="$ENDPOINT_DOMAIN_NAME$BASE_PATH$VERSION${path// /%20}"
@@ -53,7 +55,9 @@ exit 1
     FAILURE=$((FAILURE + 1))
     echo "$REQUEST_URL: $status_code - Fail"
   fi
-}smokeTest() {
+}
+
+smokeTest() {
   if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
     ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
   fi
@@ -89,7 +93,9 @@ exit 1
   doCurl 500 $TOKEN
 
   printResults
-}regressionTest() {
+}
+
+regressionTest() {
   if [[ ! "$ENDPOINT_DOMAIN_NAME" == http* ]]; then
     ENDPOINT_DOMAIN_NAME="https://$ENDPOINT_DOMAIN_NAME"
   fi
@@ -157,7 +163,9 @@ exit 1
   doCurl 500 $TOKEN
 
   printResults
-}printResults () {
+}
+
+printResults () {
   TOTAL=$((SUCCESS + FAILURE))
 
   echo "=== TOTAL: $TOTAL | SUCCESS: $SUCCESS | FAILURE: $FAILURE ==="
@@ -165,7 +173,9 @@ exit 1
   if [[ "$FAILURE" -gt 0 ]]; then
   exit 1
   fi
-}# Let's get down to business
+}
+
+# Let's get down to business
 ARGS=$(getopt -n $(basename ${0}) \
     -l "endpoint-domain-name:,environment:,token:,base-path:,patient:,help" \
     -o "d:e:t:b:v:p:h" -- "$@")
