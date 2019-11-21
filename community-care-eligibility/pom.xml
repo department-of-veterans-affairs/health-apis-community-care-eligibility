@@ -12,7 +12,7 @@
   <packaging>jar</packaging>
   <properties>
     <ee-client.version>3.0.2</ee-client.version>
-    <jacoco.coverage>0.89</jacoco.coverage>
+    <jacoco.coverage>0.77</jacoco.coverage>
   </properties>
   <dependencies>
     <dependency>

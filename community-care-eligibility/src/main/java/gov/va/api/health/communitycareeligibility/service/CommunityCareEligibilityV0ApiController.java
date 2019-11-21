@@ -23,6 +23,7 @@ import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -60,6 +61,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
   private QueenElizabethService eeClient;
 
+  private EligibilityAndEnrollmentClient eeClient2;
+
   private FacilitiesClient facilitiesClient;
 
   /** Autowired constructor. */
@@ -68,10 +71,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
       @Autowired QueenElizabethService eeClient,
+      @Autowired EligibilityAndEnrollmentClient eeClient2,
       @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
     this.eeClient = eeClient;
+    this.eeClient2 = eeClient2;
     this.facilitiesClient = facilitiesClient;
   }
 
@@ -190,7 +195,31 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         : maxDriveMinsSpecialty;
   }
 
-  private GetEESummaryResponse requestEligibility(final String icn) {
+  @SneakyThrows
+  private GetEESummaryResponse requestEligibility(String icn) {
+    List<GetEESummaryResponse> responses = new ArrayList<>();
+    List<Throwable> errors = new ArrayList<>();
+    try {
+      responses.add(requestEligibilityInner(icn));
+    } catch (Throwable t) {
+      errors.add(t);
+      log.error("QueenElizabethService exception", t);
+    }
+
+    try {
+      responses.add(eeClient2.requestEligibility(icn));
+    } catch (Throwable t) {
+      errors.add(t);
+      log.error("EligibilityAndEnrollmentClient exception", t);
+    }
+
+    if (!responses.isEmpty()) {
+      return responses.get(0);
+    }
+    throw errors.get(0);
+  }
+
+  private GetEESummaryResponse requestEligibilityInner(String icn) {
     try {
       return eeClient.getEeSummary(icn);
     } catch (PersonNotFound e) {
