@@ -305,30 +305,39 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       Coordinates coordinates, int driveMins, String serviceType) {
     VaNearbyFacilitiesResponse nearbyResponse =
         facilitiesClient.nearbyFacilities(coordinates, driveMins, serviceType);
-    Map<String, VaNearbyFacilitiesResponse.Facility> facilityMap =
-        nearbyResponse == null
-            ? null
-            : nearbyResponse
-                .data()
-                .stream()
-                .collect(Collectors.toMap(fac -> fac.id(), Function.identity()));
     if (nearbyResponse == null) {
       return emptyList();
     }
+
     VaFacilitiesResponse vaFacilitiesResponse =
         facilitiesClient.facilitiesByIds(
-            nearbyResponse.data().stream().map(fac -> fac.id()).collect(Collectors.toList()));
-    return vaFacilitiesResponse == null
-        ? emptyList()
-        : vaFacilitiesResponse
+            nearbyResponse
+                .data()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(fac -> fac.id())
+                .collect(Collectors.toList()));
+    if (vaFacilitiesResponse == null) {
+      return emptyList();
+    }
+
+    Map<String, VaNearbyFacilitiesResponse.Facility> nearbyFacilityMap =
+        nearbyResponse
             .data()
             .stream()
             .filter(Objects::nonNull)
-            .map(
-                vaFacility ->
-                    FacilityTransformer.builder()
-                        .build()
-                        .toFacility(vaFacility, facilityMap.get(vaFacility.id())))
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(fac -> fac.id(), Function.identity()));
+
+    return vaFacilitiesResponse
+        .data()
+        .stream()
+        .filter(Objects::nonNull)
+        .map(
+            vaFacility ->
+                FacilityTransformer.builder()
+                    .build()
+                    .toFacility(vaFacility, nearbyFacilityMap.get(vaFacility.id())))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 }
