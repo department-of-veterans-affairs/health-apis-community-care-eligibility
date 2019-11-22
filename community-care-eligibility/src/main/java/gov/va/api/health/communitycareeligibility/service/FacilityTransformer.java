@@ -10,14 +10,10 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import java.util.Locale;
 import lombok.Builder;
-import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
 @Builder
-public class FacilityTransformer {
-
-  @NonNull private final String serviceType;
-
+final class FacilityTransformer {
   private static Boolean active(VaFacilitiesResponse.Facility vaFacility) {
     if (vaFacility.attributes() == null) {
       return false;

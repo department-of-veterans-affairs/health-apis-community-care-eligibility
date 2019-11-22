@@ -1,16 +1,16 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static java.util.Collections.emptySet;
+
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPort;
-import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPortService;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryRequest;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import java.io.InputStream;
-import java.net.URL;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -27,6 +27,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -36,28 +37,33 @@ import org.springframework.util.ResourceUtils;
 @Slf4j
 @Component
 public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollmentClient {
+  private final Supplier<EeSummaryPort> eeSummaryPortSupplier;
+
   private final String username;
 
   private final String password;
 
   private final String endpointUrl;
 
-  private final String keyStorePath;
+  private final String keystorePath;
 
-  private final String keyStorePassword;
+  private final String keystorePassword;
 
   /** Autowired constructor. */
+  @Builder
   public SoapEligibilityAndEnrollmentClient(
+      @Autowired Supplier<EeSummaryPort> eeSummaryPortSupplier,
       @Value("${ee.header.username}") String username,
       @Value("${ee.header.password}") String password,
       @Value("${ee.endpoint.url}") String endpointUrl,
-      @Value("${ee.keystore.path}") String keyStorePath,
-      @Value("${ee.keystore.password}") String keyStorePassword) {
+      @Value("${ee.keystore.path}") String keystorePath,
+      @Value("${ee.keystore.password}") String keystorePassword) {
+    this.eeSummaryPortSupplier = eeSummaryPortSupplier;
     this.username = username;
     this.password = password;
     this.endpointUrl = endpointUrl.endsWith("/") ? endpointUrl : endpointUrl + "/";
-    this.keyStorePath = keyStorePath;
-    this.keyStorePassword = keyStorePassword;
+    this.keystorePath = keystorePath;
+    this.keystorePassword = keystorePassword;
   }
 
   private static String fileOrClasspath(String path) {
@@ -70,56 +76,40 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   /** Initialize SSL. */
   @SneakyThrows
   @EventListener(ApplicationStartedEvent.class)
-  public void initSsl() {
+  public boolean initSsl() {
     if (!endpointUrl.startsWith("https")) {
-      return;
+      return false;
     }
 
-    log.info("Initializing SSL");
-    try (InputStream keyStoreInputStream =
-        ResourceUtils.getURL(fileOrClasspath(keyStorePath)).openStream()) {
+    log.info("Initializing SSL for E&E");
+    try (InputStream keystoreInputStream =
+        ResourceUtils.getURL(fileOrClasspath(keystorePath)).openStream()) {
       KeyStore ts = KeyStore.getInstance("JKS");
-      ts.load(keyStoreInputStream, keyStorePassword.toCharArray());
+      ts.load(keystoreInputStream, keystorePassword.toCharArray());
       TrustManagerFactory trustManagerFactory =
           TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
       trustManagerFactory.init(ts);
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
       HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+      return true;
     }
   }
 
   @Override
   @SneakyThrows
   public GetEESummaryResponse requestEligibility(String patientIcn) {
-    // System.out.println("Requesting eligibilities: " + patientIcn);
-
-    // final StopWatch watch = StopWatch.createStarted();
-    EeSummaryPort port =
-        new EeSummaryPortService(new URL(endpointUrl + "eeSummary.wsdl")).getEeSummaryPortSoap11();
+    EeSummaryPort port = eeSummaryPortSupplier.get();
     BindingProvider bindingProvider = (BindingProvider) port;
     bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointUrl);
     @SuppressWarnings("rawtypes")
     List<Handler> handlers = bindingProvider.getBinding().getHandlerChain();
-    // System.out.println("initial handlers: " + handlers);
     handlers.add(SecurityHandler.builder().username(username).password(password).build());
     bindingProvider.getBinding().setHandlerChain(handlers);
 
-    // watch.stop();
-    // System.out.println("took " + watch.getTime(TimeUnit.MILLISECONDS));
-
     try {
-      // StopWatch watch2 = StopWatch.createStarted();
-      GetEESummaryResponse response =
-          port.getEESummary(
-              GetEESummaryRequest.builder()
-                  .key(patientIcn)
-                  .requestName("CommunityCareInfo")
-                  .build());
-      // log.info(response.toString());
-      // watch2.stop();
-      // System.out.println("call took " + watch2.getTime(TimeUnit.MILLISECONDS));
-      return response;
+      return port.getEESummary(
+          GetEESummaryRequest.builder().key(patientIcn).requestName("CommunityCareInfo").build());
     } catch (Exception e) {
       if (StringUtils.containsIgnoreCase(e.getMessage(), "PERSON_NOT_FOUND")) {
         throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
@@ -130,7 +120,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   }
 
   @Builder
-  private static final class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
+  static final class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
     @NonNull private final String username;
 
     @NonNull private final String password;
@@ -140,7 +130,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
 
     @Override
     public Set<QName> getHeaders() {
-      return Collections.emptySet();
+      return emptySet();
     }
 
     @Override

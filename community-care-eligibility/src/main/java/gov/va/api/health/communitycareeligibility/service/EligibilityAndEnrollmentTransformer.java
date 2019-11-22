@@ -17,7 +17,6 @@ final class EligibilityAndEnrollmentTransformer {
   EligibilityCode toEligibility() {
     String description = eligibilityInfo.getVceDescription();
     String code = eligibilityInfo.getVceCode();
-
     if (allBlank(description, code)) {
       return null;
     }

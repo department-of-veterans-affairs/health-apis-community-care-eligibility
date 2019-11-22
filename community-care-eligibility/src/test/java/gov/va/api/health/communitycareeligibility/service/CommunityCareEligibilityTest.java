@@ -12,9 +12,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
-import gov.va.api.health.queenelizabeth.ee.QueenElizabethService;
-import gov.va.api.health.queenelizabeth.ee.exceptions.PersonNotFound;
-import gov.va.api.health.queenelizabeth.ee.exceptions.RequestFailed;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
@@ -102,8 +99,8 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-    QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123"))
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -199,37 +196,9 @@ public final class CommunityCareEligibilityTest {
     assertThat(actual).isEqualTo(expected);
   }
 
-  /** Test condition when QueenElizabethService has unknown fault condition. */
-  @Test(expected = Exceptions.EeUnavailableException.class)
-  public void eeUnknownFault() {
-    QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123")).thenThrow(new RequestFailed(null));
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(client)
-            .maxDriveTimePrimary(1)
-            .build();
-    controller.search("", "123", "optometry", null);
-  }
-
-  /** Test condition when QueenElizabethService does not find person. */
-  @Test(expected = Exceptions.UnknownPatientIcnException.class)
-  public void eeUnknownPatient() {
-    QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123")).thenThrow(new PersonNotFound(null));
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(client)
-            .maxDriveTimePrimary(1)
-            .build();
-    controller.search("", "123", "optometry", null);
-  }
-
   @Test
   public void facilityTransformerNullChecks() {
-    FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
+    FacilityTransformer transformer = FacilityTransformer.builder().build();
     assertThat(transformer.toFacility(null, null)).isNull();
     assertThat(
             transformer.toFacility(
@@ -271,8 +240,8 @@ public final class CommunityCareEligibilityTest {
 
   @Test
   public void hardship() {
-    QueenElizabethService eeClient = mock(QueenElizabethService.class);
-    when(eeClient.getEeSummary("123"))
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -325,8 +294,8 @@ public final class CommunityCareEligibilityTest {
 
   @Test(expected = Exceptions.MissingGeocodingInfoException.class)
   public void incompleteGeocodingInfo() {
-    QueenElizabethService eeClient = mock(QueenElizabethService.class);
-    when(eeClient.getEeSummary("123"))
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -351,7 +320,7 @@ public final class CommunityCareEligibilityTest {
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(mock(QueenElizabethService.class))
+            .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .maxDriveTimePrimary(30)
             .build();
     controller.search("", "123", "primarycare", 20);
@@ -360,15 +329,15 @@ public final class CommunityCareEligibilityTest {
   @Test(expected = Exceptions.MissingGeocodingInfoException.class)
   public void missingGeocodingInfo() {
     CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(mock(QueenElizabethService.class))
+        .eeClient(mock(EligibilityAndEnrollmentClient.class))
         .build()
         .search("", "123", "PrimaryCare", null);
   }
 
   @Test
   public void noFacilities() {
-    QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123"))
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -458,8 +427,8 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .build());
 
-    QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123"))
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -521,8 +490,8 @@ public final class CommunityCareEligibilityTest {
 
   @Test
   public void notYetEligibleDate() {
-    QueenElizabethService eeClient = mock(QueenElizabethService.class);
-    when(eeClient.getEeSummary("123"))
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -566,8 +535,8 @@ public final class CommunityCareEligibilityTest {
   @Test(expected = Exceptions.OutdatedGeocodingInfoException.class)
   public void outdatedGeocodingInfo() {
     System.out.println(Instant.now());
-    QueenElizabethService eeClient = mock(QueenElizabethService.class);
-    when(eeClient.getEeSummary("123"))
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -609,8 +578,8 @@ public final class CommunityCareEligibilityTest {
 
   @Test(expected = Exceptions.UnknownServiceTypeException.class)
   public void unknownServiceType() {
-    QueenElizabethService client = mock(QueenElizabethService.class);
-    when(client.getEeSummary("123"))
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
@@ -649,8 +618,8 @@ public final class CommunityCareEligibilityTest {
 
   @Test
   public void xIsIneligible() {
-    QueenElizabethService eeClient = mock(QueenElizabethService.class);
-    when(eeClient.getEeSummary("123"))
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
         .thenReturn(
             GetEESummaryResponse.builder()
                 .summary(
