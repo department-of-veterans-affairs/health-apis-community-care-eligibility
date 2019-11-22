@@ -6,7 +6,9 @@ import java.net.URL;
 import java.util.function.Supplier;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public final class EeSummaryPortSupplier implements Supplier<EeSummaryPort> {
   private final String endpointUrl;
 
