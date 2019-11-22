@@ -198,7 +198,7 @@ public final class CommunityCareEligibilityTest {
 
   @Test
   public void facilityTransformerNullChecks() {
-    FacilityTransformer transformer = FacilityTransformer.builder().serviceType("xyz").build();
+    FacilityTransformer transformer = FacilityTransformer.builder().build();
     assertThat(transformer.toFacility(null, null)).isNull();
     assertThat(
             transformer.toFacility(

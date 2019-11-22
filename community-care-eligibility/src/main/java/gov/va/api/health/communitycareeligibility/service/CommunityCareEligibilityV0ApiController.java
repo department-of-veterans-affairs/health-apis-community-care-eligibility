@@ -327,7 +327,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .map(
                 vaFacility ->
                     FacilityTransformer.builder()
-                        .serviceType(serviceType)
                         .build()
                         .toFacility(vaFacility, facilityMap.get(vaFacility.id())))
             .collect(Collectors.toList());
