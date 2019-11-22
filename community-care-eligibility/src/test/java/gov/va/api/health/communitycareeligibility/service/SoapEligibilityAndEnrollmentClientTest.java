@@ -45,6 +45,17 @@ public final class SoapEligibilityAndEnrollmentClientTest {
   }
 
   @Test
+  public void initSsl() {
+    SoapEligibilityAndEnrollmentClient client =
+        SoapEligibilityAndEnrollmentClient.builder()
+            .endpointUrl("https://foo.bar")
+            .keystorePath("classpath:test.jks")
+            .keystorePassword("123456")
+            .build();
+    assertThat(client.initSsl()).isTrue();
+  }
+
+  @Test
   public void requestEligibility() {
     Binding binding = mock(Binding.class);
     BindingProvider bindingProvider = mock(BindingProvider.class);
@@ -100,6 +111,16 @@ public final class SoapEligibilityAndEnrollmentClientTest {
                 .build()
                 .handleMessage(msgContext))
         .isTrue();
+  }
+
+  @Test
+  public void skipSsl() {
+    assertThat(
+            SoapEligibilityAndEnrollmentClient.builder()
+                .endpointUrl("http://foo.bar")
+                .build()
+                .initSsl())
+        .isFalse();
   }
 
   @Test(expected = Exceptions.UnknownPatientIcnException.class)

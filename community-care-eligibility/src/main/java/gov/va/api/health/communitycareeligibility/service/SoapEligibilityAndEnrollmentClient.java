@@ -76,9 +76,9 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   /** Initialize SSL. */
   @SneakyThrows
   @EventListener(ApplicationStartedEvent.class)
-  public void initSsl() {
+  public boolean initSsl() {
     if (!endpointUrl.startsWith("https")) {
-      return;
+      return false;
     }
 
     log.info("Initializing SSL for E&E");
@@ -92,6 +92,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
       HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+      return true;
     }
   }
 
