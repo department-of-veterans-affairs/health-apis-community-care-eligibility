@@ -120,7 +120,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   }
 
   @Builder
-  private static final class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
+  static final class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
     @NonNull private final String username;
 
     @NonNull private final String password;
