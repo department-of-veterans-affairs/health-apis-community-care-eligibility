@@ -1,53 +1,27 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
-import javax.xml.ws.Binding;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
+
+import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPort;
+import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryRequest;
+import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
-
-import org.junit.Test;
-
-import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPort;
-import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryRequest;
-import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
+import javax.xml.ws.Binding;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.experimental.Delegate;
+import org.junit.Test;
 
 public final class SoapEligibilityAndEnrollmentClientTest {
-  @Test
-  public void requestEligibility() {
-    Binding binding = mock(Binding.class);
-    BindingProvider bindingProvider = mock(BindingProvider.class);
-    when(bindingProvider.getBinding()).thenReturn(binding);
-    EeSummaryPort port = mock(EeSummaryPort.class);
-    when(port.getEESummary(
-            eq(GetEESummaryRequest.builder().key("0V0").requestName("CommunityCareInfo").build())))
-        .thenReturn(GetEESummaryResponse.builder().noDataMessage("hello").build());
-    EeSummaryPort portWrapper = new MockPort(port, bindingProvider);
-
-    SoapEligibilityAndEnrollmentClient client =
-        SoapEligibilityAndEnrollmentClient.builder()
-            .eeSummaryPortSupplier(() -> portWrapper)
-            .username("bobnelson")
-            .password("12345")
-            .endpointUrl("https://foo.bar")
-            .keystorePath("xyz")
-            .keystorePassword("12345")
-            .build();
-
-    assertThat(client.requestEligibility("0V0"))
-        .isEqualTo(GetEESummaryResponse.builder().noDataMessage("hello").build());
-  }
-
   @Test(expected = Exceptions.EeUnavailableException.class)
   public void eeUnavailableException() {
     Binding binding = mock(Binding.class);
@@ -70,26 +44,28 @@ public final class SoapEligibilityAndEnrollmentClientTest {
         .requestEligibility("0V0");
   }
 
-  @Test(expected = Exceptions.UnknownPatientIcnException.class)
-  public void unknownPatientIcnException() {
+  @Test
+  public void requestEligibility() {
     Binding binding = mock(Binding.class);
     BindingProvider bindingProvider = mock(BindingProvider.class);
     when(bindingProvider.getBinding()).thenReturn(binding);
     EeSummaryPort port = mock(EeSummaryPort.class);
     when(port.getEESummary(
             eq(GetEESummaryRequest.builder().key("0V0").requestName("CommunityCareInfo").build())))
-        .thenThrow(new RuntimeException("PERSON_NOT_FOUND"));
+        .thenReturn(GetEESummaryResponse.builder().noDataMessage("hello").build());
     EeSummaryPort portWrapper = new MockPort(port, bindingProvider);
 
-    SoapEligibilityAndEnrollmentClient.builder()
-        .eeSummaryPortSupplier(() -> portWrapper)
-        .username("bobnelson")
-        .password("12345")
-        .endpointUrl("https://foo.bar")
-        .keystorePath("xyz")
-        .keystorePassword("12345")
-        .build()
-        .requestEligibility("0V0");
+    SoapEligibilityAndEnrollmentClient client =
+        SoapEligibilityAndEnrollmentClient.builder()
+            .eeSummaryPortSupplier(() -> portWrapper)
+            .username("bobnelson")
+            .password("12345")
+            .endpointUrl("https://foo.bar")
+            .keystorePath("xyz")
+            .keystorePassword("12345")
+            .build();
+    assertThat(client.requestEligibility("0V0"))
+        .isEqualTo(GetEESummaryResponse.builder().noDataMessage("hello").build());
   }
 
   @Test
@@ -124,6 +100,28 @@ public final class SoapEligibilityAndEnrollmentClientTest {
                 .build()
                 .handleMessage(msgContext))
         .isTrue();
+  }
+
+  @Test(expected = Exceptions.UnknownPatientIcnException.class)
+  public void unknownPatientIcnException() {
+    Binding binding = mock(Binding.class);
+    BindingProvider bindingProvider = mock(BindingProvider.class);
+    when(bindingProvider.getBinding()).thenReturn(binding);
+    EeSummaryPort port = mock(EeSummaryPort.class);
+    when(port.getEESummary(
+            eq(GetEESummaryRequest.builder().key("0V0").requestName("CommunityCareInfo").build())))
+        .thenThrow(new RuntimeException("PERSON_NOT_FOUND"));
+    EeSummaryPort portWrapper = new MockPort(port, bindingProvider);
+
+    SoapEligibilityAndEnrollmentClient.builder()
+        .eeSummaryPortSupplier(() -> portWrapper)
+        .username("bobnelson")
+        .password("12345")
+        .endpointUrl("https://foo.bar")
+        .keystorePath("xyz")
+        .keystorePassword("12345")
+        .build()
+        .requestEligibility("0V0");
   }
 
   @Value

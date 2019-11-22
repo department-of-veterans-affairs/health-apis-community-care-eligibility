@@ -1,13 +1,11 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import java.net.URL;
-import java.util.function.Supplier;
-
-import org.springframework.beans.factory.annotation.Value;
-
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPort;
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPortService;
+import java.net.URL;
+import java.util.function.Supplier;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 
 public final class EeSummaryPortSupplier implements Supplier<EeSummaryPort> {
   private final String endpointUrl;

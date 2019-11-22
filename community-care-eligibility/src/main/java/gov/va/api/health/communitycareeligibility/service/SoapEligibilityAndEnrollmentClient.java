@@ -11,7 +11,6 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
