@@ -75,7 +75,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
       return;
     }
 
-    log.info("Initializing SSL");
+    log.info("Initializing SSL for E&E");
     try (InputStream keyStoreInputStream =
         ResourceUtils.getURL(fileOrClasspath(keyStorePath)).openStream()) {
       KeyStore ts = KeyStore.getInstance("JKS");
@@ -92,34 +92,18 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
   @Override
   @SneakyThrows
   public GetEESummaryResponse requestEligibility(String patientIcn) {
-    // System.out.println("Requesting eligibilities: " + patientIcn);
-
-    // final StopWatch watch = StopWatch.createStarted();
     EeSummaryPort port =
         new EeSummaryPortService(new URL(endpointUrl + "eeSummary.wsdl")).getEeSummaryPortSoap11();
     BindingProvider bindingProvider = (BindingProvider) port;
     bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointUrl);
     @SuppressWarnings("rawtypes")
     List<Handler> handlers = bindingProvider.getBinding().getHandlerChain();
-    // System.out.println("initial handlers: " + handlers);
     handlers.add(SecurityHandler.builder().username(username).password(password).build());
     bindingProvider.getBinding().setHandlerChain(handlers);
 
-    // watch.stop();
-    // System.out.println("took " + watch.getTime(TimeUnit.MILLISECONDS));
-
     try {
-      // StopWatch watch2 = StopWatch.createStarted();
-      GetEESummaryResponse response =
-          port.getEESummary(
-              GetEESummaryRequest.builder()
-                  .key(patientIcn)
-                  .requestName("CommunityCareInfo")
-                  .build());
-      // log.info(response.toString());
-      // watch2.stop();
-      // System.out.println("call took " + watch2.getTime(TimeUnit.MILLISECONDS));
-      return response;
+      return port.getEESummary(
+          GetEESummaryRequest.builder().key(patientIcn).requestName("CommunityCareInfo").build());
     } catch (Exception e) {
       if (StringUtils.containsIgnoreCase(e.getMessage(), "PERSON_NOT_FOUND")) {
         throw new Exceptions.UnknownPatientIcnException(patientIcn, e);

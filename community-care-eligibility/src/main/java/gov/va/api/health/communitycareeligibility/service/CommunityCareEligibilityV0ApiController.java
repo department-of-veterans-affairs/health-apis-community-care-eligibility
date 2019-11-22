@@ -15,15 +15,12 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService;
-import gov.va.api.health.queenelizabeth.ee.QueenElizabethService;
-import gov.va.api.health.queenelizabeth.ee.exceptions.PersonNotFound;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.VceEligibilityInfo;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,9 +56,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
   private int maxDriveMinsSpecialty;
 
-  private QueenElizabethService eeClient;
-
-  private EligibilityAndEnrollmentClient eeClient2;
+  private EligibilityAndEnrollmentClient eeClient;
 
   private FacilitiesClient facilitiesClient;
 
@@ -70,13 +65,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   public CommunityCareEligibilityV0ApiController(
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
-      @Autowired QueenElizabethService eeClient,
-      @Autowired EligibilityAndEnrollmentClient eeClient2,
+      @Autowired EligibilityAndEnrollmentClient eeClient,
       @Autowired FacilitiesClient facilitiesClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
     this.eeClient = eeClient;
-    this.eeClient2 = eeClient2;
     this.facilitiesClient = facilitiesClient;
   }
 
@@ -195,44 +188,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         : maxDriveMinsSpecialty;
   }
 
-  @SneakyThrows
-  private GetEESummaryResponse requestEligibility(String icn) {
-    List<GetEESummaryResponse> responses = new ArrayList<>();
-    List<Throwable> errors = new ArrayList<>();
-    try {
-      GetEESummaryResponse response = requestEligibilityInner(icn);
-      log.info("QueenElizabethService response: " + response);
-      responses.add(response);
-    } catch (Throwable t) {
-      errors.add(t);
-      log.error("QueenElizabethService exception", t);
-    }
-
-    try {
-      GetEESummaryResponse response = eeClient2.requestEligibility(icn);
-      log.info("EligibilityAndEnrollmentClient response: " + response);
-      responses.add(response);
-    } catch (Throwable t) {
-      errors.add(t);
-      log.error("EligibilityAndEnrollmentClient exception", t);
-    }
-
-    if (!responses.isEmpty()) {
-      return responses.get(0);
-    }
-    throw errors.get(0);
-  }
-
-  private GetEESummaryResponse requestEligibilityInner(String icn) {
-    try {
-      return eeClient.getEeSummary(icn);
-    } catch (PersonNotFound e) {
-      throw new Exceptions.UnknownPatientIcnException(icn, e);
-    } catch (Exception e) {
-      throw new Exceptions.EeUnavailableException(e);
-    }
-  }
-
   /** Compute community care eligibility. */
   @Override
   @SneakyThrows
@@ -251,14 +206,17 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           stripNewlines(patientIcn),
           stripNewlines(serviceType));
     }
+
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
     if (mappedServiceType == null) {
       throw new Exceptions.UnknownServiceTypeException(serviceType);
     }
+
     if (extendedDriveMin != null && extendedDriveMin <= driveMins(mappedServiceType)) {
       throw new Exceptions.InvalidExtendedDriveMin(
           mappedServiceType, extendedDriveMin, driveMins(mappedServiceType));
     }
+
     return search(
         PatientRequest.builder()
             .patientIcn(patientIcn.trim())
@@ -269,7 +227,8 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   }
 
   private CommunityCareEligibilityResponse search(PatientRequest request) {
-    GetEESummaryResponse eeResponse = requestEligibility(request.patientIcn());
+    GetEESummaryResponse eeResponse = eeClient.requestEligibility(request.patientIcn());
+
     Instant timestamp = Instant.parse(request.timestamp());
     List<EligibilityCode> eligibilityCodes =
         eligibilityInfos(eeResponse)
