@@ -93,6 +93,7 @@ public final class CommunityCareEligibilityTest {
                                             .physical(
                                                 VaFacilitiesResponse.PhysicalAddress.builder()
                                                     .address1(" 123 who cares drive ")
+                                                    .address2("   ")
                                                     .address3(" PO Box 321 ")
                                                     .state("FL")
                                                     .build())
