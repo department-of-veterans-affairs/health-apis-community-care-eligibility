@@ -9,6 +9,9 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,11 +38,10 @@ final class FacilityTransformer {
       return null;
     }
     String street =
-        StringUtils.trimToEmpty(physical.address1())
-            + " "
-            + StringUtils.trimToEmpty(physical.address2())
-            + " "
-            + StringUtils.trimToEmpty(physical.address3());
+        Stream.of(physical.address1(), physical.address2(), physical.address3())
+            .map(StringUtils::trimToNull)
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(" "));
     if (allBlank(street, physical.city(), physical.state(), physical.zip())) {
       return null;
     }
