@@ -92,7 +92,9 @@ public final class CommunityCareEligibilityTest {
                                         VaFacilitiesResponse.Address.builder()
                                             .physical(
                                                 VaFacilitiesResponse.PhysicalAddress.builder()
-                                                    .address1("123 who cares drive")
+                                                    .address1(" 123 who cares drive ")
+                                                    .address2("   ")
+                                                    .address3(" PO Box 321 ")
                                                     .state("FL")
                                                     .build())
                                             .build())
@@ -118,7 +120,8 @@ public final class CommunityCareEligibilityTest {
                                                             .state(" fL")
                                                             .city("Melbourne ")
                                                             .line1(" 66 pat St ")
-                                                            .line3("   ")
+                                                            .line2("   ")
+                                                            .line3("   Apt 777    ")
                                                             .postalCode(" 12345 ")
                                                             .zipPlus4(" 6789 ")
                                                             .build()))
@@ -156,7 +159,7 @@ public final class CommunityCareEligibilityTest {
                     .state("FL")
                     .city("Melbourne")
                     .zip("12345-6789")
-                    .street("66 pat St")
+                    .street("66 pat St Apt 777")
                     .build())
             .patientCoordinates(
                 Coordinates.builder()
@@ -185,7 +188,10 @@ public final class CommunityCareEligibilityTest {
                         .active(true)
                         .id("FAC456")
                         .physicalAddress(
-                            Address.builder().street("123 who cares drive").state("FL").build())
+                            Address.builder()
+                                .street("123 who cares drive PO Box 321")
+                                .state("FL")
+                                .build())
                         .coordinates(
                             Coordinates.builder()
                                 .latitude(new BigDecimal("100"))

@@ -29,12 +29,14 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
@@ -164,11 +166,10 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
         .street(
             trimToNull(
-                trimToEmpty(addressInfo.getLine1())
-                    + " "
-                    + trimToEmpty(addressInfo.getLine2())
-                    + " "
-                    + trimToEmpty(addressInfo.getLine3())))
+                Stream.of(addressInfo.getLine1(), addressInfo.getLine2(), addressInfo.getLine3())
+                    .map(StringUtils::trimToNull)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining(" "))))
         .zip(trimToNull(zip))
         .build();
   }
