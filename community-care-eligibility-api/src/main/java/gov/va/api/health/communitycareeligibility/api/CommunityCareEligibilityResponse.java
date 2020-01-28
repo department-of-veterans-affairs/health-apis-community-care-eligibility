@@ -16,9 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonAutoDetect(
-  fieldVisibility = JsonAutoDetect.Visibility.ANY,
-  isGetterVisibility = JsonAutoDetect.Visibility.NONE
-)
+    fieldVisibility = JsonAutoDetect.Visibility.ANY,
+    isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 @Schema(example = "SWAGGER_EXAMPLE_COMMUNITY_CARE_ELIGIBILITY_RESPONSE")
 public final class CommunityCareEligibilityResponse {
   PatientRequest patientRequest;

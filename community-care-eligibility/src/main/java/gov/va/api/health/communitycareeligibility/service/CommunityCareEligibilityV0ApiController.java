@@ -129,12 +129,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         || eeResponse.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
       return Optional.empty();
     }
-    return eeResponse
-        .getSummary()
-        .getDemographics()
-        .getContactInfo()
-        .getAddresses()
-        .getAddress()
+    return eeResponse.getSummary().getDemographics().getContactInfo().getAddresses().getAddress()
         .stream()
         .filter(a -> "Residential".equalsIgnoreCase(a.getAddressTypeCode()))
         .findFirst();
@@ -232,8 +227,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     Instant timestamp = Instant.parse(request.timestamp());
     List<EligibilityCode> eligibilityCodes =
-        eligibilityInfos(eeResponse)
-            .stream()
+        eligibilityInfos(eeResponse).stream()
             .filter(Objects::nonNull)
             .map(
                 vceEligibilityInfo ->
@@ -312,9 +306,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     VaFacilitiesResponse vaFacilitiesResponse =
         facilitiesClient.facilitiesByIds(
-            nearbyResponse
-                .data()
-                .stream()
+            nearbyResponse.data().stream()
                 .filter(Objects::nonNull)
                 .map(fac -> fac.id())
                 .collect(Collectors.toList()));
@@ -323,15 +315,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     }
 
     Map<String, VaNearbyFacilitiesResponse.Facility> nearbyFacilityMap =
-        nearbyResponse
-            .data()
-            .stream()
+        nearbyResponse.data().stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(fac -> fac.id(), Function.identity()));
 
-    return vaFacilitiesResponse
-        .data()
-        .stream()
+    return vaFacilitiesResponse.data().stream()
         .filter(Objects::nonNull)
         .map(
             vaFacility ->

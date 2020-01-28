@@ -19,9 +19,8 @@ public class HomeControllerV0 {
 
   /** REST endpoint for OpenAPI JSON + redirect. */
   @GetMapping(
-    value = {"/", "/openapi.json", "/api/openapi.json"},
-    produces = "application/json"
-  )
+      value = {"/", "/openapi.json", "/api/openapi.json"},
+      produces = "application/json")
   @ResponseBody
   public Object openApiJson() throws IOException {
     return MAPPER.readValue(openApiYamlContent(), Object.class);
@@ -29,9 +28,8 @@ public class HomeControllerV0 {
 
   /** REST endpoint OpenAPI YAML. */
   @GetMapping(
-    value = {"/openapi.yaml", "/api/openapi.yaml"},
-    produces = "application/vnd.oai.openapi"
-  )
+      value = {"/openapi.yaml", "/api/openapi.yaml"},
+      produces = "application/vnd.oai.openapi")
   @ResponseBody
   public String openApiYaml() throws IOException {
     return openApiYamlContent();

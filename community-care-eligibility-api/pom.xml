@@ -4,7 +4,7 @@
   <parent>
     <groupId>gov.va.api.health</groupId>
     <artifactId>api-starter</artifactId>
-    <version>4.0.6</version>
+    <version>5.0.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility-api</artifactId>
@@ -13,8 +13,15 @@
   <properties>
     <checkstyle.suppressions.location>${project.basedir}/checkstyle-suppressions.xml</checkstyle.suppressions.location>
     <jacoco.skip>true</jacoco.skip>
+    <reflections.version>0.9.12</reflections.version>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.2-jre</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
