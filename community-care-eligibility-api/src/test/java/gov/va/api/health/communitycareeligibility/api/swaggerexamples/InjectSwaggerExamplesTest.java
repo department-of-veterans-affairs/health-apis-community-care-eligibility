@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.api.swaggerexamples;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,7 +36,7 @@ import org.springframework.util.ReflectionUtils;
 @Slf4j
 public class InjectSwaggerExamplesTest {
   private static void sortObjectNode(JsonNode node) {
-    checkArgument(node instanceof ObjectNode);
+    assertThat(node instanceof ObjectNode).isTrue();
     ObjectNode objNode = (ObjectNode) node;
     List<Map.Entry<String, JsonNode>> elements =
         Streams.stream(objNode.fields())
