@@ -20,7 +20,11 @@ public final class EeSummaryPortSupplier implements Supplier<EeSummaryPort> {
   @Override
   @SneakyThrows
   public EeSummaryPort get() {
-    return new EeSummaryPortService(new URL(endpointUrl + "eeSummary.wsdl"))
-        .getEeSummaryPortSoap11();
+    try {
+      return new EeSummaryPortService(new URL(endpointUrl + "eeSummary.wsdl"))
+          .getEeSummaryPortSoap11();
+    } catch (Exception e) {
+      throw new Exceptions.EeUnavailableException(e);
+    }
   }
 }

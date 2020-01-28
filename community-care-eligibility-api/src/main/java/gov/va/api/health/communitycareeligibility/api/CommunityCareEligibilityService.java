@@ -22,131 +22,113 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 @OpenAPIDefinition(
-  security =
-      @SecurityRequirement(
-        name = "OauthFlow",
-        scopes = {"patient/CommunityCareEligibility.read"}
-      ),
-  info =
-      @Info(
-        title = "Community Care Eligibility",
-        version = "v0",
-        description =
-            "Compute community care eligibility under the **objective** criteria"
-                + " of the MISSION Act. Because MISSION Act also includes"
-                + " subjective criteria, this API does not provide a **final**"
-                + " eligibility decision. Any user-facing message based on these"
-                + " results should indicate that the patient is *probably* eligible"
-                + " or *probably not* eligible, and that no decision is final until"
-                + " they have consulted VA staff and"
-                + " scheduled their appointment."
-      ),
-  externalDocs =
-      @ExternalDocumentation(
-        description = "GitHub",
-        url =
-            "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"
-      )
-)
+    security =
+        @SecurityRequirement(
+            name = "OauthFlow",
+            scopes = {"patient/CommunityCareEligibility.read"}),
+    info =
+        @Info(
+            title = "Community Care Eligibility",
+            version = "v0",
+            description =
+                "Compute community care eligibility under the **objective** criteria"
+                    + " of the MISSION Act. Because MISSION Act also includes"
+                    + " subjective criteria, this API does not provide a **final**"
+                    + " eligibility decision. Any user-facing message based on these"
+                    + " results should indicate that the patient is *probably* eligible"
+                    + " or *probably not* eligible, and that no decision is final until"
+                    + " they have consulted VA staff and"
+                    + " scheduled their appointment."),
+    externalDocs =
+        @ExternalDocumentation(
+            description = "GitHub",
+            url =
+                "https://github.com/department-of-veterans-affairs/health-apis-community-care-eligibility"))
 @SecurityScheme(
-  type = SecuritySchemeType.OAUTH2,
-  name = "OauthFlow",
-  in = SecuritySchemeIn.HEADER,
-  flows =
-      @OAuthFlows(
-        implicit =
-            @OAuthFlow(
-              authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
-              tokenUrl = "https://dev-api.va.gov/oauth2/token",
-              scopes = {
-                @OAuthScope(
-                  name = "patient/CommunityCareEligibility.read",
-                  description = "Community Care Eligibility"
-                )
-              }
-            )
-      )
-)
+    type = SecuritySchemeType.OAUTH2,
+    name = "OauthFlow",
+    in = SecuritySchemeIn.HEADER,
+    flows =
+        @OAuthFlows(
+            implicit =
+                @OAuthFlow(
+                    authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
+                    tokenUrl = "https://dev-api.va.gov/oauth2/token",
+                    scopes = {
+                      @OAuthScope(
+                          name = "patient/CommunityCareEligibility.read",
+                          description = "Community Care Eligibility")
+                    })))
 @Path("/")
 public interface CommunityCareEligibilityService {
   @Operation(
-    summary = "Compute community care eligibility by patient ICN and desired medical service type",
-    tags = "Search"
-  )
+      summary =
+          "Compute community care eligibility by patient ICN and desired medical service type",
+      tags = "Search")
   @GET
   @Path("search")
   @ApiResponse(
-    responseCode = "200",
-    description = "Record found",
-    content =
-        @Content(
-          mediaType = "application/json",
-          schema = @Schema(implementation = CommunityCareEligibilityResponse.class)
-        )
-  )
+      responseCode = "200",
+      description = "Record found",
+      content =
+          @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = CommunityCareEligibilityResponse.class)))
   @ApiResponse(
-    responseCode = "400",
-    description = "Bad request",
-    content =
-        @Content(
-          mediaType = "application/json",
-          schema = @Schema(implementation = ErrorResponse.BadRequest.class)
-        )
-  )
+      responseCode = "400",
+      description = "Bad request",
+      content =
+          @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.BadRequest.class)))
   @ApiResponse(
-    responseCode = "404",
-    description = "Not found",
-    content =
-        @Content(
-          mediaType = "application/json",
-          schema = @Schema(implementation = ErrorResponse.NotFound.class)
-        )
-  )
+      responseCode = "404",
+      description = "Not found",
+      content =
+          @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponse.NotFound.class)))
   CommunityCareEligibilityResponse search(
       String optSessionIdHeader,
       @Parameter(
-            in = ParameterIn.QUERY,
-            required = true,
-            name = "patient",
-            description = "The patient ICN"
-          )
+              in = ParameterIn.QUERY,
+              required = true,
+              name = "patient",
+              description = "The patient ICN")
           @NotBlank
           String patientIcn,
       @Parameter(
-            in = ParameterIn.QUERY,
-            required = true,
-            name = "serviceType",
-            description = "Patient's desired medical service type for community care",
-            schema =
-                @Schema(
-                  allowableValues = {
-                    "Audiology",
-                    "Cardiology",
-                    "Dermatology",
-                    "Gastroenterology",
-                    "Gynecology",
-                    "MentalHealthCare",
-                    "Nutrition",
-                    "Ophthalmology",
-                    "Optometry",
-                    "Orthopedics",
-                    "Podiatry",
-                    "PrimaryCare",
-                    "Urology",
-                    "WomensHealth"
-                  }
-                )
-          )
+              in = ParameterIn.QUERY,
+              required = true,
+              name = "serviceType",
+              description = "Patient's desired medical service type for community care",
+              schema =
+                  @Schema(
+                      allowableValues = {
+                        "Audiology",
+                        "Cardiology",
+                        "Dermatology",
+                        "Gastroenterology",
+                        "Gynecology",
+                        "MentalHealthCare",
+                        "Nutrition",
+                        "Ophthalmology",
+                        "Optometry",
+                        "Orthopedics",
+                        "Podiatry",
+                        "PrimaryCare",
+                        "Urology",
+                        "WomensHealth"
+                      }))
           @NotBlank
           String serviceType,
       @Parameter(
-            in = ParameterIn.QUERY,
-            name = "extendedDriveMin",
-            description =
-                "Optional extended drive-radius to include more VA medical facilities in response"
-                    + " (Does not change overall eligibility."
-                    + " Must exceed standard drive time for service-type.)"
-          )
+              in = ParameterIn.QUERY,
+              name = "extendedDriveMin",
+              description =
+                  "Optional extended drive-radius to include more VA medical facilities in response"
+                      + " (Does not change overall eligibility."
+                      + " Must exceed standard drive time for service-type.)")
           @Max(90)
           Integer driveMin);
 }
