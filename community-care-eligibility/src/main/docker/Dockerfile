@@ -1,4 +1,4 @@
-FROM centos:7
+FROM vasdvp/health-apis-centos:7
 
 COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
