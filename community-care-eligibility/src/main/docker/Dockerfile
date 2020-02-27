@@ -1,4 +1,4 @@
-FROM vasdvp/health-apis-spring-boot-application-base:jdk-12
+FROM vasdvp/health-apis-dev-tools:mvn-3.6-jdk-12
 
 COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
