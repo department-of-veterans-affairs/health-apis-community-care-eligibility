@@ -1,4 +1,4 @@
-FROM vasdvp/health-apis-centos:7
+FROM vasdvp/health-apis-spring-boot-application-base:jre-12
 
 COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
