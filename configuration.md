@@ -13,11 +13,11 @@ Buckets are organized as follows:
 
 ```
 S3
- ├ ${app-name}/application.properties
- ├ ${app-name}/<any>.jks
- ├ ${app-name}/<any>-truststore.jks
- ├ ..
- └ ${app-name}-kong/kong.yml
+ ??? ${app-name}/application.properties
+ ??? ${app-name}/<any>.jks
+ ??? ${app-name}/<any>-truststore.jks
+ ??? ..
+ ??? ${app-name}-kong/kong.yml
 ```
 
 - Application names can be anything. This will be configured per container using the `AWS_APP_NAME`
