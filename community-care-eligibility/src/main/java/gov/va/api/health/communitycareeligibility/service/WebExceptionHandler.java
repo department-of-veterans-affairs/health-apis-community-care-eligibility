@@ -28,7 +28,6 @@ public class WebExceptionHandler {
   }
 
   @ExceptionHandler({
-    Exceptions.MissingGeocodingInfoException.class,
     Exceptions.OutdatedGeocodingInfoException.class,
     Exceptions.UnknownPatientIcnException.class
   })
