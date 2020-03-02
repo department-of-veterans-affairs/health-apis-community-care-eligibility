@@ -298,6 +298,43 @@ public final class CommunityCareEligibilityTest {
                 .build());
   }
 
+  @Test
+  public void incompleteGeocodingInfo() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(BigDecimal.ZERO)
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(eeClient)
+            .build()
+            .search("", "123", "primarycare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .build());
+  }
+
   @Test(expected = Exceptions.InvalidExtendedDriveMin.class)
   public void invalidExtendedDriveMin() {
     CommunityCareEligibilityV0ApiController controller =
@@ -307,6 +344,30 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(30)
             .build();
     controller.search("", "123", "primarycare", 20);
+  }
+
+  @Test
+  public void missingGeocodingInfo() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123")).thenReturn(GetEESummaryResponse.builder().build());
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .build()
+            .search("", "123", "primarycare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .build());
   }
 
   @Test
@@ -457,30 +518,6 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .eligible(true)
-                .build());
-  }
-
-  @Test
-  public void noGeocodingInfo() {
-    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
-    when(client.requestEligibility("123")).thenReturn(GetEESummaryResponse.builder().build());
-    CommunityCareEligibilityResponse result =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(mock(FacilitiesClient.class))
-            .eeClient(client)
-            .build()
-            .search("", "123", "primarycare", null);
-    assertThat(result)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .patientRequest(
-                    CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .patientIcn("123")
-                        .serviceType("PrimaryCare")
-                        .timestamp(result.patientRequest().timestamp())
-                        .build())
-                .grandfathered(false)
-                .noFullServiceVaMedicalFacility(false)
                 .build());
   }
 
