@@ -528,7 +528,7 @@ public final class CommunityCareEligibilityTest {
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
-  @Test(expected = Exceptions.OutdatedGeocodingInfoException.class)
+  @Test
   public void outdatedGeocodingInfo() {
     System.out.println(Instant.now());
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
@@ -566,10 +566,28 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(eeClient)
-        .build()
-        .search("", "123", "PrimaryCare", null);
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .eeClient(eeClient)
+            .build()
+            .search("", "123", "PrimaryCare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .patientCoordinates(
+                    Coordinates.builder()
+                        .longitude(BigDecimal.ZERO)
+                        .latitude(BigDecimal.ZERO)
+                        .build())
+                .build());
   }
 
   @Test(expected = Exceptions.UnknownServiceTypeException.class)
