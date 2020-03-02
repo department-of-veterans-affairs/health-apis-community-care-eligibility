@@ -155,18 +155,33 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (zip != null && zipPlus4 != null) {
       zip = zip + "-" + zipPlus4;
     }
-    return Address.builder()
-        .country(trimToNull(addressInfo.getCountry()))
-        .city(trimToNull(addressInfo.getCity()))
-        .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
-        .street(
-            trimToNull(
-                Stream.of(addressInfo.getLine1(), addressInfo.getLine2(), addressInfo.getLine3())
-                    .map(StringUtils::trimToNull)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining(" "))))
-        .zip(trimToNull(zip))
-        .build();
+
+    Address patientAddress =
+        Address.builder()
+            .country(trimToNull(addressInfo.getCountry()))
+            .city(trimToNull(addressInfo.getCity()))
+            .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
+            .street(
+                trimToNull(
+                    Stream.of(
+                            addressInfo.getLine1(), addressInfo.getLine2(), addressInfo.getLine3())
+                        .map(StringUtils::trimToNull)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining(" "))))
+            .zip(trimToNull(zip))
+            .build();
+
+    /* Dont return a value when all null. */
+    if (Transformers.allBlank(
+        patientAddress.country(),
+        patientAddress.city(),
+        patientAddress.state(),
+        patientAddress.street(),
+        patientAddress.zip())) {
+      return null;
+    }
+
+    return patientAddress;
   }
 
   private static Optional<Coordinates> toCoordinates(GeocodingInfo geocodingInfo) {
@@ -259,11 +274,15 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
+      log.info("No geocoding information found for ICN: {}", request.patientIcn());
       return response.build();
     }
 
     Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
     if (patientCoordinates.isEmpty()) {
+      log.info(
+          "Unable to determine coordinates from geocoding info found for ICN: {}",
+          request.patientIcn());
       return response.build();
     }
 
@@ -278,10 +297,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .toGregorianCalendar()
             .toInstant()
             .isBefore(eeAddressChangeXgc.toGregorianCalendar().toInstant())) {
-      throw new Exceptions.OutdatedGeocodingInfoException(
+      log.info(
+          "For patient ICN {}, geocoding information (updated {})"
+              + " is out of date against residential address (updated {})",
           request.patientIcn(),
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
+      return response.build();
     }
 
     List<Facility> nearbyFacilities =
