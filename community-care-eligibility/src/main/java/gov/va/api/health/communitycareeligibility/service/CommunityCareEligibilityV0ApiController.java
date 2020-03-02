@@ -169,13 +169,13 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         .build();
   }
 
-  private static Coordinates toCoordinates(String patientIcn, GeocodingInfo geocodingInfo) {
+  private static Optional<Coordinates> toCoordinates(GeocodingInfo geocodingInfo) {
     BigDecimal lat = geocodingInfo.getAddressLatitude();
     BigDecimal lng = geocodingInfo.getAddressLongitude();
     if (lat == null || lng == null) {
-      throw new Exceptions.MissingGeocodingInfoException(patientIcn);
+      return Optional.empty();
     }
-    return Coordinates.builder().latitude(lat).longitude(lng).build();
+    return Optional.ofNullable(Coordinates.builder().latitude(lat).longitude(lng).build());
   }
 
   private int driveMins(String serviceType) {
@@ -259,11 +259,15 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
-      throw new Exceptions.MissingGeocodingInfoException(request.patientIcn());
+      return response.build();
     }
 
-    Coordinates patientCoordinates = toCoordinates(request.patientIcn(), geocoding.get());
-    response.patientCoordinates(patientCoordinates);
+    Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
+    if (patientCoordinates.isEmpty()) {
+      return response.build();
+    }
+
+    response.patientCoordinates(patientCoordinates.get());
 
     XMLGregorianCalendar eeAddressChangeXgc =
         eeAddress.isPresent() ? eeAddress.get().getAddressChangeDateTime() : null;
@@ -282,14 +286,14 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     List<Facility> nearbyFacilities =
         transformFacilitiesCalls(
-            patientCoordinates, driveMins(request.serviceType()), request.serviceType());
+            patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
 
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
           transformFacilitiesCalls(
-              patientCoordinates, request.extendedDriveMin(), request.serviceType());
+              patientCoordinates.get(), request.extendedDriveMin(), request.serviceType());
       response.nearbyFacilities(extendedFacilities);
     }
 
