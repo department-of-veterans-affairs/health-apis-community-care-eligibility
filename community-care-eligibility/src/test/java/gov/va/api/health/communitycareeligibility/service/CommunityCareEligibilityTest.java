@@ -401,7 +401,6 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
     when(client.requestEligibility("123"))
         .thenReturn(
@@ -418,7 +417,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -426,7 +424,6 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
             .build();
-
     CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology", 90);
     assertThat(actual)
         .isEqualTo(
@@ -460,6 +457,30 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .eligible(true)
+                .build());
+  }
+
+  @Test
+  public void noGeocodingInfo() {
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123")).thenReturn(GetEESummaryResponse.builder().build());
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .build()
+            .search("", "123", "primarycare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
                 .build());
   }
 
