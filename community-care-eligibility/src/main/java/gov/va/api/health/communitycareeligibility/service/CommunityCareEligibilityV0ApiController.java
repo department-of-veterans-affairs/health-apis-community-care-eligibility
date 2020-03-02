@@ -8,6 +8,7 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
+import gov.va.api.health.autoconfig.logging.LogSanitizer;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
@@ -135,10 +136,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         .findFirst();
   }
 
-  private static String stripNewlines(String str) {
-    return str.replaceAll("[\r\n]", "");
-  }
-
   private static Address toAddress(Optional<AddressInfo> eeAddress) {
     if (eeAddress.isEmpty()) {
       return null;
@@ -213,9 +210,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       // Strip newlines for Spotbugs
       log.info(
           "sessionId={}, patient={}, serviceType={}",
-          stripNewlines(optSessionIdHeader),
-          stripNewlines(patientIcn),
-          stripNewlines(serviceType));
+          LogSanitizer.sanitize(optSessionIdHeader),
+          LogSanitizer.sanitize(patientIcn),
+          LogSanitizer.sanitize(serviceType));
     }
 
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
@@ -274,7 +271,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
-      log.info("No geocoding information found for ICN: {}", request.patientIcn());
+      log.info(
+          "No geocoding information found for ICN: {}",
+          LogSanitizer.sanitize(request.patientIcn()));
       return response.build();
     }
 
@@ -282,7 +281,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (patientCoordinates.isEmpty()) {
       log.info(
           "Unable to determine coordinates from geocoding info found for ICN: {}",
-          request.patientIcn());
+          LogSanitizer.sanitize(request.patientIcn()));
       return response.build();
     }
 
@@ -300,7 +299,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       log.info(
           "For patient ICN {}, geocoding information (updated {})"
               + " is out of date against residential address (updated {})",
-          request.patientIcn(),
+          LogSanitizer.sanitize(request.patientIcn()),
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
       return response.build();

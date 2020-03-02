@@ -71,10 +71,17 @@ final class FacilityTransformer {
     if (nearbyFacility.attributes() == null) {
       return null;
     }
-    return CommunityCareEligibilityResponse.DriveMinutes.builder()
-        .min(nearbyFacility.attributes().minTime())
-        .max(nearbyFacility.attributes().maxTime())
-        .build();
+    CommunityCareEligibilityResponse.DriveMinutes driveMinutes =
+        CommunityCareEligibilityResponse.DriveMinutes.builder()
+            .min(nearbyFacility.attributes().minTime())
+            .max(nearbyFacility.attributes().maxTime())
+            .build();
+
+    if (allBlank(driveMinutes.min(), driveMinutes.max())) {
+      return null;
+    }
+
+    return driveMinutes;
   }
 
   private static Boolean mobile(VaFacilitiesResponse.Facility vaFacility) {
