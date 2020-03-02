@@ -175,7 +175,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (lat == null || lng == null) {
       return Optional.empty();
     }
-    return Optional.ofNullable(Coordinates.builder().latitude(lat).longitude(lng).build());
+    return Optional.of(Coordinates.builder().latitude(lat).longitude(lng).build());
   }
 
   private int driveMins(String serviceType) {
