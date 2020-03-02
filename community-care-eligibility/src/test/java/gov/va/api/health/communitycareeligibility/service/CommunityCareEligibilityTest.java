@@ -298,29 +298,6 @@ public final class CommunityCareEligibilityTest {
                 .build());
   }
 
-  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
-  public void incompleteGeocodingInfo() {
-    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    when(eeClient.requestEligibility("123"))
-        .thenReturn(
-            GetEESummaryResponse.builder()
-                .summary(
-                    EeSummary.builder()
-                        .communityCareEligibilityInfo(
-                            CommunityCareEligibilityInfo.builder()
-                                .geocodingInfo(
-                                    GeocodingInfo.builder()
-                                        .addressLatitude(BigDecimal.ZERO)
-                                        .build())
-                                .build())
-                        .build())
-                .build());
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(eeClient)
-        .build()
-        .search("", "123", "PrimaryCare", null);
-  }
-
   @Test(expected = Exceptions.InvalidExtendedDriveMin.class)
   public void invalidExtendedDriveMin() {
     CommunityCareEligibilityV0ApiController controller =
@@ -330,14 +307,6 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(30)
             .build();
     controller.search("", "123", "primarycare", 20);
-  }
-
-  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
-  public void missingGeocodingInfo() {
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(mock(EligibilityAndEnrollmentClient.class))
-        .build()
-        .search("", "123", "PrimaryCare", null);
   }
 
   @Test
