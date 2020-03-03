@@ -1,5 +1,6 @@
 package gov.va.api.health.communitycareeligibility.service;
 
+import static gov.va.api.health.autoconfig.logging.LogSanitizer.sanitize;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
@@ -135,10 +136,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         .findFirst();
   }
 
-  private static String stripNewlines(String str) {
-    return str.replaceAll("[\r\n]", "");
-  }
-
   private static Address toAddress(Optional<AddressInfo> eeAddress) {
     if (eeAddress.isEmpty()) {
       return null;
@@ -155,27 +152,42 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     if (zip != null && zipPlus4 != null) {
       zip = zip + "-" + zipPlus4;
     }
-    return Address.builder()
-        .country(trimToNull(addressInfo.getCountry()))
-        .city(trimToNull(addressInfo.getCity()))
-        .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
-        .street(
-            trimToNull(
-                Stream.of(addressInfo.getLine1(), addressInfo.getLine2(), addressInfo.getLine3())
-                    .map(StringUtils::trimToNull)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining(" "))))
-        .zip(trimToNull(zip))
-        .build();
+
+    Address patientAddress =
+        Address.builder()
+            .country(trimToNull(addressInfo.getCountry()))
+            .city(trimToNull(addressInfo.getCity()))
+            .state(upperCase(trimToNull(addressInfo.getState()), Locale.US))
+            .street(
+                trimToNull(
+                    Stream.of(
+                            addressInfo.getLine1(), addressInfo.getLine2(), addressInfo.getLine3())
+                        .map(StringUtils::trimToNull)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining(" "))))
+            .zip(trimToNull(zip))
+            .build();
+
+    /* Dont return a value when all null. */
+    if (Transformers.allBlank(
+        patientAddress.country(),
+        patientAddress.city(),
+        patientAddress.state(),
+        patientAddress.street(),
+        patientAddress.zip())) {
+      return null;
+    }
+
+    return patientAddress;
   }
 
-  private static Coordinates toCoordinates(String patientIcn, GeocodingInfo geocodingInfo) {
+  private static Optional<Coordinates> toCoordinates(GeocodingInfo geocodingInfo) {
     BigDecimal lat = geocodingInfo.getAddressLatitude();
     BigDecimal lng = geocodingInfo.getAddressLongitude();
     if (lat == null || lng == null) {
-      throw new Exceptions.MissingGeocodingInfoException(patientIcn);
+      return Optional.empty();
     }
-    return Coordinates.builder().latitude(lat).longitude(lng).build();
+    return Optional.of(Coordinates.builder().latitude(lat).longitude(lng).build());
   }
 
   private int driveMins(String serviceType) {
@@ -198,9 +210,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       // Strip newlines for Spotbugs
       log.info(
           "sessionId={}, patient={}, serviceType={}",
-          stripNewlines(optSessionIdHeader),
-          stripNewlines(patientIcn),
-          stripNewlines(serviceType));
+          sanitize(optSessionIdHeader),
+          sanitize(patientIcn),
+          sanitize(serviceType));
     }
 
     String mappedServiceType = SERVICES_MAP.get(trimToEmpty(serviceType));
@@ -259,11 +271,19 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
 
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
-      throw new Exceptions.MissingGeocodingInfoException(request.patientIcn());
+      log.info("No geocoding information found for ICN: {}", request.patientIcn());
+      return response.build();
     }
 
-    Coordinates patientCoordinates = toCoordinates(request.patientIcn(), geocoding.get());
-    response.patientCoordinates(patientCoordinates);
+    Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
+    if (patientCoordinates.isEmpty()) {
+      log.info(
+          "Unable to determine coordinates from geocoding info found for ICN: {}",
+          request.patientIcn());
+      return response.build();
+    }
+
+    response.patientCoordinates(patientCoordinates.get());
 
     XMLGregorianCalendar eeAddressChangeXgc =
         eeAddress.isPresent() ? eeAddress.get().getAddressChangeDateTime() : null;
@@ -274,22 +294,25 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .toGregorianCalendar()
             .toInstant()
             .isBefore(eeAddressChangeXgc.toGregorianCalendar().toInstant())) {
-      throw new Exceptions.OutdatedGeocodingInfoException(
+      log.info(
+          "For patient ICN {}, geocoding information (updated {})"
+              + " is out of date against residential address (updated {})",
           request.patientIcn(),
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
+      return response.build();
     }
 
     List<Facility> nearbyFacilities =
         transformFacilitiesCalls(
-            patientCoordinates, driveMins(request.serviceType()), request.serviceType());
+            patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
     response.eligible(nearbyFacilities.isEmpty());
 
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
           transformFacilitiesCalls(
-              patientCoordinates, request.extendedDriveMin(), request.serviceType());
+              patientCoordinates.get(), request.extendedDriveMin(), request.serviceType());
       response.nearbyFacilities(extendedFacilities);
     }
 

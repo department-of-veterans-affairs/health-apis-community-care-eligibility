@@ -27,11 +27,7 @@ public class WebExceptionHandler {
     return responseFor(new ErrorResponse.BadRequest(), e);
   }
 
-  @ExceptionHandler({
-    Exceptions.MissingGeocodingInfoException.class,
-    Exceptions.OutdatedGeocodingInfoException.class,
-    Exceptions.UnknownPatientIcnException.class
-  })
+  @ExceptionHandler({Exceptions.UnknownPatientIcnException.class})
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorResponse.NotFound handleNotFound(Exception e) {
     return responseFor(new ErrorResponse.NotFound(), e);

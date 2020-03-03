@@ -298,7 +298,7 @@ public final class CommunityCareEligibilityTest {
                 .build());
   }
 
-  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
+  @Test
   public void incompleteGeocodingInfo() {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     when(eeClient.requestEligibility("123"))
@@ -315,10 +315,24 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(eeClient)
-        .build()
-        .search("", "123", "PrimaryCare", null);
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(eeClient)
+            .build()
+            .search("", "123", "primarycare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .build());
   }
 
   @Test(expected = Exceptions.InvalidExtendedDriveMin.class)
@@ -332,12 +346,28 @@ public final class CommunityCareEligibilityTest {
     controller.search("", "123", "primarycare", 20);
   }
 
-  @Test(expected = Exceptions.MissingGeocodingInfoException.class)
+  @Test
   public void missingGeocodingInfo() {
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(mock(EligibilityAndEnrollmentClient.class))
-        .build()
-        .search("", "123", "PrimaryCare", null);
+    EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
+    when(client.requestEligibility("123")).thenReturn(GetEESummaryResponse.builder().build());
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .eeClient(client)
+            .build()
+            .search("", "123", "primarycare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .build());
   }
 
   @Test
@@ -432,7 +462,6 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .build());
-
     EligibilityAndEnrollmentClient client = mock(EligibilityAndEnrollmentClient.class);
     when(client.requestEligibility("123"))
         .thenReturn(
@@ -449,7 +478,6 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)
@@ -457,7 +485,6 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(60)
             .maxDriveTimeSpecialty(60)
             .build();
-
     CommunityCareEligibilityResponse actual = controller.search("", "123", "Audiology", 90);
     assertThat(actual)
         .isEqualTo(
@@ -538,7 +565,7 @@ public final class CommunityCareEligibilityTest {
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
-  @Test(expected = Exceptions.OutdatedGeocodingInfoException.class)
+  @Test
   public void outdatedGeocodingInfo() {
     System.out.println(Instant.now());
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
@@ -576,10 +603,28 @@ public final class CommunityCareEligibilityTest {
                                 .build())
                         .build())
                 .build());
-    CommunityCareEligibilityV0ApiController.builder()
-        .eeClient(eeClient)
-        .build()
-        .search("", "123", "PrimaryCare", null);
+    CommunityCareEligibilityResponse result =
+        CommunityCareEligibilityV0ApiController.builder()
+            .eeClient(eeClient)
+            .build()
+            .search("", "123", "PrimaryCare", null);
+    assertThat(result)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .timestamp(result.patientRequest().timestamp())
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .patientCoordinates(
+                    Coordinates.builder()
+                        .longitude(BigDecimal.ZERO)
+                        .latitude(BigDecimal.ZERO)
+                        .build())
+                .build());
   }
 
   @Test(expected = Exceptions.UnknownServiceTypeException.class)
