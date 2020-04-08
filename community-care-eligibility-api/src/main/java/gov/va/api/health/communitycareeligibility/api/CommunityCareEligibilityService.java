@@ -52,8 +52,8 @@ import javax.ws.rs.Path;
         @OAuthFlows(
             implicit =
                 @OAuthFlow(
-                    authorizationUrl = "https://dev-api.va.gov/oauth2/authorization",
-                    tokenUrl = "https://dev-api.va.gov/oauth2/token",
+                    authorizationUrl = "https://sandbox-api.va.gov/oauth2/authorization",
+                    tokenUrl = "https://sandbox-api.va.gov/oauth2/token",
                     scopes = {
                       @OAuthScope(
                           name = "patient/CommunityCareEligibility.read",
