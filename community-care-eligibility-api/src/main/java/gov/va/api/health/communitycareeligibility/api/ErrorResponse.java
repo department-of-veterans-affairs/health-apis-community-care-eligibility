@@ -34,7 +34,11 @@ public abstract class ErrorResponse {
   }
 
   @NoArgsConstructor
-  @Schema(example = "SWAGGER_EXAMPLE_ERROR_RESPONSE_BAD_REQUEST")
+  @Schema(
+      example =
+          "${communitycareeligibility.badRequest:"
+              + "gov.va.api.health.communitycareeligibility.api.swaggerexamples."
+              + "SwaggerErrorResponse#badRequest}")
   public static final class BadRequest extends ErrorResponse {
     @Builder
     public BadRequest(long timestamp, String type, String message) {
@@ -51,7 +55,11 @@ public abstract class ErrorResponse {
   }
 
   @NoArgsConstructor
-  @Schema(example = "SWAGGER_EXAMPLE_ERROR_RESPONSE_NOT_FOUND")
+  @Schema(
+      example =
+          "${communitycareeligibility.notFound:"
+              + "gov.va.api.health.communitycareeligibility.api.swaggerexamples."
+              + "SwaggerErrorResponse#notFound}")
   public static final class NotFound extends ErrorResponse {
     @Builder
     public NotFound(long timestamp, String type, String message) {
