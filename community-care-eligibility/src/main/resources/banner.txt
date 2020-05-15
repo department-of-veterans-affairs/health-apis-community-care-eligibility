@@ -1,0 +1,6 @@
+
+====
+
+    ${Ansi.BLUE}Health API ${Ansi.BOLD}${Ansi.YELLOW}Community Care Eligibility ${Ansi.NORMAL}${Ansi.BLUE}${application.version}${Ansi.NORMAL}
+
+====
