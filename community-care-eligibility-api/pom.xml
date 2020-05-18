@@ -10,85 +10,11 @@
   <artifactId>community-care-eligibility-api</artifactId>
   <version>2.0.39-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <properties>
-    <checkstyle.suppressions.location>${project.basedir}/checkstyle-suppressions.xml</checkstyle.suppressions.location>
-    <jacoco.skip>true</jacoco.skip>
-    <reflections.version>0.9.12</reflections.version>
-  </properties>
   <dependencies>
-    <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>${reflections.version}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
       <scope>compile</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>community-care-eligibility-swag</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>resolve</goal>
-            </goals>
-            <configuration>
-              <resourceClasses>
-                <resourceClass>gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService</resourceClass>
-              </resourceClasses>
-              <outputFileName>openapi</outputFileName>
-              <outputPath>${project.build.directory}/swagger</outputPath>
-              <outputFormat>JSONANDYAML</outputFormat>
-              <prettyPrint>true</prettyPrint>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>target/swagger/openapi.yaml</file>
-                  <classifier>openapi</classifier>
-                  <type>yaml</type>
-                </artifact>
-                <artifact>
-                  <file>target/swagger/openapi.json</file>
-                  <classifier>openapi</classifier>
-                  <type>json</type>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>test-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 </project>

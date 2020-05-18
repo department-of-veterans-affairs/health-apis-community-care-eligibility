@@ -13,6 +13,8 @@
   <properties>
     <ee-client.version>3.0.6</ee-client.version>
     <jacoco.coverage>0.90</jacoco.coverage>
+    <swagger-examples-plugin.version>1.0.1</swagger-examples-plugin.version>
+    <swagger-maven-plugin.version>2.1.1</swagger-maven-plugin.version>
   </properties>
   <dependencies>
     <dependency>
@@ -37,60 +39,52 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-maven-plugin</artifactId>
+        <version>${swagger-maven-plugin.version}</version>
         <executions>
           <execution>
-            <id>swagger</id>
-            <phase>generate-resources</phase>
+            <id>cce-swagger</id>
+            <phase>compile</phase>
             <goals>
-              <goal>copy</goal>
+              <goal>resolve</goal>
             </goals>
             <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>${project.groupId}</groupId>
-                  <artifactId>community-care-eligibility-api</artifactId>
-                  <version>${project.version}</version>
-                  <type>yaml</type>
-                  <classifier>openapi</classifier>
-                  <overWrite>true</overWrite>
-                  <outputDirectory>${project.build.directory}/swagger</outputDirectory>
-                  <destFileName>openapi.yaml</destFileName>
-                </artifactItem>
-              </artifactItems>
+              <contextId>cce-openapi</contextId>
+              <resourceClasses>
+                <resourceClass>gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService</resourceClass>
+              </resourceClasses>
+              <outputFileName>openapi</outputFileName>
+              <outputPath>${project.build.outputDirectory}</outputPath>
+              <outputFormat>JSON</outputFormat>
+              <prettyPrint>true</prettyPrint>
             </configuration>
           </execution>
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
+        <groupId>gov.va.plugin.maven</groupId>
+        <artifactId>swagger-examples-maven-plugin</artifactId>
+        <version>${swagger-examples-plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>gov.va.api.health</groupId>
+            <artifactId>community-care-eligibility-api</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
-            <id>add-some-swagger</id>
-            <phase>generate-resources</phase>
+            <id>inject-examples</id>
+            <phase>compile</phase>
             <goals>
-              <goal>add-resource</goal>
+              <goal>inject</goal>
             </goals>
             <configuration>
-              <resources>
-                <resource>
-                  <directory>${project.build.directory}/swagger</directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>conformance-timestamp</id>
-            <goals>
-              <goal>timestamp-property</goal>
-            </goals>
-            <configuration>
-              <name>conformance.publication-date</name>
-              <pattern>yyyy-MM-dd'T'HH:mm:ss'Z'</pattern>
-              <timeZone>UTC</timeZone>
-              <locale>en_US</locale>
-              <unit>second</unit>
+              <files>
+                <file file="${project.build.outputDirectory}/openapi.json" format="JSON"/>
+              </files>
             </configuration>
           </execution>
         </executions>
