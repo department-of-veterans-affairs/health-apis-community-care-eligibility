@@ -1,6 +1,6 @@
 package gov.va.api.health.communitycareeligibility.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.va.api.health.autoconfig.configuration.JacksonConfig;
@@ -12,6 +12,6 @@ public class RoundTrip {
     ObjectMapper mapper = new JacksonConfig().objectMapper();
     String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
     Object evilTwin = mapper.readValue(json, object.getClass());
-    assertThat(evilTwin).isEqualTo(object);
+    assertEquals(evilTwin, object);
   }
 }
