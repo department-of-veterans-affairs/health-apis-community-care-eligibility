@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
     isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 @Schema(
     example =
-        "${communitycareeligibility.communityCareEligibilityResponse:"
+        "${cce.communityCareEligibilityResponse:"
             + "gov.va.api.health.communitycareeligibility.api.swaggerexamples."
             + "SwaggerCommunityCareEligibilityResponse#communityCareEligibilityResponse}")
 public final class CommunityCareEligibilityResponse {

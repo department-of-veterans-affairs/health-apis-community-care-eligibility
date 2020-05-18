@@ -11,8 +11,7 @@ VERSION="/v0/eligibility"
 
 #Put Health endpoints here if you got them
 PATHS=(/actuator/health \
-$VERSION/openapi.json \
-$VERSION/openapi.yaml)
+$VERSION/openapi.json)
 
 SUCCESS=0
 

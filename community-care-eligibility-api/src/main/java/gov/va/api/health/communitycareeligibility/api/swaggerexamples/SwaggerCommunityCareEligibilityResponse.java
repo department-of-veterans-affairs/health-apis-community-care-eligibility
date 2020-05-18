@@ -56,6 +56,11 @@ public class SwaggerCommunityCareEligibilityResponse {
                             .build())
                     .phoneNumber("177-112-8657 x")
                     .website("https://www.va.gov")
+                    .driveMinutes(
+                        CommunityCareEligibilityResponse.DriveMinutes.builder()
+                            .min(5)
+                            .max(30)
+                            .build())
                     .build(),
                 CommunityCareEligibilityResponse.Facility.builder()
                     .id("vha_46368ZZ")

@@ -1,9 +1,8 @@
 package gov.va.api.health.communitycareeligibility.service;
 
-import gov.va.api.health.autoconfig.configuration.JacksonConfig;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -25,14 +24,14 @@ public class HomeControllerV0 {
   }
 
   /** REST endpoint for OpenAPI JSON + redirect. */
+  @SneakyThrows
   @GetMapping(
       value = {"/", "/openapi.json"},
       produces = "application/json")
   @ResponseBody
-  public Object openApiJson() throws IOException {
+  public Object openApiJson() {
     try (InputStream is = openapi.getInputStream()) {
-      String openapiContent = StreamUtils.copyToString(is, Charset.defaultCharset());
-      return JacksonConfig.createMapper().readValue(openapiContent, Object.class);
+      return StreamUtils.copyToString(is, Charset.defaultCharset());
     }
   }
 }

@@ -9,12 +9,6 @@ public class CommunityCareEligibilityResponseTest {
 
   @Test
   public void communityCareEligibilityResponse() {
-    CommunityCareEligibilityResponse r =
-        SwaggerCommunityCareEligibilityResponse.communityCareEligibilityResponse();
-    r.nearbyFacilities()
-        .get(0)
-        .driveMinutes(
-            CommunityCareEligibilityResponse.DriveMinutes.builder().min(5).max(30).build());
-    assertRoundTrip(r);
+    assertRoundTrip(SwaggerCommunityCareEligibilityResponse.communityCareEligibilityResponse());
   }
 }

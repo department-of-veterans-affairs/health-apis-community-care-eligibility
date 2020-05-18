@@ -11,17 +11,9 @@
   <version>2.0.39-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
-    <checkstyle.suppressions.location>${project.basedir}/checkstyle-suppressions.xml</checkstyle.suppressions.location>
-    <reflections.version>0.9.12</reflections.version>
     <jacoco.coverage>0.90</jacoco.coverage>
   </properties>
   <dependencies>
-    <dependency>
-      <groupId>org.reflections</groupId>
-      <artifactId>reflections</artifactId>
-      <version>${reflections.version}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>

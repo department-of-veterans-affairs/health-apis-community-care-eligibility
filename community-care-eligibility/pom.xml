@@ -13,6 +13,7 @@
   <properties>
     <ee-client.version>3.0.6</ee-client.version>
     <jacoco.coverage>0.90</jacoco.coverage>
+    <swagger-examples-plugin.version>1.0.1</swagger-examples-plugin.version>
     <swagger-maven-plugin.version>2.1.1</swagger-maven-plugin.version>
   </properties>
   <dependencies>
@@ -43,7 +44,7 @@
         <version>${swagger-maven-plugin.version}</version>
         <executions>
           <execution>
-            <id>cce-swag</id>
+            <id>cce-swagger</id>
             <phase>compile</phase>
             <goals>
               <goal>resolve</goal>
@@ -64,7 +65,7 @@
       <plugin>
         <groupId>gov.va.plugin.maven</groupId>
         <artifactId>swagger-examples-maven-plugin</artifactId>
-        <version>1.0.1</version>
+        <version>${swagger-examples-plugin.version}</version>
         <dependencies>
           <dependency>
             <groupId>gov.va.api.health</groupId>
