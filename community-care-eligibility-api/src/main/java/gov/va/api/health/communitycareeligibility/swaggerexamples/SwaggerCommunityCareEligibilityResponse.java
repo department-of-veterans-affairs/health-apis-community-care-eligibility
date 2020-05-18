@@ -58,8 +58,8 @@ public class SwaggerCommunityCareEligibilityResponse {
                     .website("https://www.va.gov")
                     .driveMinutes(
                         CommunityCareEligibilityResponse.DriveMinutes.builder()
-                            .min(5)
-                            .max(15)
+                            .min(0)
+                            .max(10)
                             .build())
                     .build(),
                 CommunityCareEligibilityResponse.Facility.builder()
@@ -79,8 +79,8 @@ public class SwaggerCommunityCareEligibilityResponse {
                             .build())
                     .driveMinutes(
                         CommunityCareEligibilityResponse.DriveMinutes.builder()
-                            .min(15)
-                            .max(25)
+                            .min(20)
+                            .max(30)
                             .build())
                     .active(true)
                     .mobile(false)
