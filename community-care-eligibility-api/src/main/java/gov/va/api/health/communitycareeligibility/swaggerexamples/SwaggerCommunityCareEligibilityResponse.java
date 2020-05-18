@@ -59,7 +59,7 @@ public class SwaggerCommunityCareEligibilityResponse {
                     .driveMinutes(
                         CommunityCareEligibilityResponse.DriveMinutes.builder()
                             .min(5)
-                            .max(30)
+                            .max(15)
                             .build())
                     .build(),
                 CommunityCareEligibilityResponse.Facility.builder()
@@ -76,6 +76,11 @@ public class SwaggerCommunityCareEligibilityResponse {
                         CommunityCareEligibilityResponse.Coordinates.builder()
                             .latitude(new BigDecimal("196.418"))
                             .longitude(new BigDecimal("317.811"))
+                            .build())
+                    .driveMinutes(
+                        CommunityCareEligibilityResponse.DriveMinutes.builder()
+                            .min(15)
+                            .max(25)
                             .build())
                     .active(true)
                     .mobile(false)
