@@ -1,4 +1,4 @@
-package gov.va.api.health.communitycareeligibility.api.swaggerexamples;
+package gov.va.api.health.communitycareeligibility.swaggerexamples;
 
 import static java.util.Arrays.asList;
 

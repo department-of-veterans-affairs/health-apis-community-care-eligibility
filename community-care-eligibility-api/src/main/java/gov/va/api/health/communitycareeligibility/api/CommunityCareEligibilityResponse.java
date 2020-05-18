@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Schema(
     example =
         "${cce.communityCareEligibilityResponse:"
-            + "gov.va.api.health.communitycareeligibility.api.swaggerexamples."
+            + "gov.va.api.health.communitycareeligibility.swaggerexamples."
             + "SwaggerCommunityCareEligibilityResponse#communityCareEligibilityResponse}")
 public final class CommunityCareEligibilityResponse {
   PatientRequest patientRequest;

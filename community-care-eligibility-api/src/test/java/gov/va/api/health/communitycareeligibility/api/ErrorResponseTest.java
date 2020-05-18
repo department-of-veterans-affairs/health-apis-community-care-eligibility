@@ -3,7 +3,7 @@ package gov.va.api.health.communitycareeligibility.api;
 import static gov.va.api.health.communitycareeligibility.api.RoundTrip.assertRoundTrip;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gov.va.api.health.communitycareeligibility.api.swaggerexamples.SwaggerErrorResponse;
+import gov.va.api.health.communitycareeligibility.swaggerexamples.SwaggerErrorResponse;
 import org.junit.jupiter.api.Test;
 
 public class ErrorResponseTest {

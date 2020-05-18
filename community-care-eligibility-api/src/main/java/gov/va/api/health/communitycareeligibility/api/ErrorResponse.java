@@ -37,7 +37,7 @@ public abstract class ErrorResponse {
   @Schema(
       example =
           "${cce.badRequest:"
-              + "gov.va.api.health.communitycareeligibility.api.swaggerexamples."
+              + "gov.va.api.health.communitycareeligibility.swaggerexamples."
               + "SwaggerErrorResponse#badRequest}")
   public static final class BadRequest extends ErrorResponse {
     @Builder
@@ -58,7 +58,7 @@ public abstract class ErrorResponse {
   @Schema(
       example =
           "${cce.notFound:"
-              + "gov.va.api.health.communitycareeligibility.api.swaggerexamples."
+              + "gov.va.api.health.communitycareeligibility.swaggerexamples."
               + "SwaggerErrorResponse#notFound}")
   public static final class NotFound extends ErrorResponse {
     @Builder
