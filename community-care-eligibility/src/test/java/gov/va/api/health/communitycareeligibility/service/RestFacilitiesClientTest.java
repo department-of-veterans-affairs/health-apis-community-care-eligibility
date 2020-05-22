@@ -23,7 +23,7 @@ public final class RestFacilitiesClientTest {
     when(response.getBody()).thenReturn(VaFacilitiesResponse.builder().build());
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
-            eq("http://foo/bar/v0/facilities?ids=vha_675GD"),
+            eq("http://foo/bar/v0/facilities?ids=vha_675GD&page=1&per_page=500"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(VaFacilitiesResponse.class)))
