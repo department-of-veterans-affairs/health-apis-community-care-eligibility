@@ -97,6 +97,8 @@ makeConfig community-care-eligibility $PROFILE
 configValue community-care-eligibility $PROFILE ee.endpoint.url "http://localhost:9090/v0/ws"
 configValue community-care-eligibility $PROFILE ee.header.password "MockEEPassword"
 configValue community-care-eligibility $PROFILE ee.header.username "MockEEUsername"
+configValue community-care-eligibility $PROFILE ee.keystore.password "unused"
+configValue community-care-eligibility $PROFILE ee.keystore.path "unused"
 configValue community-care-eligibility $PROFILE va-facilities.api-key "$VA_FACILITIES_API_KEY"
 configValue community-care-eligibility $PROFILE va-facilities.url "$VA_FACILITIES_URL"
 

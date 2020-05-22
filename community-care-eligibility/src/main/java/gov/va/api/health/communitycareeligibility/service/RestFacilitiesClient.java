@@ -41,6 +41,8 @@ public class RestFacilitiesClient implements FacilitiesClient {
     String url =
         UriComponentsBuilder.fromHttpUrl(baseUrl + "v0/facilities")
             .queryParam("ids", String.join(",", ids))
+            .queryParam("page", 1)
+            .queryParam("per_page", 500)
             .build()
             .toUriString();
     try {
