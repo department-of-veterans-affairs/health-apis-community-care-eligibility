@@ -113,9 +113,8 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     } catch (Exception e) {
       if (StringUtils.containsIgnoreCase(e.getMessage(), "PERSON_NOT_FOUND")) {
         throw new Exceptions.UnknownPatientIcnException(patientIcn, e);
-      } else {
-        throw new Exceptions.EeUnavailableException(e);
       }
+      throw new Exceptions.EeUnavailableException(e);
     }
   }
 
