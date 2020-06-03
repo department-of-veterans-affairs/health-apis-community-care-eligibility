@@ -87,11 +87,11 @@ public class HealthController {
   @Cacheable("health")
   @GetMapping(value = "/health")
   public ResponseEntity<Health> health() {
-    hasCachedRecently.set(true);
     return health(Instant.now());
   }
 
   ResponseEntity<Health> health(@NonNull Instant time) {
+    hasCachedRecently.set(true);
     List<Health> services = List.of(eeHealth(time), facilitiesHealth(time));
     String code = services.stream().anyMatch(d -> !d.getStatus().equals(Status.UP)) ? "DOWN" : "UP";
     Health health =
