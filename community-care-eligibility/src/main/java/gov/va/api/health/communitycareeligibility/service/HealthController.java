@@ -85,7 +85,7 @@ public class HealthController {
    * @see #clearCacheScheduled()
    */
   @Cacheable("health")
-  @GetMapping(value = "/health")
+  @GetMapping(value = {"/health", "/v0/health"})
   public ResponseEntity<Health> health() {
     return health(Instant.now());
   }
