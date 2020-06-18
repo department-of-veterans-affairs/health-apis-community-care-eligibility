@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -9,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import java.math.BigDecimal;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +35,8 @@ public final class RestFacilitiesClientTest {
         .isEqualTo(VaFacilitiesResponse.builder().build());
   }
 
+  @Test
   @SuppressWarnings("unchecked")
-  @Test(expected = Exceptions.FacilitiesUnavailableException.class)
   public void facilitiesByIdException() {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
@@ -46,7 +47,10 @@ public final class RestFacilitiesClientTest {
         .thenThrow(new RuntimeException());
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "http://foo/bar", restTemplate);
-    client.facilitiesByIds(asList("vha_675GD"));
+
+    assertThrows(
+        Exceptions.FacilitiesUnavailableException.class,
+        () -> client.facilitiesByIds(asList("vha_675GD")));
   }
 
   @Test
@@ -75,8 +79,8 @@ public final class RestFacilitiesClientTest {
         .isEqualTo(VaNearbyFacilitiesResponse.builder().build());
   }
 
+  @Test
   @SuppressWarnings("unchecked")
-  @Test(expected = Exceptions.FacilitiesUnavailableException.class)
   public void nearbyFacilitiesException() {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
@@ -88,12 +92,16 @@ public final class RestFacilitiesClientTest {
         .thenThrow(new RuntimeException());
     RestFacilitiesClient client =
         new RestFacilitiesClient("fakeApiKey", "http://foo/bar", restTemplate);
-    client.nearbyFacilities(
-        CommunityCareEligibilityResponse.Coordinates.builder()
-            .latitude(BigDecimal.ZERO)
-            .longitude(BigDecimal.ZERO)
-            .build(),
-        30,
-        "PrimaryCare");
+
+    assertThrows(
+        Exceptions.FacilitiesUnavailableException.class,
+        () ->
+            client.nearbyFacilities(
+                CommunityCareEligibilityResponse.Coordinates.builder()
+                    .latitude(BigDecimal.ZERO)
+                    .longitude(BigDecimal.ZERO)
+                    .build(),
+                30,
+                "PrimaryCare"));
   }
 }
