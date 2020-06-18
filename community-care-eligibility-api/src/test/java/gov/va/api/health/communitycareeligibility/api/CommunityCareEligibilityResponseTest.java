@@ -6,7 +6,6 @@ import gov.va.api.health.communitycareeligibility.swaggerexamples.SwaggerCommuni
 import org.junit.jupiter.api.Test;
 
 public class CommunityCareEligibilityResponseTest {
-
   @Test
   public void communityCareEligibilityResponse() {
     assertRoundTrip(SwaggerCommunityCareEligibilityResponse.communityCareEligibilityResponse());
