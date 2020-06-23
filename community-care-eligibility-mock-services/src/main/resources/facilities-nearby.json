@@ -1,0 +1,11 @@
+{
+  "data" : [
+    {
+      "id" : "vha_675GA",
+      "attributes" : {
+        "min_time" : 10,
+        "max_time" : 20
+      }
+    }
+  ]
+}

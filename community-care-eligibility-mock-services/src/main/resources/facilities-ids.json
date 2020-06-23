@@ -1,0 +1,138 @@
+{
+  "data" : [
+    {
+      "id" : "vha_675GA",
+      "type" : "va_facilities",
+      "attributes" : {
+        "name" : "Viera VA Clinic",
+        "facility_type" : "va_health_facility",
+        "classification" : "Health Care Center (HCC)",
+        "website" : "https://www.orlando.va.gov/locations/Viera.asp",
+        "lat" : 28.25527705,
+        "long" : -80.73810655,
+        "address" : {
+          "mailing" : { },
+          "physical" : {
+            "zip" : "32940-8007",
+            "city" : "Viera",
+            "state" : "FL",
+            "address_1" : "2900 Veterans Way",
+            "address_2" : null,
+            "address_3" : null
+          }
+        },
+        "phone" : {
+          "fax" : "321-637-3515",
+          "main" : "321-637-3788",
+          "pharmacy" : "877-646-4550",
+          "after_hours" : "877-741-3400",
+          "patient_advocate" : "321-637-3534",
+          "mental_health_clinic" : "321-637-3788",
+          "enrollment_coordinator" : "321-637-3527"
+        },
+        "hours" : {
+          "friday" : "730AM-430PM",
+          "monday" : "730AM-430PM",
+          "sunday" : "Closed",
+          "tuesday" : "730AM-430PM",
+          "saturday" : "Closed",
+          "thursday" : "730AM-430PM",
+          "wednesday" : "730AM-430PM"
+        },
+        "services" : {
+          "other" : [ ],
+          "health" : [
+            "Audiology",
+            "Cardiology",
+            "DentalServices",
+            "Dermatology",
+            "Gastroenterology",
+            "MentalHealthCare",
+            "Nutrition",
+            "Ophthalmology",
+            "Optometry",
+            "Orthopedics",
+            "Podiatry",
+            "PrimaryCare",
+            "SpecialtyCare",
+            "Urology"
+          ],
+          "last_updated" : "2020-06-15"
+        },
+        "satisfaction" : {
+          "health" : {
+            "primary_care_urgent" : 0.7400000095367432,
+            "primary_care_routine" : 0.8299999833106995
+          },
+          "effective_date" : "2019-06-20"
+        },
+        "wait_times" : {
+          "health" : [
+            {
+              "service" : "Audiology",
+              "new" : 9.051724,
+              "established" : 0.544117
+            },
+            {
+              "service" : "Cardiology",
+              "new" : 47.333333,
+              "established" : 4.135135
+            },
+            {
+              "service" : "Dermatology",
+              "new" : 5.8,
+              "established" : null
+            },
+            {
+              "service" : "Gastroenterology",
+              "new" : 8.5,
+              "established" : 5.0
+            },
+            {
+              "service" : "MentalHealthCare",
+              "new" : 4.339622,
+              "established" : 0.439799
+            },
+            {
+              "service" : "Ophthalmology",
+              "new" : 224.0,
+              "established" : 0.210526
+            },
+            {
+              "service" : "Optometry",
+              "new" : 4.0,
+              "established" : 6.069767
+            },
+            {
+              "service" : "Orthopedics",
+              "new" : 50.1,
+              "established" : 20.217391
+            },
+            {
+              "service" : "PrimaryCare",
+              "new" : 3.730769,
+              "established" : 0.312199
+            },
+            {
+              "service" : "SpecialtyCare",
+              "new" : 17.794871,
+              "established" : 3.39233
+            },
+            {
+              "service" : "Urology",
+              "new" : 6.904761,
+              "established" : 7.833333
+            }
+          ],
+          "effective_date" : "2020-06-15"
+        },
+        "mobile" : false,
+        "active_status" : "A",
+        "operating_status" : {
+          "code" : "NORMAL"
+        },
+        "visn" : "8"
+      }
+    }
+  ]
+}
