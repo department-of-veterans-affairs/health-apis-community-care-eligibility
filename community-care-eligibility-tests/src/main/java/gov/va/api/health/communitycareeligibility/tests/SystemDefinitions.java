@@ -29,7 +29,7 @@ class SystemDefinitions {
         .cce(
             serviceDefinition(
                 "community-care-eligibility",
-                "http://blue.lab.lighthouse.va.gov",
+                "https://blue.lab.lighthouse.va.gov",
                 443,
                 magicAccessToken(),
                 "/community-care/"))
@@ -49,7 +49,7 @@ class SystemDefinitions {
         .cce(
             serviceDefinition(
                 "community-care-eligibility",
-                "http://blue.production.lighthouse.va.gov",
+                "https://blue.production.lighthouse.va.gov",
                 443,
                 magicAccessToken(),
                 "/community-care/"))
@@ -62,7 +62,7 @@ class SystemDefinitions {
         .cce(
             serviceDefinition(
                 "community-care-eligibility",
-                "http://blue.qa.lighthouse.va.gov",
+                "https://blue.qa.lighthouse.va.gov",
                 443,
                 magicAccessToken(),
                 "/community-care/"))
@@ -85,7 +85,7 @@ class SystemDefinitions {
         .cce(
             serviceDefinition(
                 "community-care-eligibility",
-                "http://blue.staging.lighthouse.va.gov",
+                "https://blue.staging.lighthouse.va.gov",
                 443,
                 magicAccessToken(),
                 "/community-care/"))
@@ -98,7 +98,7 @@ class SystemDefinitions {
         .cce(
             serviceDefinition(
                 "community-care-eligibility",
-                "http://blue.staging-lab.lighthouse.va.gov",
+                "https://blue.staging-lab.lighthouse.va.gov",
                 443,
                 magicAccessToken(),
                 "/community-care/"))
