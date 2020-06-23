@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 import gov.va.api.health.sentinel.Environment;
 import gov.va.api.health.sentinel.ExpectedResponse;
+import gov.va.api.health.sentinel.ServiceDefinition;
 import io.restassured.RestAssured;
 import io.restassured.http.Method;
 import lombok.extern.slf4j.Slf4j;
@@ -29,17 +30,15 @@ public class TokenIT {
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s",
             systemDefinition().patient(), "PrimaryCare");
-    log.info(
-        "Expect {} with bad token is status code ({})",
-        cceClient().service().apiPath() + request,
-        401);
+    ServiceDefinition svc = cceClient().service();
+    log.info("Expect {} with bad token is status code ({})", svc.apiPath() + request, 401);
     ExpectedResponse.of(
             RestAssured.given()
-                .baseUri(cceClient().service().url())
-                .port(cceClient().service().port())
+                .baseUri(svc.url())
+                .port(svc.port())
                 .relaxedHTTPSValidation()
                 .header("Authorization", "Bearer BADTOKEN")
-                .request(Method.GET, cceClient().service().urlWithApiPath() + request))
+                .request(Method.GET, svc.urlWithApiPath() + request))
         .logAction(logAllWithTruncatedBody(2000))
         .expect(401);
   }
