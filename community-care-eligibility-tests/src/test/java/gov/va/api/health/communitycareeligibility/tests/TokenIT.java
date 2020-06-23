@@ -1,6 +1,6 @@
 package gov.va.api.health.communitycareeligibility.tests;
 
-import static gov.va.api.health.communitycareeligibility.tests.Requestor.search;
+import static gov.va.api.health.communitycareeligibility.tests.Requestor.makeRequest;
 import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions.cceClient;
 import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions.systemDefinition;
 import static gov.va.api.health.sentinel.ExpectedResponse.logAllWithTruncatedBody;
@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 import gov.va.api.health.sentinel.Environment;
 import gov.va.api.health.sentinel.ExpectedResponse;
+import io.restassured.RestAssured;
 import io.restassured.http.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,9 +34,10 @@ public class TokenIT {
         cceClient().service().apiPath() + request,
         401);
     ExpectedResponse.of(
-            cceClient()
-                .service()
-                .requestSpecification()
+            RestAssured.given()
+                .baseUri(cceClient().service().url())
+                .port(cceClient().service().port())
+                .relaxedHTTPSValidation()
                 .header("Authorization", "Bearer BADTOKEN")
                 .request(Method.GET, cceClient().service().urlWithApiPath() + request))
         .logAction(logAllWithTruncatedBody(2000))
@@ -47,6 +49,6 @@ public class TokenIT {
     String request =
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s", "5555555555555", "PrimaryCare");
-    search(request, 403);
+    makeRequest(request, 403);
   }
 }

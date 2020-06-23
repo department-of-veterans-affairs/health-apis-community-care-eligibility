@@ -1,6 +1,6 @@
 package gov.va.api.health.communitycareeligibility.tests;
 
-import static gov.va.api.health.communitycareeligibility.tests.Requestor.search;
+import static gov.va.api.health.communitycareeligibility.tests.Requestor.makeRequest;
 import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions.systemDefinition;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
@@ -14,7 +14,7 @@ public class SearchValidationIT {
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s&extendedDriveMin=%s",
             systemDefinition().patient(), "PrimaryCare", 90);
-    search(request, 200).expectValid(CommunityCareEligibilityResponse.class);
+    makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
   }
 
   @Test
@@ -23,7 +23,7 @@ public class SearchValidationIT {
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s&extendedDriveMin=%s",
             systemDefinition().patient(), "PrimaryCare", 100);
-    search(request, 400).expectValid(ErrorResponse.BadRequest.class);
+    makeRequest(request, 400).expectValid(ErrorResponse.BadRequest.class);
   }
 
   @Test
@@ -32,19 +32,19 @@ public class SearchValidationIT {
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s&extendedDriveMin=%s",
             systemDefinition().patient(), "PrimaryCare", -1);
-    search(request, 400).expectValid(ErrorResponse.BadRequest.class);
+    makeRequest(request, 400).expectValid(ErrorResponse.BadRequest.class);
   }
 
   @Test
   void missingPatient() {
     String request = String.format("v0/eligibility/search?serviceType=%s", "PrimaryCare");
-    search(request, 500).expectValid(ErrorResponse.InternalServerError.class);
+    makeRequest(request, 500).expectValid(ErrorResponse.InternalServerError.class);
   }
 
   @Test
   void missingServiceType() {
     String request =
         String.format("v0/eligibility/search?patient=%s", systemDefinition().patient());
-    search(request, 500).expectValid(ErrorResponse.InternalServerError.class);
+    makeRequest(request, 500).expectValid(ErrorResponse.InternalServerError.class);
   }
 }
