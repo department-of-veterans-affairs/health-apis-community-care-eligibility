@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import static gov.va.api.health.autoconfig.logging.LogSanitizer.sanitize;
+import static gov.va.api.health.communitycareeligibility.service.Transformers.allBlank;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
@@ -169,7 +170,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
             .build();
 
     /* Dont return a value when all null. */
-    if (Transformers.allBlank(
+    if (allBlank(
         patientAddress.country(),
         patientAddress.city(),
         patientAddress.state(),

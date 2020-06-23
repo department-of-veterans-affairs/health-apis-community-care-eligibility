@@ -12,6 +12,7 @@
   <modules>
     <module>community-care-eligibility-api</module>
     <module>community-care-eligibility-mock-services</module>
+    <module>community-care-eligibility-tests</module>
     <module>community-care-eligibility</module>
   </modules>
 </project>
