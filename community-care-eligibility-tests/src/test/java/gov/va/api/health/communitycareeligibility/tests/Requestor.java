@@ -4,6 +4,8 @@ import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions
 import static gov.va.api.health.sentinel.ExpectedResponse.logAllWithTruncatedBody;
 
 import gov.va.api.health.sentinel.ExpectedResponse;
+import gov.va.api.health.sentinel.ServiceDefinition;
+import io.restassured.http.Method;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @UtilityClass
 final class Requestor {
-  static ExpectedResponse search(@NonNull String request, int expectedStatus) {
-    log.info(
-        "Expect {} is status code ({})", cceClient().service().apiPath() + request, expectedStatus);
-    return cceClient().get(request).logAction(logAllWithTruncatedBody(2000)).expect(expectedStatus);
+  static ExpectedResponse makeRequest(@NonNull String request, int expectedStatus) {
+    ServiceDefinition svc = cceClient().service();
+    log.info("Expect {} is status code ({})", svc.apiPath() + request, expectedStatus);
+    return ExpectedResponse.of(
+            svc.requestSpecification().request(Method.GET, svc.urlWithApiPath() + request))
+        .logAction(logAllWithTruncatedBody(2000))
+        .expect(expectedStatus);
   }
 }

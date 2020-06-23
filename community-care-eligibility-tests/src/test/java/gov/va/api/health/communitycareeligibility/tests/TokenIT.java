@@ -1,6 +1,6 @@
 package gov.va.api.health.communitycareeligibility.tests;
 
-import static gov.va.api.health.communitycareeligibility.tests.Requestor.search;
+import static gov.va.api.health.communitycareeligibility.tests.Requestor.makeRequest;
 import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions.cceClient;
 import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions.systemDefinition;
 import static gov.va.api.health.sentinel.ExpectedResponse.logAllWithTruncatedBody;
@@ -8,6 +8,8 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 import gov.va.api.health.sentinel.Environment;
 import gov.va.api.health.sentinel.ExpectedResponse;
+import gov.va.api.health.sentinel.ServiceDefinition;
+import io.restassured.RestAssured;
 import io.restassured.http.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,16 +30,15 @@ public class TokenIT {
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s",
             systemDefinition().patient(), "PrimaryCare");
-    log.info(
-        "Expect {} with bad token is status code ({})",
-        cceClient().service().apiPath() + request,
-        401);
+    ServiceDefinition svc = cceClient().service();
+    log.info("Expect {} with bad token is status code ({})", svc.apiPath() + request, 401);
     ExpectedResponse.of(
-            cceClient()
-                .service()
-                .requestSpecification()
+            RestAssured.given()
+                .baseUri(svc.url())
+                .port(svc.port())
+                .relaxedHTTPSValidation()
                 .header("Authorization", "Bearer BADTOKEN")
-                .request(Method.GET, cceClient().service().urlWithApiPath() + request))
+                .request(Method.GET, svc.urlWithApiPath() + request))
         .logAction(logAllWithTruncatedBody(2000))
         .expect(401);
   }
@@ -47,6 +48,6 @@ public class TokenIT {
     String request =
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s", "5555555555555", "PrimaryCare");
-    search(request, 403);
+    makeRequest(request, 403);
   }
 }
