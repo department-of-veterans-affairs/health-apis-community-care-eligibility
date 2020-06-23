@@ -7,7 +7,8 @@ standards.
 
 ![applications](src/plantuml/apps.png)
 
-Average drive times are computed by Facilities API,
+Average drive times are computed by
+[Facilities API](https://github.com/department-of-veterans-affairs/lighthouse-facilities),
 based on the patient's physical (residential) address in E&E.
 
 E&E is not accessible outside the VA Intranet. For local development,

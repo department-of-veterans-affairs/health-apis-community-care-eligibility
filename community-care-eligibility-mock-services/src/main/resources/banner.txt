@@ -1,0 +1,5 @@
+====
+
+    ${Ansi.BLUE}Community Care Eligibility API ${Ansi.BOLD}${Ansi.YELLOW}Mock Services ${Ansi.NORMAL}${Ansi.BLUE}${application.version}${Ansi.NORMAL}
+
+====
