@@ -16,6 +16,7 @@ public class AdvancedSearchIT {
     assumeThat(Environment.get())
         .overridingErrorMessage("Skipping in " + Environment.get())
         .isNotEqualTo(Environment.LOCAL)
+        .isNotEqualTo(Environment.QA)
         .isNotEqualTo(Environment.STAGING)
         .isNotEqualTo(Environment.PROD);
   }
