@@ -54,6 +54,9 @@ public class MockServices {
   }
 
   private void addFacilitiesNearby(MockServerClient mock) {
+    mock.when(addQuery("/v0/nearby?lat=25.885108&lng=-97.510832"))
+        .respond(
+            response().withStatusCode(200).withHeader(contentApplicationJson()).withBody("{}"));
     mock.when(addQuery("/v0/nearby"))
         .respond(
             response()
