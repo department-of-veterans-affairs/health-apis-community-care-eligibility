@@ -12,13 +12,10 @@ import org.junit.jupiter.api.Test;
 
 public class AdvancedSearchIT {
   @BeforeAll
-  public static void assumeStagingLabOrLab() {
+  public static void assumeLocal() {
     assumeThat(Environment.get())
         .overridingErrorMessage("Skipping in " + Environment.get())
-        .isNotEqualTo(Environment.LOCAL)
-        .isNotEqualTo(Environment.QA)
-        .isNotEqualTo(Environment.STAGING)
-        .isNotEqualTo(Environment.PROD);
+        .isEqualTo(Environment.LOCAL);
   }
 
   @Test
@@ -81,7 +78,6 @@ public class AdvancedSearchIT {
 
   @Test
   void patientIndeterminateDueToNoGeoCoding() {
-    assumeStagingLabOrLab();
     String request =
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s", "1013120801V413425", "PrimaryCare");
