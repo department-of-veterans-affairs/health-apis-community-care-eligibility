@@ -6,7 +6,8 @@ import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import org.junit.jupiter.api.Test;
 
-public class SearchIT {
+public class BasicSearchIT {
+
   @Test
   void audiology() {
     String request =
