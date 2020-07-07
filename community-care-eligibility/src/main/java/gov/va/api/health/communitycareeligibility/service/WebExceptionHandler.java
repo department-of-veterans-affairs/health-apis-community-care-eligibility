@@ -4,6 +4,7 @@ import gov.va.api.health.communitycareeligibility.api.ErrorResponse;
 import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -20,7 +21,8 @@ public class WebExceptionHandler {
   @ExceptionHandler({
     ConstraintViolationException.class,
     Exceptions.InvalidExtendedDriveMin.class,
-    Exceptions.UnknownServiceTypeException.class
+    Exceptions.UnknownServiceTypeException.class,
+    MissingServletRequestParameterException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorResponse.BadRequest handleBadRequest(Exception e) {

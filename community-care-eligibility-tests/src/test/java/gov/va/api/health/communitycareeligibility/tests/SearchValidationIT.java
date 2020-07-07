@@ -38,13 +38,13 @@ public class SearchValidationIT {
   @Test
   void missingPatient() {
     String request = String.format("v0/eligibility/search?serviceType=%s", "PrimaryCare");
-    makeRequest(request, 500).expectValid(ErrorResponse.InternalServerError.class);
+    makeRequest(request, 400).expectValid(ErrorResponse.BadRequest.class);
   }
 
   @Test
   void missingServiceType() {
     String request =
         String.format("v0/eligibility/search?patient=%s", systemDefinition().patient());
-    makeRequest(request, 500).expectValid(ErrorResponse.InternalServerError.class);
+    makeRequest(request, 400).expectValid(ErrorResponse.BadRequest.class);
   }
 }
