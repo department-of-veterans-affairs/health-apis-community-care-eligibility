@@ -12,7 +12,7 @@
   <packaging>jar</packaging>
   <properties>
     <docker.imageName>community-care-tests</docker.imageName>
-    <mock-ee.version>2.0.28</mock-ee.version>
+    <mock-ee.version>3.0.0</mock-ee.version>
   </properties>
   <dependencies>
     <dependency>
