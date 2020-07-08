@@ -4,14 +4,14 @@
   <parent>
     <groupId>gov.va.api.health</groupId>
     <artifactId>service-starter</artifactId>
-    <version>7.0.0</version>
+    <version>7.0.1</version>
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility</artifactId>
   <version>3.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
-    <ee-client.version>3.0.6</ee-client.version>
+    <ee-client.version>4.0.0</ee-client.version>
     <jacoco.coverage>0.90</jacoco.coverage>
     <swagger-examples-plugin.version>1.0.1</swagger-examples-plugin.version>
     <swagger-maven-plugin.version>2.1.1</swagger-maven-plugin.version>
