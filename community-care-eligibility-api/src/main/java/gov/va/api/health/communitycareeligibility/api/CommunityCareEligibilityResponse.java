@@ -1,6 +1,7 @@
 package gov.va.api.health.communitycareeligibility.api;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ public final class CommunityCareEligibilityResponse {
 
   Boolean eligible;
 
+  ProcessingStatus processingStatus;
+
   /** Lazy getter. */
   public List<EligibilityCode> eligibilityCodes() {
     if (eligibilityCodes == null) {
@@ -54,6 +57,16 @@ public final class CommunityCareEligibilityResponse {
       nearbyFacilities = new ArrayList<>();
     }
     return nearbyFacilities;
+  }
+
+  public enum ProcessingStatus {
+    successful,
+    @JsonProperty("geocoding-not-available")
+    geocoding_not_available,
+    @JsonProperty("geocoding-out-of-date")
+    geocoding_out_of_date,
+    @JsonProperty("geocoding-incomplete")
+    geocoding_incomplete
   }
 
   @Data
@@ -91,6 +104,7 @@ public final class CommunityCareEligibilityResponse {
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
   public static final class DriveMinutes {
     Integer min;
+
     Integer max;
   }
 
@@ -124,6 +138,7 @@ public final class CommunityCareEligibilityResponse {
     String phoneNumber;
 
     String website;
+
     Boolean mobile;
 
     Boolean active;

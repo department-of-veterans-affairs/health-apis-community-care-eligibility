@@ -264,6 +264,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .eligible(!codeStrings.contains("X"))
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
           .build();
     }
 
@@ -273,7 +274,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
       log.info("No geocoding information found for ICN: {}", request.patientIcn());
-      return response.build();
+
+      return response
+          .processingStatus(
+              CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
+          .build();
     }
 
     Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
@@ -281,7 +286,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       log.info(
           "Unable to determine coordinates from geocoding info found for ICN: {}",
           request.patientIcn());
-      return response.build();
+      return response
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
+          .build();
     }
 
     response.patientCoordinates(patientCoordinates.get());
@@ -301,7 +308,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           request.patientIcn(),
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
-      return response.build();
+      return response
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
+          .build();
     }
 
     List<Facility> nearbyFacilities =
@@ -317,7 +326,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       response.nearbyFacilities(extendedFacilities);
     }
 
-    return response.build();
+    return response
+        .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
+        .build();
   }
 
   private List<Facility> transformFacilitiesCalls(
