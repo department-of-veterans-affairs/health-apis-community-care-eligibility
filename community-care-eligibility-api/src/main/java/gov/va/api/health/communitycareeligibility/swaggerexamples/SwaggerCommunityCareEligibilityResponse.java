@@ -87,6 +87,7 @@ public class SwaggerCommunityCareEligibilityResponse {
                     .phoneNumber("1-422-983-2040")
                     .website("https://www.va.gov")
                     .build()))
+        .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
         .eligible(false)
         .build();
   }

@@ -67,6 +67,13 @@ and scheduled their appointment.
 The response includes the overall eligibility decision and the individual details
 (patient address, eligibility codes, nearby facilities, etc.) that were used to compute it.
 
+It should be noted that partial success states can occur. Partial success states can occur due to:
+```
+Address geocoding is not available
+Address geocoding is out of date compared to the users address
+Address geocoding is incomplete (e.g. missing latitude)
+```
+
 Sample request:
 
 ```
