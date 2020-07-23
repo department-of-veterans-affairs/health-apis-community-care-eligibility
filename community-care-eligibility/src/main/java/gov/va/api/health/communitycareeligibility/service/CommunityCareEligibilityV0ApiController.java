@@ -251,12 +251,15 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         .toEligibility())
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+
     CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(request)
             .eligibilityCodes(eligibilityCodes)
             .grandfathered(false)
-            .noFullServiceVaMedicalFacility(false);
+            .noFullServiceVaMedicalFacility(false)
+            .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful);
+
     List<String> codeStrings =
         eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());
     if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
@@ -264,7 +267,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           .eligible(!codeStrings.contains("X"))
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
-          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
           .build();
     }
 
@@ -326,9 +328,7 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       response.nearbyFacilities(extendedFacilities);
     }
 
-    return response
-        .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
-        .build();
+    return response.build();
   }
 
   private List<Facility> transformFacilitiesCalls(

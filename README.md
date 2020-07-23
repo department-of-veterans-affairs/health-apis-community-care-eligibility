@@ -144,6 +144,7 @@ Sample response:
       "website" : "https://www.va.gov"
     }
   ],
-  "eligible" : false
+  "eligible" : false,
+  "processingStatus" : successful
 }
 ```
