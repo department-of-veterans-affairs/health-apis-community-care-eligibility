@@ -1,6 +1,6 @@
 # Local Development
 
-This application requires instances of Facilities API and E&E. Becuase E&E is not accessible outside the VA Intranet,
+This application requires instances of Facilities API and E&E. Because E&E is not accessible outside the VA Intranet,
 [Mock-EE](https://github.com/department-of-veterans-affairs/health-apis-mock-eligibility-and-enrollment)
 is recommended for local development.
 
