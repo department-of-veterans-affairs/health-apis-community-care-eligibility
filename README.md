@@ -11,9 +11,6 @@ Average drive times are computed by
 [Facilities API](https://github.com/department-of-veterans-affairs/lighthouse-facilities),
 based on the patient's physical (residential) address in E&E.
 
-E&E is not accessible outside the VA Intranet. For local development,
-[Mock-EE](https://github.com/department-of-veterans-affairs/health-apis-mock-eligibility-and-enrollment) is recommended.
-
 For more information about the end-to-end flow of information and interactions between systems/APIs,
 see the [sequence diagram](sequence-diagram.md).
 

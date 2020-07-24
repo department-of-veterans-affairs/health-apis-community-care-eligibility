@@ -1,64 +1,32 @@
-# Developer Guide
+# Local Development
 
-## Building
-- [Java Development Kit](https://adoptopenjdk.net/) 14
-- [Maven](http://maven.apache.org/) 3.6
-- [PlantUml](http://plantuml.com/) for diagrams
-- Recommended [IntelliJ](https://www.jetbrains.com/idea/)
-  or [Eclipse](https://www.eclipse.org/downloads/packages/installer)
-  with the following plugins
-  - [Lombok](https://projectlombok.org/)
-  - [Google Java Format](https://github.com/google/google-java-format)
-- [git-secrets](https://github.com/awslabs/git-secrets)
+This application requires instances of Facilities API and E&E. Becuase E&E is not accessible outside the VA Intranet,
+[Mock-EE](https://github.com/department-of-veterans-affairs/health-apis-mock-eligibility-and-enrollment)
+is recommended for local development.
 
-#### Maven
-- Formats Java, XML, and JSON files
-  (See the [Style Guide](https://google.github.io/styleguide/javaguide.html))
-- Enforces unit test code coverage
-- Performs [Checkstyle](http://checkstyle.sourceforge.net/) analysis using Google rules
-- Performs [SpotBugs](https://spotbugs.github.io/) analysis
-  with [Find Security Bugs](http://find-sec-bugs.github.io/) extensions
-- Enforces Git branch naming conventions to support Jira integration
+Refer to [health-apis-parent](https://github.com/department-of-veterans-affairs/health-apis-parent)
+for basic environment setup. (Java, Maven, Docker, etc.)
 
-The above build steps can be skipped for use with IDE launch support by disabling the
-_standard_ profile, e.g. `mvn -P'!standard' package`
+Build all of the modules:
 
-#### git-secrets
-git-secrets must be installed and configured to scan for AWS entries and the patterns in
-[.git-secrets-patterns](.git-secrets-patterns). Exclusions are managed in
-[.gitallowed](.gitallowed).
-The [init-git-secrets.sh](src/scripts/init-git-secrets.sh) script can be used to simply set up.
+`mvn clean install`
 
-> ###### !!?? Mac users
-> If using [Homebrew](https://brew.sh/), use `brew install --HEAD git-secrets` as decribed
-> by [this post](https://github.com/awslabs/git-secrets/issues/65#issuecomment-416382565) to
-> avoid issues committing multiple files.
+A `secrets.conf` file is required for generating local configuration. For example:
 
-----
+```
+#!/bin/bash
+export VA_FACILITIES_API_KEY='xxx'
+export VA_FACILITIES_URL='https://sandbox-api.va.gov/services/va_facilities/'
+```
 
-## Tools
-`src/scripts` provides tools to support development activities.
+Generate configuration for local development:
 
-> :warning: Review each script before running to ensure you understand exactly what it does.
+`src/scripts/make-configs.sh`
 
-- `dev-app.sh`
-  Run the applilcation locally.
+Verify application properties for local development:
 
-- `init-git-secrets.sh`
-  Initializes your clone of this repository to work with git secrets.
+`less community-care-eligibility/config/application-dev.properties`
 
-- `make-configs.sh`
-  Create application configuration for local development.
+To launch the application:
 
-----
-
-## Running
-
-The Spring application requires
-[external configuration](https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html)
-for environment specific information, such as other service URLs. In production or
-production-like environments, configuration is stored in AWS S3 buckets. In local developer
-environments, configuration can be `config/` directories that are not maintained in Git. See
-a teammate for connection details to developr resources.
-
-See the [configuration guide](configuration.md) for configuring applications in AWS.
+`java -Dspring.profiles.active=dev -jar community-care-eligibility/target/community-care-eligibility-${VERSION}.jar`
