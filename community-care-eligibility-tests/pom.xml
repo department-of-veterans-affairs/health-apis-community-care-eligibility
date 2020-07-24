@@ -92,7 +92,7 @@
             </goals>
             <configuration>
               <name>mock-services</name>
-              <healthcheckUrl>http://localhost:8666/help</healthcheckUrl>
+              <healthcheckUrl>http://localhost:8319/help</healthcheckUrl>
               <skip>${sentinel.skipLaunch}</skip>
               <processLogFile>${project.build.directory}/mock-services.log</processLogFile>
               <waitForInterrupt>false</waitForInterrupt>
@@ -125,7 +125,7 @@
                 <argument>-Dloader=gov.va.api.health.communitycareeligibility.service.Application</argument>
                 <argument>-Dlogging.level.root=INFO</argument>
                 <argument>-Dspring.config.location=classpath:/application.properties,file:${project.basedir}/config/secrets.properties</argument>
-                <argument>-Dva-facilities.url=http://localhost:8666</argument>
+                <argument>-Dva-facilities.url=http://localhost:8319</argument>
                 <argument>org.springframework.boot.loader.PropertiesLauncher</argument>
               </arguments>
             </configuration>
