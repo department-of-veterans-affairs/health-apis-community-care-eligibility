@@ -199,6 +199,7 @@ public final class CommunityCareEligibilityTest {
                                 .longitude(new BigDecimal("300"))
                                 .build())
                         .build()))
+            .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
             .build();
     assertThat(actual).isEqualTo(expected);
   }
@@ -296,6 +297,7 @@ public final class CommunityCareEligibilityTest {
                             .description("Hardship")
                             .code("H")
                             .build()))
+                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
 
@@ -333,6 +335,8 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
+                .processingStatus(
+                    CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
                 .build());
   }
 
@@ -371,6 +375,8 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
+                .processingStatus(
+                    CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
                 .build());
   }
 
@@ -415,6 +421,7 @@ public final class CommunityCareEligibilityTest {
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
                 .eligible(true)
+                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
 
@@ -522,6 +529,7 @@ public final class CommunityCareEligibilityTest {
                                     .build())
                             .build()))
                 .eligible(true)
+                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
 
@@ -628,6 +636,8 @@ public final class CommunityCareEligibilityTest {
                         .longitude(BigDecimal.ZERO)
                         .latitude(BigDecimal.ZERO)
                         .build())
+                .processingStatus(
+                    CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
                 .build());
   }
 
@@ -721,6 +731,7 @@ public final class CommunityCareEligibilityTest {
                             .description("Ineligible")
                             .code("X")
                             .build()))
+                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
 }

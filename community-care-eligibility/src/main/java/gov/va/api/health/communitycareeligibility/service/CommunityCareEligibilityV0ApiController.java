@@ -251,12 +251,15 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
                         .toEligibility())
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+
     CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response =
         CommunityCareEligibilityResponse.builder()
             .patientRequest(request)
             .eligibilityCodes(eligibilityCodes)
             .grandfathered(false)
-            .noFullServiceVaMedicalFacility(false);
+            .noFullServiceVaMedicalFacility(false)
+            .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful);
+
     List<String> codeStrings =
         eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());
     if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
@@ -273,7 +276,11 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
     Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
     if (geocoding.isEmpty()) {
       log.info("No geocoding information found for ICN: {}", request.patientIcn());
-      return response.build();
+
+      return response
+          .processingStatus(
+              CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
+          .build();
     }
 
     Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
@@ -281,7 +288,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
       log.info(
           "Unable to determine coordinates from geocoding info found for ICN: {}",
           request.patientIcn());
-      return response.build();
+      return response
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
+          .build();
     }
 
     response.patientCoordinates(patientCoordinates.get());
@@ -301,7 +310,9 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
           request.patientIcn(),
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
-      return response.build();
+      return response
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
+          .build();
     }
 
     List<Facility> nearbyFacilities =

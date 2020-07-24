@@ -67,6 +67,13 @@ and scheduled their appointment.
 The response includes the overall eligibility decision and the individual details
 (patient address, eligibility codes, nearby facilities, etc.) that were used to compute it.
 
+It should be noted that partial success states can occur. Partial success states can occur due to:
+```
+Address geocoding is not available
+Address geocoding is out of date compared to the users address
+Address geocoding is incomplete (e.g. missing latitude)
+```
+
 Sample request:
 
 ```
@@ -127,8 +134,8 @@ Sample response:
         "state" : "KY",
         "zip" : "75025"
       },
-      "mobile": false,
-      "active": true,
+      "mobile" : false,
+      "active" : true,
       "coordinates" : {
         "latitude" : 196.418,
         "longitude" : 317.811
@@ -137,6 +144,7 @@ Sample response:
       "website" : "https://www.va.gov"
     }
   ],
-  "eligible" : false
+  "eligible" : false,
+  "processingStatus" : "successful"
 }
 ```
