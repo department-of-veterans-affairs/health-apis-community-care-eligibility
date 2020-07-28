@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 final class Requestor {
   static ExpectedResponse makeRequest(@NonNull String request, int expectedStatus) {
-    SystemDefinitions.ServiceDefinition svc = systemDefinition().cce();
+    SystemDefinitions.Service svc = systemDefinition().cce();
     log.info("Expect {} is status code ({})", svc.apiPath() + request, expectedStatus);
     return ExpectedResponse.of(
             RestAssured.given()

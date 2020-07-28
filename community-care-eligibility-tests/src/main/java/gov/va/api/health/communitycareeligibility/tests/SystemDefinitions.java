@@ -52,9 +52,8 @@ class SystemDefinitions {
         .build();
   }
 
-  private static ServiceDefinition serviceDefinition(
-      String name, String url, int port, String apiPath) {
-    return ServiceDefinition.builder()
+  private static Service serviceDefinition(String name, String url, int port, String apiPath) {
+    return Service.builder()
         .url(SentinelProperties.optionUrl(name, url))
         .port(port)
         .apiPath(SentinelProperties.optionApiPath(name, apiPath))
@@ -107,28 +106,14 @@ class SystemDefinitions {
 
   @Value
   @Builder
-  static final class SystemDefinition {
-    @NonNull ServiceDefinition cce;
-
-    @NonNull String patient;
-  }
-
-  /** Defines particulars for interacting with a specific service. */
-  @Value
-  @Builder
-  static final class ServiceDefinition {
+  static final class Service {
     @NonNull String url;
 
     @NonNull Integer port;
 
     @NonNull String apiPath;
 
-    /**
-     * Return a url + path that adds / as necessary to produce a url that ends in a /.
-     *
-     * <p>For example: https://something.com/my/cool/api/
-     */
-    public String urlWithApiPath() {
+    String urlWithApiPath() {
       StringBuilder builder = new StringBuilder(url());
       if (!apiPath().startsWith("/")) {
         builder.append('/');
@@ -139,5 +124,13 @@ class SystemDefinitions {
       }
       return builder.toString();
     }
+  }
+
+  @Value
+  @Builder
+  static final class SystemDefinition {
+    @NonNull Service cce;
+
+    @NonNull String patient;
   }
 }

@@ -27,7 +27,7 @@ public class TokenIT {
         String.format(
             "v0/eligibility/search?patient=%s&serviceType=%s",
             systemDefinition().patient(), "PrimaryCare");
-    SystemDefinitions.ServiceDefinition svc = systemDefinition().cce();
+    SystemDefinitions.Service svc = systemDefinition().cce();
     log.info("Expect {} with bad token is status code ({})", svc.apiPath() + request, 401);
     ExpectedResponse.of(
             RestAssured.given()
