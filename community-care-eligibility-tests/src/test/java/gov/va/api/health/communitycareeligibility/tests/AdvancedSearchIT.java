@@ -1,8 +1,8 @@
 package gov.va.api.health.communitycareeligibility.tests;
 
 import static gov.va.api.health.communitycareeligibility.tests.Requestor.makeRequest;
+import static gov.va.api.health.sentinel.EnvironmentAssumptions.assumeEnvironmentIn;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.sentinel.Environment;
@@ -13,9 +13,7 @@ import org.junit.jupiter.api.Test;
 public class AdvancedSearchIT {
   @BeforeAll
   public static void assumeLocal() {
-    assumeThat(Environment.get())
-        .overridingErrorMessage("Skipping in " + Environment.get())
-        .isEqualTo(Environment.LOCAL);
+    assumeEnvironmentIn(Environment.LOCAL);
   }
 
   @Test

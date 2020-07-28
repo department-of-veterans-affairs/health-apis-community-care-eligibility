@@ -2,8 +2,8 @@ package gov.va.api.health.communitycareeligibility.tests;
 
 import static gov.va.api.health.communitycareeligibility.tests.Requestor.makeRequest;
 import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions.systemDefinition;
+import static gov.va.api.health.sentinel.EnvironmentAssumptions.assumeEnvironmentNotIn;
 import static gov.va.api.health.sentinel.ExpectedResponse.logAllWithTruncatedBody;
-import static org.assertj.core.api.Assumptions.assumeThat;
 
 import gov.va.api.health.sentinel.Environment;
 import gov.va.api.health.sentinel.ExpectedResponse;
@@ -16,10 +16,9 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 public class TokenIT {
   @BeforeAll
-  static void assumeEnvironment() {
+  static void assumeNotLocal() {
     // These tests require Kong
-    String m = "Skipping TokenIT in " + Environment.get();
-    assumeThat(Environment.get()).overridingErrorMessage(m).isNotEqualTo(Environment.LOCAL);
+    assumeEnvironmentNotIn(Environment.LOCAL);
   }
 
   @Test
