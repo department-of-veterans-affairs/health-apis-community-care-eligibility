@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class HomeControllerV0 {
-
   private final Resource openapi;
 
   @Autowired

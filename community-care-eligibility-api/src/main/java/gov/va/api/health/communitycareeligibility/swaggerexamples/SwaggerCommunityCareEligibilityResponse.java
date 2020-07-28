@@ -6,7 +6,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import java.math.BigDecimal;
 
 public class SwaggerCommunityCareEligibilityResponse {
-
   /** Swagger CommunityCareEligibilityResponse Example. */
   public static CommunityCareEligibilityResponse communityCareEligibilityResponse() {
     return CommunityCareEligibilityResponse.builder()
