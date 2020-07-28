@@ -4,7 +4,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import java.util.List;
 
 public interface FacilitiesClient {
-
   VaFacilitiesResponse facilitiesByIds(List<String> ids);
 
   VaNearbyFacilitiesResponse nearbyFacilities(

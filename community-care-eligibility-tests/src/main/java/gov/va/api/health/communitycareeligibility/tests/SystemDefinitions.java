@@ -1,14 +1,7 @@
 package gov.va.api.health.communitycareeligibility.tests;
 
-import static gov.va.api.health.sentinel.SentinelProperties.magicAccessToken;
-
-import gov.va.api.health.autoconfig.configuration.JacksonConfig;
-import gov.va.api.health.sentinel.BasicTestClient;
 import gov.va.api.health.sentinel.Environment;
 import gov.va.api.health.sentinel.SentinelProperties;
-import gov.va.api.health.sentinel.ServiceDefinition;
-import gov.va.api.health.sentinel.TestClient;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -16,14 +9,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 class SystemDefinitions {
-  static TestClient cceClient() {
-    return BasicTestClient.builder()
-        .service(SystemDefinitions.systemDefinition().cce())
-        .mapper(JacksonConfig::createMapper)
-        .contentType("application/json")
-        .build();
-  }
-
   private static SystemDefinition lab() {
     return SystemDefinition.builder()
         .cce(
@@ -31,7 +16,6 @@ class SystemDefinitions {
                 "community-care-eligibility",
                 "https://blue.lab.lighthouse.va.gov",
                 443,
-                magicAccessToken(),
                 "/community-care/"))
         .patient("1017283148V813263")
         .build();
@@ -39,7 +23,7 @@ class SystemDefinitions {
 
   private static SystemDefinition local() {
     return SystemDefinition.builder()
-        .cce(serviceDefinition("community-care-eligibility", "http://localhost", 8090, null, "/"))
+        .cce(serviceDefinition("community-care-eligibility", "http://localhost", 8090, "/"))
         .patient("1012853802V084487")
         .build();
   }
@@ -51,7 +35,6 @@ class SystemDefinitions {
                 "community-care-eligibility",
                 "https://blue.production.lighthouse.va.gov",
                 443,
-                magicAccessToken(),
                 "/community-care/"))
         .patient("1013294025V219497")
         .build();
@@ -64,19 +47,16 @@ class SystemDefinitions {
                 "community-care-eligibility",
                 "https://blue.qa.lighthouse.va.gov",
                 443,
-                magicAccessToken(),
                 "/community-care/"))
         .patient("1008679665V880686")
         .build();
   }
 
-  private static ServiceDefinition serviceDefinition(
-      String name, String url, int port, String accessToken, String apiPath) {
-    return ServiceDefinition.builder()
+  private static Service serviceDefinition(String name, String url, int port, String apiPath) {
+    return Service.builder()
         .url(SentinelProperties.optionUrl(name, url))
         .port(port)
         .apiPath(SentinelProperties.optionApiPath(name, apiPath))
-        .accessToken(() -> Optional.ofNullable(accessToken))
         .build();
   }
 
@@ -87,7 +67,6 @@ class SystemDefinitions {
                 "community-care-eligibility",
                 "https://blue.staging.lighthouse.va.gov",
                 443,
-                magicAccessToken(),
                 "/community-care/"))
         .patient("0000001008405009V205102000000")
         .build();
@@ -100,7 +79,6 @@ class SystemDefinitions {
                 "community-care-eligibility",
                 "https://blue.staging-lab.lighthouse.va.gov",
                 443,
-                magicAccessToken(),
                 "/community-care/"))
         .patient("1017283148V813263")
         .build();
@@ -128,8 +106,30 @@ class SystemDefinitions {
 
   @Value
   @Builder
+  static final class Service {
+    @NonNull String url;
+
+    @NonNull Integer port;
+
+    @NonNull String apiPath;
+
+    String urlWithApiPath() {
+      StringBuilder builder = new StringBuilder(url());
+      if (!apiPath().startsWith("/")) {
+        builder.append('/');
+      }
+      builder.append(apiPath());
+      if (!apiPath.endsWith("/")) {
+        builder.append('/');
+      }
+      return builder.toString();
+    }
+  }
+
+  @Value
+  @Builder
   static final class SystemDefinition {
-    @NonNull ServiceDefinition cce;
+    @NonNull Service cce;
 
     @NonNull String patient;
   }
