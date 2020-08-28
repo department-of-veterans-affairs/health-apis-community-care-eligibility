@@ -49,7 +49,7 @@ import javax.ws.rs.Path;
                     + "API requests are authorized using a Bearer token issued through "
                     + "an OpenID Connect service. The token should be submitted as an "
                     + "Authorization header in the form Bearer.\n\n"
-                    + "See our [Authorization Guide](https://developer.va.gov/explore/verification/docs/authorization)"
+                    + "See our [Authorization Guide](https://developer.va.gov/explore/health/docs/authorization)"
                     + " for more details."
                     + "\n\n"
                     + "## Partial Success States"
