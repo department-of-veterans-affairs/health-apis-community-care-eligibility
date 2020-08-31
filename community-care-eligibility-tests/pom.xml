@@ -4,15 +4,15 @@
   <parent>
     <groupId>gov.va.api.health</groupId>
     <artifactId>test-starter</artifactId>
-    <version>7.0.4</version>
+    <version>7.0.8</version>
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility-tests</artifactId>
-  <version>3.0.8-SNAPSHOT</version>
+  <version>3.0.8</version>
   <packaging>jar</packaging>
   <properties>
     <docker.imageName>community-care-tests</docker.imageName>
-    <mock-ee.version>3.0.3</mock-ee.version>
+    <mock-ee.version>3.0.6</mock-ee.version>
   </properties>
   <dependencies>
     <dependency>

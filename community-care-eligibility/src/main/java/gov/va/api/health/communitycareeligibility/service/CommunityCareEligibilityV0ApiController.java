@@ -131,7 +131,12 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
         || eeResponse.getSummary().getDemographics().getContactInfo().getAddresses() == null) {
       return Optional.empty();
     }
-    return eeResponse.getSummary().getDemographics().getContactInfo().getAddresses().getAddress()
+    return eeResponse
+        .getSummary()
+        .getDemographics()
+        .getContactInfo()
+        .getAddresses()
+        .getAddress()
         .stream()
         .filter(a -> "Residential".equalsIgnoreCase(a.getAddressTypeCode()))
         .findFirst();
