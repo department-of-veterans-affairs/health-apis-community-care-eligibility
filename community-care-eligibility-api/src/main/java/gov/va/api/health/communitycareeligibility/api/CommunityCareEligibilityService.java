@@ -31,14 +31,37 @@ import javax.ws.rs.Path;
             title = "Community Care Eligibility",
             version = "v0",
             description =
-                "Compute community care eligibility under the **objective** criteria"
-                    + " of the MISSION Act. Because MISSION Act also includes"
-                    + " subjective criteria, this API does not provide a **final**"
-                    + " eligibility decision. Any user-facing message based on these"
-                    + " results should indicate that the patient is *probably* eligible"
-                    + " or *probably not* eligible, and that no decision is final until"
-                    + " they have consulted VA staff and"
-                    + " scheduled their appointment."),
+                "## Background"
+                    + "\n\n"
+                    + "Community care eligibility is computed based on "
+                    + "[rules defined in the MISSION Act](https://www.va.gov/COMMUNITYCARE/programs/veterans/General_Care.asp#Eligibility)"
+                    + ", which includes criteria that can change depending on a "
+                    + "Veteran's situation, such as their distance from a VA facility."
+                    + " Because of this, the Community Care Eligibility"
+                    + " API does not provide a **final** eligibility decision. "
+                    + "Any message based on this API's results should say that the patient "
+                    + " is **probably** eligible or **probably not** eligible, "
+                    + "and that no decision is final until VA staff is consulted and an"
+                    + " appointment is scheduled."
+                    + "\n\n"
+                    + "## Authorization"
+                    + "\n\n"
+                    + "This API uses the [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)"
+                    + " standard (OAuth 2) to allow the "
+                    + "person being confirmed to log in and provide digital consent. "
+                    + "API requests are authorized using a Bearer token issued through "
+                    + "an OpenID Connect service. The token should be submitted as an "
+                    + "Authorization header in the form Bearer.\n\n"
+                    + "See our [Authorization Guide](https://developer.va.gov/explore/health/docs/authorization)"
+                    + " for more details."
+                    + "\n\n"
+                    + "## Partial Success States"
+                    + "\n\n"
+                    + "It should be noted that partial success states can occur. "
+                    + "Partial success states occur due to:\n"
+                    + "- Address geocoding is not available\n"
+                    + "- Address geocoding is out of date compared to the users address\n"
+                    + "- Address geocoding is incomplete (e.g. missing latitude)"),
     externalDocs =
         @ExternalDocumentation(
             description = "GitHub",
