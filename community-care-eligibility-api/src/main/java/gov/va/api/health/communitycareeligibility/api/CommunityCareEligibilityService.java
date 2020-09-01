@@ -110,7 +110,6 @@ public interface CommunityCareEligibilityService {
               mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.NotFound.class)))
   CommunityCareEligibilityResponse search(
-      String optSessionIdHeader,
       @Parameter(
               in = ParameterIn.QUERY,
               required = true,

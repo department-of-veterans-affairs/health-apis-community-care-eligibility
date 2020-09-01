@@ -16,7 +16,6 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.EligibilityCode;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
-import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityService;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -53,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
-public class CommunityCareEligibilityV0ApiController implements CommunityCareEligibilityService {
+public class CommunityCareEligibilityV0ApiController {
   private static final Map<String, String> SERVICES_MAP = initServicesMap();
 
   private int maxDriveMinsPrimary;
@@ -203,7 +202,6 @@ public class CommunityCareEligibilityV0ApiController implements CommunityCareEli
   }
 
   /** Compute community care eligibility. */
-  @Override
   @SneakyThrows
   @GetMapping(value = "/search")
   public CommunityCareEligibilityResponse search(
