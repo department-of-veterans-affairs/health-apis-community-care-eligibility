@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,10 +69,9 @@ import javax.ws.rs.Path;
 @SecurityScheme(
     type = SecuritySchemeType.OAUTH2,
     name = "OauthFlow",
-    in = SecuritySchemeIn.HEADER,
     flows =
         @OAuthFlows(
-            implicit =
+            authorizationCode =
                 @OAuthFlow(
                     authorizationUrl = "https://sandbox-api.va.gov/oauth2/authorization",
                     tokenUrl = "https://sandbox-api.va.gov/oauth2/token",
@@ -112,7 +110,6 @@ public interface CommunityCareEligibilityService {
               mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponse.NotFound.class)))
   CommunityCareEligibilityResponse search(
-      String optSessionIdHeader,
       @Parameter(
               in = ParameterIn.QUERY,
               required = true,
