@@ -7,7 +7,7 @@
     <version>7.0.8</version>
   </parent>
   <artifactId>community-care-eligibility-parent</artifactId>
-  <version>3.0.9-SNAPSHOT</version>
+  <version>3.0.9</version>
   <packaging>pom</packaging>
   <modules>
     <module>community-care-eligibility-api</module>
