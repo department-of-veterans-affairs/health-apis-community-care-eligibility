@@ -40,36 +40,10 @@ The medical service type is one of:
 * Urology
 * WomensHealth
 
-The API combines data from two sources:
-1. Patient physical address, latitude and longitude, and eligibility information, from E&E.
-2. VA health facilities in the state, from Facilities API.
-
-This data is used to compute an overall determination of community-care-eligibility
-based on the **objective** criteria of the MISSION Act. The six criteria are described
-[here](https://www.va.gov/COMMUNITYCARE/docs/pubfiles/factsheets/VA-FS_CC-Eligibility.pdf).
-The objective criteria of the MISSION Act are:
-1. Service unavailable
-2. Residence in a state without a full-service VA medical facility
-3. 40-mile legacy/grandfathered from the Choice program
-4. Access standards
-
-For this MVP, access standards are based only on drive-times, without appointment wait times.
-The last two criteria, *best medical interest* and *quality standards*, are subjective
-criteria outside the scope of this API. Because the subjective criteria are not included,
-this API's eligibility decisions **are not final**. A user-facing message
-based on the result of this API should stress that the patient is *probably* eligible or
-*probably not* eligible, and that no decision is final until they have consulted VA staff
-and scheduled their appointment.
-
 The response includes the overall eligibility decision and the individual details
 (patient address, eligibility codes, nearby facilities, etc.) that were used to compute it.
 
-It should be noted that partial success states can occur. Partial success states can occur due to:
-```
-Address geocoding is not available
-Address geocoding is out of date compared to the users address
-Address geocoding is incomplete (e.g. missing latitude)
-```
+For additional details, refer to the OpenAPI documentation on the [Lighthouse Developer Portal](https://developer.va.gov/explore/health/docs/community_care).
 
 Sample request:
 
