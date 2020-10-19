@@ -2,22 +2,21 @@
 
 This API is a [Spring Boot](https://spring.io/projects/spring-boot) microservice
 that computes **objective** overall community-care eligibility by combining eligibility codes
-from the Eligibility and Enrollment System (E&E) with drive-time access
-standards.
+from the VA's Eligibility and Enrollment System (E&E) with drive-time access standards.
 
 ![applications](src/plantuml/apps.png)
 
-Average drive times are computed by
+Average drive times are computed by the
 [Facilities API](https://github.com/department-of-veterans-affairs/lighthouse-facilities),
 based on the patient's physical (residential) address in E&E.
 
-For more information about the end-to-end flow of information and interactions between systems/APIs,
-see the [sequence diagram](sequence-diagram.md).
-
-For more information about the deployment architecture in different environments,
+Additional information is available in the following resources:
+* For more information about the end-to-end flow of information and interactions between 
+systems/APIs, see the [sequence diagram](sequence-diagram.md).
+* For more information about the deployment architecture in different environments,
 see the [architecture diagrams](architecture.md).
-
-For details about building and running this application, see the [developer guide](developer.md).
+* For details about building and running this application, see the [developer guide](developer.md).
+* For additional API details, refer to the OpenAPI documentation on the [Lighthouse Developer Portal](https://developer.va.gov/explore/health/docs/community_care).
 
 ----
 
@@ -42,8 +41,6 @@ The medical service type is one of:
 
 The response includes the overall eligibility decision and the individual details
 (patient address, eligibility codes, nearby facilities, etc.) that were used to compute it.
-
-For additional details, refer to the OpenAPI documentation on the [Lighthouse Developer Portal](https://developer.va.gov/explore/health/docs/community_care).
 
 Sample request:
 
