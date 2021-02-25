@@ -42,6 +42,36 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
+  public void PrimaryCareAlwaysIneligible() {
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(facilitiesClient)
+            .eeClient(eeClient)
+            .maxDriveTimePrimary(60)
+            .maxDriveTimeSpecialty(60)
+            .build();
+    CommunityCareEligibilityResponse actual =
+        controller.search("session-id", "123", "primarycare", null);
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .timestamp(actual.patientRequest().timestamp())
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .eligible(false)
+                .eligibilityCodes(emptyList())
+                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
+                .build());
+  }
+
+  @Test
   public void audiology() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(
@@ -278,7 +308,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .build();
     CommunityCareEligibilityResponse actual =
-        controller.search("session-id", "123", "primarycare", null);
+        controller.search("session-id", "123", "cardiology", null);
     assertThat(actual)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -286,7 +316,7 @@ public final class CommunityCareEligibilityTest {
                     CommunityCareEligibilityResponse.PatientRequest.builder()
                         .timestamp(actual.patientRequest().timestamp())
                         .patientIcn("123")
-                        .serviceType("PrimaryCare")
+                        .serviceType("Cardiology")
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
@@ -323,14 +353,14 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(eeClient)
             .build()
-            .search("", "123", "primarycare", null);
+            .search("", "123", "cardiology", null);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
                 .patientRequest(
                     CommunityCareEligibilityResponse.PatientRequest.builder()
                         .patientIcn("123")
-                        .serviceType("PrimaryCare")
+                        .serviceType("Cardiology")
                         .timestamp(result.patientRequest().timestamp())
                         .build())
                 .grandfathered(false)
@@ -346,12 +376,11 @@ public final class CommunityCareEligibilityTest {
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
-            .maxDriveTimePrimary(30)
+            .maxDriveTimeSpecialty(30)
             .build();
-
     assertThrows(
         Exceptions.InvalidExtendedDriveMin.class,
-        () -> controller.search("", "123", "primarycare", 20));
+        () -> controller.search("", "123", "cardiology", 20));
   }
 
   @Test
@@ -363,14 +392,14 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
             .build()
-            .search("", "123", "primarycare", null);
+            .search("", "123", "cardiology", null);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
                 .patientRequest(
                     CommunityCareEligibilityResponse.PatientRequest.builder()
                         .patientIcn("123")
-                        .serviceType("PrimaryCare")
+                        .serviceType("Cardiology")
                         .timestamp(result.patientRequest().timestamp())
                         .build())
                 .grandfathered(false)
@@ -403,7 +432,7 @@ public final class CommunityCareEligibilityTest {
             .facilitiesClient(mock(FacilitiesClient.class))
             .eeClient(client)
             .build()
-            .search("", "123", "primarycare", null);
+            .search("", "123", "cardiology", null);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
@@ -411,7 +440,7 @@ public final class CommunityCareEligibilityTest {
                     CommunityCareEligibilityResponse.PatientRequest.builder()
                         .patientIcn("123")
                         .timestamp(result.patientRequest().timestamp())
-                        .serviceType("PrimaryCare")
+                        .serviceType("Cardiology")
                         .build())
                 .patientCoordinates(
                     Coordinates.builder()
@@ -573,7 +602,7 @@ public final class CommunityCareEligibilityTest {
             .eeClient(eeClient)
             .maxDriveTimePrimary(1)
             .build();
-    CommunityCareEligibilityResponse result = controller.search("", "123", "primarycare", null);
+    CommunityCareEligibilityResponse result = controller.search("", "123", "cardiology", null);
     assertThat(result.nearbyFacilities().isEmpty());
   }
 
@@ -619,14 +648,14 @@ public final class CommunityCareEligibilityTest {
         CommunityCareEligibilityV0ApiController.builder()
             .eeClient(eeClient)
             .build()
-            .search("", "123", "PrimaryCare", null);
+            .search("", "123", "cardiology", null);
     assertThat(result)
         .isEqualTo(
             CommunityCareEligibilityResponse.builder()
                 .patientRequest(
                     CommunityCareEligibilityResponse.PatientRequest.builder()
                         .patientIcn("123")
-                        .serviceType("PrimaryCare")
+                        .serviceType("Cardiology")
                         .timestamp(result.patientRequest().timestamp())
                         .build())
                 .grandfathered(false)
@@ -678,7 +707,6 @@ public final class CommunityCareEligibilityTest {
             .maxDriveTimePrimary(30)
             .maxDriveTimeSpecialty(30)
             .build();
-
     assertThrows(
         Exceptions.UnknownServiceTypeException.class,
         () -> controller.search("", "123", "Dentistry", 20));

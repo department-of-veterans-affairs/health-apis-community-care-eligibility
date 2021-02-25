@@ -263,6 +263,10 @@ public class CommunityCareEligibilityV0ApiController {
             .noFullServiceVaMedicalFacility(false)
             .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful);
 
+    if (request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
+      return response.eligible(false).build();
+    }
+
     List<String> codeStrings =
         eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());
     if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {

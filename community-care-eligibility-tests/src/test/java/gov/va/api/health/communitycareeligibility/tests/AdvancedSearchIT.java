@@ -20,7 +20,7 @@ public class AdvancedSearchIT {
   void patientEligibleDueToCode() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1013120787V412913", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1013120787V412913", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(
@@ -35,7 +35,7 @@ public class AdvancedSearchIT {
   void patientEligibleDueToHardship() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1012845331V153043", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1012845331V153043", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.eligible()).isTrue();
@@ -45,7 +45,7 @@ public class AdvancedSearchIT {
   void patientEligibleDueToNoNearbyFacilities() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1012845943V900681", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1012845943V900681", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.nearbyFacilities()).isEmpty();
@@ -56,7 +56,7 @@ public class AdvancedSearchIT {
   void patientEligibleDueToStateWithNoVaMedicalCenters() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1012845944V882130", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1012845944V882130", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.noFullServiceVaMedicalFacility()).isTrue();
@@ -67,7 +67,7 @@ public class AdvancedSearchIT {
   void patientIndeterminateDueToNoAddress() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1013117618V394810", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1013117618V394810", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.patientAddress()).isNull();
@@ -78,7 +78,7 @@ public class AdvancedSearchIT {
   void patientIndeterminateDueToNoGeoCoding() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1013120801V413425", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1013120801V413425", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.patientCoordinates()).isNull();
@@ -89,7 +89,7 @@ public class AdvancedSearchIT {
   void patientNotEligibleDueToCode() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1013120835V054496", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1013120835V054496", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(
@@ -104,7 +104,7 @@ public class AdvancedSearchIT {
   void patientNotEligibleDueToNearbyFacility() {
     String request =
         String.format(
-            "v0/eligibility/search?patient=%s&serviceType=%s", "1012853802V084487", "PrimaryCare");
+            "v0/eligibility/search?patient=%s&serviceType=%s", "1012853802V084487", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.nearbyFacilities()).isNotEmpty();
