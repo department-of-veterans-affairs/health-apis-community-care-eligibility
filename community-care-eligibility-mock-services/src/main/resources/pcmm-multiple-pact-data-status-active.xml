@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PatientSummary>
+  <PatientSummaryText><![CDATA[CHEY6 (987)
+ PACT: LS Training *PC* (Focus: Primary Care Only)
+ Primary Care Provider:  Smith,Past Vista
+ Care Manager:           Cannon,Lorelle
+ Clinical Associate:
+ Administrative Associate:
+ Clinical POC:
+ Administrative POC:
+DAYT20 (988)
+ PACT: mad_team_one (Focus: Primary Care Only)
+ Physician-attending:  Madhavi,Yarlagadda
+ Clinical POC:
+ Administrative POC:
+]]></PatientSummaryText>
+  <nonVAPCProviders/>
+  <patientAssignmentsAtStations>
+    <patientAssignmentsAtStation>
+      <stationNameAndNumber>CHEY6 (#987)</stationNameAndNumber>
+      <stationNameRaw>CHEY6</stationNameRaw>
+      <stationNumber>987</stationNumber>
+      <parentStationNameAndNumber>CHEY6 (#987)</parentStationNameAndNumber>
+      <parentStationNameRaw>CHEY6</parentStationNameRaw>
+      <stationNumber>987</stationNumber>
+      <primaryCareAssignments>
+        <primaryCareAssignment>
+          <assignmentStatus>Active</assignmentStatus>
+          <!-- THIS IS PACT STATUS-->
+          <teamName>LS Training *PC*</teamName>
+          <careType>PRIMARY CARE</careType>
+          <teamFocus>Primary Care Only</teamFocus>
+          <teamletMembers>
+            <teamletMember>
+              <teamRole>
+                <description>PRIMARY CARE PROVIDER</description>
+                <name>PRIMARY CARE PROVIDER</name>
+                <code>43</code>
+                <ien>67</ien>
+                <primaryCare>true</primaryCare>
+                <supportStaff>false</supportStaff>
+              </teamRole>
+              <staffContact>
+                <teamRoleName>Primary Care Provider</teamRoleName>
+                <teamRoleCode>43</teamRoleCode>
+                <name>Smith,Past Vista</name>
+                <phone xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></phone>
+                <pager xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></pager>
+                <ien>520643182</ien>
+              </staffContact>
+            </teamletMember>
+            <teamletMember>
+              <teamRole>
+                <description>CARE MANAGER</description>
+                <name>CARE MANAGER</name>
+                <code>5</code>
+                <ien>26</ien>
+                <primaryCare>false</primaryCare>
+                <supportStaff>true</supportStaff>
+              </teamRole>
+              <staffContact>
+                <teamRoleName>Care Manager</teamRoleName>
+                <teamRoleCode>5</teamRoleCode>
+                <name>Cannon,Lorelle</name>
+                <phone xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></phone>
+                <pager xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></pager>
+                <ien>520642585</ien>
+              </staffContact>
+            </teamletMember>
+            <teamletMember>
+              <teamRole>
+                <description>CLINICAL ASSOCIATE</description>
+                <name>CLINICAL ASSOCIATE</name>
+                <code>8</code>
+                <ien>60</ien>
+                <primaryCare>false</primaryCare>
+                <supportStaff>true</supportStaff>
+              </teamRole>
+            </teamletMember>
+            <teamletMember>
+              <teamRole>
+                <description>ADMINISTRATIVE ASSOCIATE (MAS/PSA)</description>
+                <name>ADMINISTRATIVE ASSOCIATE</name>
+                <code>2</code>
+                <ien>56</ien>
+                <primaryCare>false</primaryCare>
+                <supportStaff>true</supportStaff>
+              </teamRole>
+            </teamletMember>
+          </teamletMembers>
+          <assignmentDate>2018-08-28T17:12:00Z</assignmentDate>
+        </primaryCareAssignment>
+      </primaryCareAssignments>
+      <primaryCareHBPCAssignments/>
+      <mentalHealthAssignments/>
+      <tcmAssignments/>
+      <specialtyAssignments/>
+    </patientAssignmentsAtStation>
+    <patientAssignmentsAtStation>
+      <stationNameAndNumber>DAYT20 (#988)</stationNameAndNumber>
+      <stationNameRaw>DAYT20</stationNameRaw>
+      <stationNumber>988</stationNumber>
+      <parentStationNameAndNumber>DAYT20 (#988)</parentStationNameAndNumber>
+      <parentStationNameRaw>DAYT20</parentStationNameRaw>
+      <stationNumber>988</stationNumber>
+      <primaryCareAssignments>
+        <primaryCareAssignment>
+          <assignmentStatus>Active</assignmentStatus>
+          <!-- THIS IS PACT STATUS-->
+          <teamName>mad_team_one</teamName>
+          <careType>PRIMARY CARE</careType>
+          <teamFocus>Primary Care Only</teamFocus>
+          <teamletMembers>
+            <teamletMember>
+              <teamRole>
+                <description>PHYSICIAN-ATTENDING</description>
+                <name>PHYSICIAN-ATTENDING</name>
+                <code>39</code>
+                <ien>1</ien>
+                <primaryCare>true</primaryCare>
+                <supportStaff>false</supportStaff>
+              </teamRole>
+              <staffContact>
+                <teamRoleName>Physician-attending</teamRoleName>
+                <teamRoleCode>39</teamRoleCode>
+                <name>Madhavi,Yarlagadda</name>
+                <phone xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></phone>
+                <pager xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></pager>
+                <ien>35458</ien>
+              </staffContact>
+            </teamletMember>
+          </teamletMembers>
+          <assignmentDate>2018-08-21T17:30:00Z</assignmentDate>
+        </primaryCareAssignment>
+      </primaryCareAssignments>
+      <primaryCareHBPCAssignments/>
+      <mentalHealthAssignments/>
+      <tcmAssignments/>
+      <specialtyAssignments/>
+    </patientAssignmentsAtStation>
+  </patientAssignmentsAtStations>
+  <nonVAProviders/>
+</PatientSummary>

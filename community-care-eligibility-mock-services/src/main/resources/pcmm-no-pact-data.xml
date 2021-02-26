@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PatientSummary>
+  <PatientSummaryText><![CDATA[ No PACT assigned at any VA location.]]></PatientSummaryText>
+  <nonVAPCProviders/>
+  <patientAssignmentsAtStations/>
+  <nonVAProviders/>
+</PatientSummary>
