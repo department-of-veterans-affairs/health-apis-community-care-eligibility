@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -201,6 +202,14 @@ public class CommunityCareEligibilityV0ApiController {
         : maxDriveMinsSpecialty;
   }
 
+  private String requestNearbyFacilityResults() {
+    return "Nearby Facilities Results Stub";
+  }
+
+  private String requestPcmmResults() {
+    return "PCMM Results Stub";
+  }
+
   /** Compute community care eligibility. */
   @SneakyThrows
   @GetMapping(value = "/search")
@@ -238,6 +247,7 @@ public class CommunityCareEligibilityV0ApiController {
             .build());
   }
 
+  @SneakyThrows
   private CommunityCareEligibilityResponse search(PatientRequest request) {
     GetEESummaryResponse eeResponse = eeClient.requestEligibility(request.patientIcn());
 
@@ -276,6 +286,22 @@ public class CommunityCareEligibilityV0ApiController {
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
     }
+
+    CompletableFuture<String> pcmmRequestFuture =
+        CompletableFuture.supplyAsync(this::requestPcmmResults);
+
+    CompletableFuture<String> nearbyRequestFuture =
+        CompletableFuture.supplyAsync(this::requestNearbyFacilityResults);
+
+    CompletableFuture<String> combinedPcmmAndNearbyResultsFuture =
+        pcmmRequestFuture.thenCombine(
+            nearbyRequestFuture,
+            (pcmmRequestResult, nearbyRequestResult) ->
+                "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult);
+
+    // Stub before actual results processing
+    System.out.println(
+        "Results of PCMM and Nearby Facilities calls: " + combinedPcmmAndNearbyResultsFuture.get());
 
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
