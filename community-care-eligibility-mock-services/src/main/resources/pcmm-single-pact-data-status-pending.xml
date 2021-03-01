@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PatientSummary>
+  <PatientSummaryText><![CDATA[SLC4 TEST LAB (991)
+ PACT: PENDING: RAJESH SLC4 PCMM TEAM (Focus: Womens Health)
+ Designated Wh Pcp:  Manivasagam,Rajesh || PHONE:123-456-7890
+ Care Manager:
+ Clinical Associate:
+ Administrative Associate:
+ Clinical POC:
+ Administrative POC:
+
+ SP: C6 NON-VA PC TEST (NON-VA CARE)
+  Care Coordinator || Via Mdws,User
+
+NON-VA PC: Non-VA Care: C6 NON-VA PC TEST
+ Care Coordinator: VIA MDWS, USER
+]]></PatientSummaryText>
+  <nonVAPCProviders>
+    <nonVAProvider>
+      <roleCode>DO</roleCode>
+      <roleName>PHYSICIAN</roleName>
+      <specialtyCode>37</specialtyCode>
+      <specialtyName>PRIMARY CARE</specialtyName>
+      <teamName>C6 NON-VA PC TEST</teamName>
+      <careCoordinatorName>VIA MDWS, USER</careCoordinatorName>
+      <providerName>SMITH, JOE</providerName>
+      <phone xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></phone>
+      <city xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></city>
+      <state xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></state>
+      <practiceName>JAY'S JAYBIRDS</practiceName>
+      <practicePhone xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></practicePhone>
+      <practiceCity>ANYWHERE</practiceCity>
+      <practiceState>CA</practiceState>
+      <assignmentDate>2020-12-14T16:55:00Z</assignmentDate>
+      <Category>Veteran's Choice</Category>
+    </nonVAProvider>
+  </nonVAPCProviders>
+  <patientAssignmentsAtStations>
+    <patientAssignmentsAtStation>
+      <stationNameAndNumber>SLC4 TEST LAB (#991)</stationNameAndNumber>
+      <stationNameRaw>SLC4 TEST LAB</stationNameRaw>
+      <stationNumber>991</stationNumber>
+      <parentStationNameAndNumber>SLC4 TEST LAB (#991)</parentStationNameAndNumber>
+      <parentStationNameRaw>SLC4 TEST LAB</parentStationNameRaw>
+      <stationNumber>991</stationNumber>
+      <primaryCareAssignments>
+        <primaryCareAssignment>
+          <assignmentStatus>Pending</assignmentStatus>
+          <!-- THIS IS PACT STATUS-->
+          <teamName>RAJESH SLC4 PCMM TEAM</teamName>
+          <careType>PRIMARY CARE</careType>
+          <teamFocus>Womens Health</teamFocus>
+          <teamletMembers>
+            <teamletMember>
+              <teamRole>
+                <description>DESIGNATED WOMENS HEALTH PROVIDER</description>
+                <name>DESIGNATED WH PCP</name>
+                <code>11</code>
+                <ien>30</ien>
+                <primaryCare>true</primaryCare>
+                <supportStaff>false</supportStaff>
+              </teamRole>
+              <staffContact>
+                <teamRoleName>Designated Wh Pcp</teamRoleName>
+                <teamRoleCode>11</teamRoleCode>
+                <name>Manivasagam,Rajesh</name>
+                <phone>123-456-7890</phone>
+                <pager xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></pager>
+                <ien>59826</ien>
+              </staffContact>
+            </teamletMember>
+            <teamletMember>
+              <teamRole>
+                <description>CARE MANAGER</description>
+                <name>CARE MANAGER</name>
+                <code>5</code>
+                <ien>26</ien>
+                <primaryCare>false</primaryCare>
+                <supportStaff>true</supportStaff>
+              </teamRole>
+            </teamletMember>
+            <teamletMember>
+              <teamRole>
+                <description>CLINICAL ASSOCIATE</description>
+                <name>CLINICAL ASSOCIATE</name>
+                <code>8</code>
+                <ien>60</ien>
+                <primaryCare>false</primaryCare>
+                <supportStaff>true</supportStaff>
+              </teamRole>
+            </teamletMember>
+            <teamletMember>
+              <teamRole>
+                <description>ADMINISTRATIVE ASSOCIATE (MAS/PSA)</description>
+                <name>ADMINISTRATIVE ASSOCIATE</name>
+                <code>2</code>
+                <ien>56</ien>
+                <primaryCare>false</primaryCare>
+                <supportStaff>true</supportStaff>
+              </teamRole>
+            </teamletMember>
+          </teamletMembers>
+          <assignmentDate>2020-05-19T15:20:00Z</assignmentDate>
+        </primaryCareAssignment>
+      </primaryCareAssignments>
+      <primaryCareHBPCAssignments/>
+      <mentalHealthAssignments/>
+      <tcmAssignments/>
+      <specialtyAssignments>
+        <specialtyAssignment>
+          <careTypeCode>14</careTypeCode>
+          <careTypeName>NON-VA CARE</careTypeName>
+          <teamName>C6 NON-VA PC TEST</teamName>
+          <teamMembers>
+            <teamRoleName>Care Coordinator</teamRoleName>
+            <teamRoleCode>93</teamRoleCode>
+            <name>Via Mdws,User</name>
+            <phone xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></phone>
+            <pager xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"></pager>
+            <ien>59917</ien>
+          </teamMembers>
+          <assignmentDate>2020-12-14T16:54:00Z</assignmentDate>
+        </specialtyAssignment>
+      </specialtyAssignments>
+    </patientAssignmentsAtStation>
+  </patientAssignmentsAtStations>
+  <nonVAProviders/>
+</PatientSummary>

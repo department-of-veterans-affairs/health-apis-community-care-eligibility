@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class MockServices {
+  public static final String PCMM_PATH = "/pcmmr_web/ws/patientSummary/icn/";
+
   /** All queries added to the mock server are listed here, except for /help. */
   private final List<String> supportedQueries = new ArrayList<>();
 
@@ -38,6 +40,10 @@ public class MockServices {
 
   private static Header contentApplicationJson() {
     return new Header("Content-Type", "application/json");
+  }
+
+  private static Header contentApplicationXml() {
+    return new Header("Content-Type", "application/xml");
   }
 
   private static Header contentTextPlain() {
@@ -75,6 +81,30 @@ public class MockServices {
     log.info("List of supported queries available at http://localhost:{}/help", options.getPort());
   }
 
+  private void addPcmmStatusRequests(MockServerClient mock) {
+    final String pactStatusNoDataIcn = "1012870703V135989";
+    final String pactStatusPendingIcn = "1012667674V820648";
+    final String pactStatusMultiDataStatusActiveIcn = "1013060957V646684";
+    mock.when(addQuery(PCMM_PATH + pactStatusNoDataIcn))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withHeader(contentApplicationXml())
+                .withBody(contentOf("/pcmm-no-pact-data.xml")));
+    mock.when(addQuery(PCMM_PATH + pactStatusPendingIcn))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withHeader(contentApplicationXml())
+                .withBody(contentOf("/pcmm-single-pact-data-status-pending.xml")));
+    mock.when(addQuery(PCMM_PATH + pactStatusMultiDataStatusActiveIcn))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withHeader(contentApplicationXml())
+                .withBody(contentOf("/pcmm-multiple-pact-data-status-active.xml")));
+  }
+
   @SneakyThrows
   private HttpRequest addQuery(String path) {
     log.info("http://localhost:{}{}", options.getPort(), path);
@@ -110,6 +140,7 @@ public class MockServices {
     MockServerClient mock = new MockServerClient("localhost", options.getPort());
     addFacilitiesIds(mock);
     addFacilitiesNearby(mock);
+    addPcmmStatusRequests(mock);
     addHelp(mock);
   }
 }
