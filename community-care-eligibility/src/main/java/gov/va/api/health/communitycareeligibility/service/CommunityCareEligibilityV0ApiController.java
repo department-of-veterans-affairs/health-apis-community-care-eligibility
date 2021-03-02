@@ -202,8 +202,79 @@ public class CommunityCareEligibilityV0ApiController {
         : maxDriveMinsSpecialty;
   }
 
-  private String requestNearbyFacilityResults() {
-    return "Nearby Facilities Results Stub";
+  private CommunityCareEligibilityResponse requestNearbyFacilityResults(
+      PatientRequest request,
+      CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response,
+      GetEESummaryResponse eeResponse,
+      List<String> codeStrings) {
+
+    if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
+      return response
+          .eligible(!codeStrings.contains("X"))
+          .grandfathered(codeStrings.contains("G"))
+          .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
+          .build();
+    }
+
+    Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
+    response.patientAddress(toAddress(eeAddress));
+
+    Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
+    if (geocoding.isEmpty()) {
+      log.info("No geocoding information found for ICN: {}", request.patientIcn());
+
+      return response
+          .processingStatus(
+              CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
+          .build();
+    }
+
+    Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
+    if (patientCoordinates.isEmpty()) {
+      log.info(
+          "Unable to determine coordinates from geocoding info found for ICN: {}",
+          request.patientIcn());
+      return response
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
+          .build();
+    }
+
+    response.patientCoordinates(patientCoordinates.get());
+
+    XMLGregorianCalendar eeAddressChangeXgc =
+        eeAddress.isPresent() ? eeAddress.get().getAddressChangeDateTime() : null;
+    XMLGregorianCalendar geocodeXgc = geocoding.get().getGeocodeDate();
+    if (eeAddressChangeXgc != null
+        && geocodeXgc != null
+        && geocodeXgc
+            .toGregorianCalendar()
+            .toInstant()
+            .isBefore(eeAddressChangeXgc.toGregorianCalendar().toInstant())) {
+      log.info(
+          "For patient ICN {}, geocoding information (updated {})"
+              + " is out of date against residential address (updated {})",
+          request.patientIcn(),
+          geocodeXgc.toGregorianCalendar().toInstant(),
+          eeAddressChangeXgc.toGregorianCalendar().toInstant());
+      return response
+          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
+          .build();
+    }
+
+    List<Facility> nearbyFacilities =
+        transformFacilitiesCalls(
+            patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
+    response.nearbyFacilities(nearbyFacilities);
+    response.eligible(nearbyFacilities.isEmpty());
+
+    if (request.extendedDriveMin() != null) {
+      List<Facility> extendedFacilities =
+          transformFacilitiesCalls(
+              patientCoordinates.get(), request.extendedDriveMin(), request.serviceType());
+      response.nearbyFacilities(extendedFacilities);
+    }
+
+    return response.build();
   }
 
   private String requestPcmmResults() {
@@ -278,10 +349,10 @@ public class CommunityCareEligibilityV0ApiController {
     }
 
     List<String> codeStrings =
-        eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());
-    if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
+        eligibilityCodes.stream().map(EligibilityCode::code).collect(Collectors.toList());
+    if (codeStrings.contains("X")) {
       return response
-          .eligible(!codeStrings.contains("X"))
+          .eligible(false)
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
@@ -290,8 +361,9 @@ public class CommunityCareEligibilityV0ApiController {
     CompletableFuture<String> pcmmRequestFuture =
         CompletableFuture.supplyAsync(this::requestPcmmResults);
 
-    CompletableFuture<String> nearbyRequestFuture =
-        CompletableFuture.supplyAsync(this::requestNearbyFacilityResults);
+    CompletableFuture<CommunityCareEligibilityResponse> nearbyRequestFuture =
+        CompletableFuture.supplyAsync(
+            () -> requestNearbyFacilityResults(request, response, eeResponse, codeStrings));
 
     CompletableFuture<String> combinedPcmmAndNearbyResultsFuture =
         pcmmRequestFuture.thenCombine(
@@ -302,64 +374,6 @@ public class CommunityCareEligibilityV0ApiController {
     // Stub before actual results processing
     System.out.println(
         "Results of PCMM and Nearby Facilities calls: " + combinedPcmmAndNearbyResultsFuture.get());
-
-    Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
-    response.patientAddress(toAddress(eeAddress));
-
-    Optional<GeocodingInfo> geocoding = geocodingInfo(eeResponse);
-    if (geocoding.isEmpty()) {
-      log.info("No geocoding information found for ICN: {}", request.patientIcn());
-
-      return response
-          .processingStatus(
-              CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
-          .build();
-    }
-
-    Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
-    if (patientCoordinates.isEmpty()) {
-      log.info(
-          "Unable to determine coordinates from geocoding info found for ICN: {}",
-          request.patientIcn());
-      return response
-          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
-          .build();
-    }
-
-    response.patientCoordinates(patientCoordinates.get());
-
-    XMLGregorianCalendar eeAddressChangeXgc =
-        eeAddress.isPresent() ? eeAddress.get().getAddressChangeDateTime() : null;
-    XMLGregorianCalendar geocodeXgc = geocoding.get().getGeocodeDate();
-    if (eeAddressChangeXgc != null
-        && geocodeXgc != null
-        && geocodeXgc
-            .toGregorianCalendar()
-            .toInstant()
-            .isBefore(eeAddressChangeXgc.toGregorianCalendar().toInstant())) {
-      log.info(
-          "For patient ICN {}, geocoding information (updated {})"
-              + " is out of date against residential address (updated {})",
-          request.patientIcn(),
-          geocodeXgc.toGregorianCalendar().toInstant(),
-          eeAddressChangeXgc.toGregorianCalendar().toInstant());
-      return response
-          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
-          .build();
-    }
-
-    List<Facility> nearbyFacilities =
-        transformFacilitiesCalls(
-            patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
-    response.nearbyFacilities(nearbyFacilities);
-    response.eligible(nearbyFacilities.isEmpty());
-
-    if (request.extendedDriveMin() != null) {
-      List<Facility> extendedFacilities =
-          transformFacilitiesCalls(
-              patientCoordinates.get(), request.extendedDriveMin(), request.serviceType());
-      response.nearbyFacilities(extendedFacilities);
-    }
 
     return response.build();
   }
