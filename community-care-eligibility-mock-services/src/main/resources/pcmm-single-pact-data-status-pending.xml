@@ -45,8 +45,8 @@ NON-VA PC: Non-VA Care: C6 NON-VA PC TEST
       <stationNumber>991</stationNumber>
       <primaryCareAssignments>
         <primaryCareAssignment>
-          <assignmentStatus>Pending</assignmentStatus>
           <!-- THIS IS PACT STATUS-->
+          <assignmentStatus>Pending</assignmentStatus>
           <teamName>RAJESH SLC4 PCMM TEAM</teamName>
           <careType>PRIMARY CARE</careType>
           <teamFocus>Womens Health</teamFocus>

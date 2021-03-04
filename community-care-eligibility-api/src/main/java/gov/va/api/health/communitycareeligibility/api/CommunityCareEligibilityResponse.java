@@ -43,6 +43,8 @@ public final class CommunityCareEligibilityResponse {
 
   ProcessingStatus processingStatus;
 
+  String pactStatus;
+
   /** Lazy getter. */
   public List<EligibilityCode> eligibilityCodes() {
     if (eligibilityCodes == null) {

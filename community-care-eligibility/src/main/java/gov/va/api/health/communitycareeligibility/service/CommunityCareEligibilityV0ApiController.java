@@ -16,6 +16,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.EligibilityCode;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
+import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -64,17 +65,21 @@ public class CommunityCareEligibilityV0ApiController {
 
   private FacilitiesClient facilitiesClient;
 
+  private PcmmClient pcmmClient;
+
   /** Autowired constructor. */
   @Builder
   public CommunityCareEligibilityV0ApiController(
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
       @Autowired EligibilityAndEnrollmentClient eeClient,
-      @Autowired FacilitiesClient facilitiesClient) {
+      @Autowired FacilitiesClient facilitiesClient,
+      @Autowired PcmmClient pcmmClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
+    this.pcmmClient = pcmmClient;
   }
 
   private static List<VceEligibilityInfo> eligibilityInfos(GetEESummaryResponse response) {
@@ -206,8 +211,33 @@ public class CommunityCareEligibilityV0ApiController {
     return "Nearby Facilities Results Stub";
   }
 
-  private String requestPcmmResults() {
-    return "PCMM Results Stub";
+  private PcmmResponse requestPcmmResults(CommunityCareEligibilityResponse.PatientRequest request) {
+
+    PcmmResponse response = null;
+
+    // todo make call for rest template
+
+    if (request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
+
+      response = pcmmClient.pactStatusByIcn(request.patientIcn());
+
+      //      response =
+      //          ExpectedResponse.of(
+      //                  RestAssured.given()
+      //                      .contentType(ContentType.XML)
+      //                      .relaxedHTTPSValidation()
+      //                      .request(
+      //                          Method.GET,
+      //                          "http://localhost:8319/pcmmr_web/ws/patientSummary/icn/" +
+      // request.patientIcn()))
+      //              .mapper(new
+      // XmlMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
+      //              .expectValid(PcmmResponse.class);
+    } else {
+      // todo Skip pcmm check if service type isn't primary care
+    }
+
+    return response;
   }
 
   /** Compute community care eligibility. */
@@ -287,8 +317,8 @@ public class CommunityCareEligibilityV0ApiController {
           .build();
     }
 
-    CompletableFuture<String> pcmmRequestFuture =
-        CompletableFuture.supplyAsync(this::requestPcmmResults);
+    CompletableFuture<PcmmResponse> pcmmRequestFuture =
+        CompletableFuture.supplyAsync(() -> requestPcmmResults(request));
 
     CompletableFuture<String> nearbyRequestFuture =
         CompletableFuture.supplyAsync(this::requestNearbyFacilityResults);

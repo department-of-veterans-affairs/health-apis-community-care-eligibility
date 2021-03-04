@@ -13,6 +13,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.SneakyThrows;
@@ -45,6 +47,23 @@ public final class CommunityCareEligibilityTest {
   public void PrimaryCareAlwaysIneligible() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+
+    PcmmClient pcmmClient = mock(PcmmClient.class);
+
+    when(pcmmClient.pactStatusByIcn("123"))
+        .thenReturn(
+            PcmmResponse.builder()
+                .patientAssignmentsAtStation(
+                    List.of(
+                        PcmmResponse.PatientAssignmentsAtStation.builder()
+                            .primaryCareAssignment(
+                                List.of(
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus("Active")
+                                        .build()))
+                            .build()))
+                .build());
+
     CommunityCareEligibilityV0ApiController controller =
         CommunityCareEligibilityV0ApiController.builder()
             .facilitiesClient(facilitiesClient)

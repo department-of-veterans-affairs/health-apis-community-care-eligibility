@@ -16,6 +16,12 @@ final class Exceptions {
     }
   }
 
+  static final class PcmmUnavailableException extends RuntimeException {
+    PcmmUnavailableException(Throwable cause) {
+      super("PCMM Endpoint is not available: " + cause.getMessage(), cause);
+    }
+  }
+
   static final class InvalidExtendedDriveMin extends RuntimeException {
     InvalidExtendedDriveMin(String serviceType, int extendedDriveMins, int driveMins) {
       super(

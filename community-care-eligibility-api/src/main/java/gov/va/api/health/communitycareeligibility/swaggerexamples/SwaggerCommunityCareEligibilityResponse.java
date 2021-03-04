@@ -88,6 +88,7 @@ public class SwaggerCommunityCareEligibilityResponse {
                     .build()))
         .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
         .eligible(false)
+        .pactStatus("Active")
         .build();
   }
 }
