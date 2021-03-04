@@ -363,6 +363,7 @@ public final class CommunityCareEligibilityTest {
                         .serviceType("Cardiology")
                         .timestamp(result.patientRequest().timestamp())
                         .build())
+                .eligible(false)
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
                 .processingStatus(
@@ -402,6 +403,7 @@ public final class CommunityCareEligibilityTest {
                         .serviceType("Cardiology")
                         .timestamp(result.patientRequest().timestamp())
                         .build())
+                .eligible(false)
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
                 .processingStatus(
@@ -658,6 +660,7 @@ public final class CommunityCareEligibilityTest {
                         .serviceType("Cardiology")
                         .timestamp(result.patientRequest().timestamp())
                         .build())
+                .eligible(false)
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
                 .patientCoordinates(

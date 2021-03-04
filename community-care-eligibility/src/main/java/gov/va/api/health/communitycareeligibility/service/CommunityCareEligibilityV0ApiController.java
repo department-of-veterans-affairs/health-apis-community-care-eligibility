@@ -208,9 +208,8 @@ public class CommunityCareEligibilityV0ApiController {
       GetEESummaryResponse eeResponse,
       List<String> codeStrings) {
 
-    if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H", "X"))) {
+    if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H"))) {
       return response
-          .eligible(!codeStrings.contains("X"))
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
@@ -224,6 +223,7 @@ public class CommunityCareEligibilityV0ApiController {
       log.info("No geocoding information found for ICN: {}", request.patientIcn());
 
       return response
+          .eligible(false)
           .processingStatus(
               CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
           .build();
@@ -235,6 +235,7 @@ public class CommunityCareEligibilityV0ApiController {
           "Unable to determine coordinates from geocoding info found for ICN: {}",
           request.patientIcn());
       return response
+          .eligible(false)
           .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
           .build();
     }
@@ -257,6 +258,7 @@ public class CommunityCareEligibilityV0ApiController {
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
       return response
+          .eligible(false)
           .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
           .build();
     }
@@ -265,7 +267,10 @@ public class CommunityCareEligibilityV0ApiController {
         transformFacilitiesCalls(
             patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
-    response.eligible(nearbyFacilities.isEmpty());
+
+    if (!nearbyFacilities.isEmpty()) {
+      response.eligible(false);
+    }
 
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
@@ -357,6 +362,9 @@ public class CommunityCareEligibilityV0ApiController {
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
     }
+
+    // Set default eligibility
+    response.eligible(true);
 
     CompletableFuture<String> pcmmRequestFuture =
         CompletableFuture.supplyAsync(this::requestPcmmResults);
