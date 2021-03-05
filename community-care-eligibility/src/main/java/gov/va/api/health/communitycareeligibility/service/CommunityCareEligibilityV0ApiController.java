@@ -215,26 +215,27 @@ public class CommunityCareEligibilityV0ApiController {
       PatientRequest request,
       CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response) {
 
-    if (request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
+    if (!request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
+      return response.build();
+    }
 
-      // default pact status to None until a valid status is found
-      response.pactStatus("None");
+    // default pact status to None until a valid status is found
+    response.pactStatus("None");
+    PcmmResponse pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
 
-      PcmmResponse pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
+    if (pcmmResponse.patientAssignmentsAtStation == null) {
+      return response.build();
+    }
 
-      if (pcmmResponse.patientAssignmentsAtStation != null) {
-        for (PcmmResponse.PatientAssignmentsAtStation paas :
-            pcmmResponse.patientAssignmentsAtStation) {
-          if (paas.primaryCareAssignment() != null) {
-            for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
-              final String pactStatus = pca.assignmentStatus();
-              if ("Active".equals(pactStatus)) {
-                return response.eligible(false).pactStatus(pactStatus).build();
-              } else if ("Pending".equals(pactStatus)) {
-                // Do not return here in case there is an Active status (higher priority)
-                response.eligible(false).pactStatus(pactStatus);
-              }
-            }
+    for (PcmmResponse.PatientAssignmentsAtStation paas : pcmmResponse.patientAssignmentsAtStation) {
+      if (paas.primaryCareAssignment() != null) {
+        for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
+          final String pactStatus = pca.assignmentStatus();
+          if ("Active".equals(pactStatus)) {
+            return response.eligible(false).pactStatus(pactStatus).build();
+          } else if ("Pending".equals(pactStatus)) {
+            // Do not return here in case there is an Active status (higher priority)
+            response.eligible(false).pactStatus(pactStatus);
           }
         }
       }
@@ -305,10 +306,6 @@ public class CommunityCareEligibilityV0ApiController {
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
             .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful);
-
-    if (request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
-      return response.eligible(false).build();
-    }
 
     List<String> codeStrings =
         eligibilityCodes.stream().map(c -> c.code()).collect(Collectors.toList());

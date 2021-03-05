@@ -5,6 +5,7 @@ import static gov.va.api.health.communitycareeligibility.tests.SystemDefinitions
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import gov.va.api.health.communitycareeligibility.api.ErrorResponse;
+import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import org.junit.jupiter.api.Test;
 
 public class SearchValidationIT {

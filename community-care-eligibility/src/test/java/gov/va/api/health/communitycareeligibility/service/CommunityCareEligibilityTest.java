@@ -44,53 +44,6 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  public void PrimaryCareAlwaysIneligible() {
-    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-
-    PcmmClient pcmmClient = mock(PcmmClient.class);
-
-    when(pcmmClient.pactStatusByIcn("123"))
-        .thenReturn(
-            PcmmResponse.builder()
-                .patientAssignmentsAtStation(
-                    List.of(
-                        PcmmResponse.PatientAssignmentsAtStation.builder()
-                            .primaryCareAssignment(
-                                List.of(
-                                    PcmmResponse.PrimaryCareAssignment.builder()
-                                        .assignmentStatus("Active")
-                                        .build()))
-                            .build()))
-                .build());
-
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(facilitiesClient)
-            .eeClient(eeClient)
-            .maxDriveTimePrimary(60)
-            .maxDriveTimeSpecialty(60)
-            .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("session-id", "123", "primarycare", null);
-    assertThat(actual)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .patientRequest(
-                    CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .timestamp(actual.patientRequest().timestamp())
-                        .patientIcn("123")
-                        .serviceType("PrimaryCare")
-                        .build())
-                .grandfathered(false)
-                .noFullServiceVaMedicalFacility(false)
-                .eligible(false)
-                .eligibilityCodes(emptyList())
-                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
-                .build());
-  }
-
-  @Test
   public void audiology() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.nearbyFacilities(
@@ -686,6 +639,53 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .processingStatus(
                     CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
+                .build());
+  }
+
+  @Test
+  public void primaryCare() {
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    PcmmClient pcmmClient = mock(PcmmClient.class);
+    when(pcmmClient.pactStatusByIcn("123"))
+        .thenReturn(
+            PcmmResponse.builder()
+                .patientAssignmentsAtStation(
+                    List.of(
+                        PcmmResponse.PatientAssignmentsAtStation.builder()
+                            .primaryCareAssignment(
+                                List.of(
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus("Active")
+                                        .build()))
+                            .build()))
+                .build());
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(facilitiesClient)
+            .eeClient(eeClient)
+            .pcmmClient(pcmmClient)
+            .maxDriveTimePrimary(60)
+            .maxDriveTimeSpecialty(60)
+            .build();
+    CommunityCareEligibilityResponse actual =
+        controller.search("session-id", "123", "primarycare", null);
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .timestamp(actual.patientRequest().timestamp())
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .build())
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                .eligible(false)
+                .eligibilityCodes(emptyList())
+                .processingStatus(
+                    CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
+                .pactStatus("Active")
                 .build());
   }
 
