@@ -211,33 +211,36 @@ public class CommunityCareEligibilityV0ApiController {
     return "Nearby Facilities Results Stub";
   }
 
-  private PcmmResponse requestPcmmResults(CommunityCareEligibilityResponse.PatientRequest request) {
-
-    PcmmResponse response = null;
-
-    // todo make call for rest template
+  private CommunityCareEligibilityResponse requestPcmmResults(
+      PatientRequest request,
+      CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response) {
 
     if (request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
 
-      response = pcmmClient.pactStatusByIcn(request.patientIcn());
+      // default pact status to None until a valid status is found
+      response.pactStatus("None");
 
-      //      response =
-      //          ExpectedResponse.of(
-      //                  RestAssured.given()
-      //                      .contentType(ContentType.XML)
-      //                      .relaxedHTTPSValidation()
-      //                      .request(
-      //                          Method.GET,
-      //                          "http://localhost:8319/pcmmr_web/ws/patientSummary/icn/" +
-      // request.patientIcn()))
-      //              .mapper(new
-      // XmlMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
-      //              .expectValid(PcmmResponse.class);
-    } else {
-      // todo Skip pcmm check if service type isn't primary care
+      PcmmResponse pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
+
+      if (pcmmResponse.patientAssignmentsAtStation != null) {
+        for (PcmmResponse.PatientAssignmentsAtStation paas :
+            pcmmResponse.patientAssignmentsAtStation) {
+          if (paas.primaryCareAssignment() != null) {
+            for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
+              final String pactStatus = pca.assignmentStatus();
+              if ("Active".equals(pactStatus)) {
+                return response.eligible(false).pactStatus(pactStatus).build();
+              } else if ("Pending".equals(pactStatus)) {
+                // Do not return here in case there is an Active status (higher priority)
+                response.eligible(false).pactStatus(pactStatus);
+              }
+            }
+          }
+        }
+      }
     }
 
-    return response;
+    return response.build();
   }
 
   /** Compute community care eligibility. */
@@ -317,8 +320,8 @@ public class CommunityCareEligibilityV0ApiController {
           .build();
     }
 
-    CompletableFuture<PcmmResponse> pcmmRequestFuture =
-        CompletableFuture.supplyAsync(() -> requestPcmmResults(request));
+    CompletableFuture<CommunityCareEligibilityResponse> pcmmRequestFuture =
+        CompletableFuture.supplyAsync(() -> requestPcmmResults(request, response));
 
     CompletableFuture<String> nearbyRequestFuture =
         CompletableFuture.supplyAsync(this::requestNearbyFacilityResults);

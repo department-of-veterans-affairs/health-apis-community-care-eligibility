@@ -1,6 +1,8 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,9 @@ public class RestPcmmClient implements PcmmClient {
 
   /** Autowired constructor. */
   public RestPcmmClient(
-      @Value("${pcmm.username}") String pcmmUsername,
-      @Value("${pcmm.password}") String pcmmPassword,
-      @Value("${pcmm.url}") String baseUrl,
+      @Value("${pcmm.header.username}") String pcmmUsername,
+      @Value("${pcmm.header.password}") String pcmmPassword,
+      @Value("${pcmm.endpoint.url}") String baseUrl,
       @Autowired RestTemplate restTemplate) {
     this.pcmmUsername = pcmmUsername;
     this.pcmmPassword = pcmmPassword;
@@ -37,10 +39,14 @@ public class RestPcmmClient implements PcmmClient {
     this.restTemplate = restTemplate;
   }
 
+  @SneakyThrows
   private HttpHeaders headers() {
     HttpHeaders headers = new HttpHeaders();
     // todo how to add password
-    headers.add("todo", pcmmUsername + ":" + pcmmPassword);
+    String base64Credentials =
+        Base64.getEncoder()
+            .encodeToString((pcmmUsername + ":" + pcmmPassword).getBytes(StandardCharsets.UTF_8));
+    headers.add("Authorization", "Basic " + base64Credentials);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
     return headers;
   }
