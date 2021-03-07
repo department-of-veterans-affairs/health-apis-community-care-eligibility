@@ -83,7 +83,7 @@ public class MockServices {
 
   private void addPcmmStatusRequests(MockServerClient mock) {
     final String pactStatusNoDataIcn = "1012870703V135989";
-    final String pactStatusPendingIcn = "1012667674V820648";
+    final String pactStatusPendingIcn = "1012853802V084487";
     final String pactStatusMultiDataStatusActiveIcn = "1013060957V646684";
     mock.when(addQuery(PCMM_PATH + pactStatusNoDataIcn))
         .respond(

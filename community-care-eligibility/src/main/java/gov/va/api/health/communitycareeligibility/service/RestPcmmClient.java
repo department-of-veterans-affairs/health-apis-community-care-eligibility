@@ -1,7 +1,7 @@
 package gov.va.api.health.communitycareeligibility.service;
 
 import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Collections;
 import lombok.SneakyThrows;
@@ -42,10 +42,9 @@ public class RestPcmmClient implements PcmmClient {
   @SneakyThrows
   private HttpHeaders headers() {
     HttpHeaders headers = new HttpHeaders();
-    // todo how to add password
     String base64Credentials =
         Base64.getEncoder()
-            .encodeToString((pcmmUsername + ":" + pcmmPassword).getBytes(StandardCharsets.UTF_8));
+            .encodeToString((pcmmUsername + ":" + pcmmPassword).getBytes(Charset.defaultCharset()));
     headers.add("Authorization", "Basic " + base64Credentials);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
     return headers;
