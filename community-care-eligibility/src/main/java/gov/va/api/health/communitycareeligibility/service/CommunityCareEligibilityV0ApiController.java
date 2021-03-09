@@ -215,6 +215,8 @@ public class CommunityCareEligibilityV0ApiController {
       return true;
     }
 
+    Boolean geoCodingResult = null;
+
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
 
@@ -224,8 +226,7 @@ public class CommunityCareEligibilityV0ApiController {
 
       response.processingStatus(
           CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available);
-
-      return null;
+      return geoCodingResult;
     }
 
     Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
@@ -236,7 +237,7 @@ public class CommunityCareEligibilityV0ApiController {
       response.processingStatus(
           CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete);
 
-      return null;
+      return geoCodingResult;
     }
 
     response.patientCoordinates(patientCoordinates.get());
@@ -259,7 +260,7 @@ public class CommunityCareEligibilityV0ApiController {
       response.processingStatus(
           CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date);
 
-      return null;
+      return geoCodingResult;
     }
 
     List<Facility> nearbyFacilities =
