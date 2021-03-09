@@ -202,17 +202,17 @@ public class CommunityCareEligibilityV0ApiController {
         : maxDriveMinsSpecialty;
   }
 
-  private CommunityCareEligibilityResponse requestNearbyFacilityResults(
+  private Boolean requestNearbyFacilityResults(
       PatientRequest request,
       CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response,
       GetEESummaryResponse eeResponse,
       List<String> codeStrings) {
 
     if (CollectionUtils.containsAny(codeStrings, asList("G", "N", "H"))) {
-      return response
+      response
           .grandfathered(codeStrings.contains("G"))
-          .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
-          .build();
+          .noFullServiceVaMedicalFacility(codeStrings.contains("N"));
+      return true;
     }
 
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
@@ -222,11 +222,10 @@ public class CommunityCareEligibilityV0ApiController {
     if (geocoding.isEmpty()) {
       log.info("No geocoding information found for ICN: {}", request.patientIcn());
 
-      return response
-          .eligible(null)
-          .processingStatus(
-              CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
-          .build();
+      response.processingStatus(
+          CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available);
+
+      return null;
     }
 
     Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
@@ -234,10 +233,10 @@ public class CommunityCareEligibilityV0ApiController {
       log.info(
           "Unable to determine coordinates from geocoding info found for ICN: {}",
           request.patientIcn());
-      return response
-          .eligible(null)
-          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
-          .build();
+      response.processingStatus(
+          CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete);
+
+      return null;
     }
 
     response.patientCoordinates(patientCoordinates.get());
@@ -257,10 +256,10 @@ public class CommunityCareEligibilityV0ApiController {
           request.patientIcn(),
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
-      return response
-          .eligible(null)
-          .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
-          .build();
+      response.processingStatus(
+          CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date);
+
+      return null;
     }
 
     List<Facility> nearbyFacilities =
@@ -268,9 +267,7 @@ public class CommunityCareEligibilityV0ApiController {
             patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
 
-    if (!nearbyFacilities.isEmpty()) {
-      response.eligible(false);
-    }
+    Boolean isNearbyEligible = nearbyFacilities.isEmpty();
 
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
@@ -279,7 +276,7 @@ public class CommunityCareEligibilityV0ApiController {
       response.nearbyFacilities(extendedFacilities);
     }
 
-    return response.build();
+    return isNearbyEligible;
   }
 
   private String requestPcmmResults() {
@@ -369,15 +366,18 @@ public class CommunityCareEligibilityV0ApiController {
     CompletableFuture<String> pcmmRequestFuture =
         CompletableFuture.supplyAsync(this::requestPcmmResults);
 
-    CompletableFuture<CommunityCareEligibilityResponse> nearbyRequestFuture =
+    CompletableFuture<Boolean> nearbyRequestFuture =
         CompletableFuture.supplyAsync(
             () -> requestNearbyFacilityResults(request, response, eeResponse, codeStrings));
 
     CompletableFuture<String> combinedPcmmAndNearbyResultsFuture =
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
-            (pcmmRequestResult, nearbyRequestResult) ->
-                "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult);
+            (pcmmRequestResult, nearbyRequestResult) -> {
+              // todo combine results of pcmm and nearby once both stubs are filled out
+              response.eligible(nearbyRequestResult);
+              return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
+            });
 
     // Stub before actual results processing
     System.out.println(
