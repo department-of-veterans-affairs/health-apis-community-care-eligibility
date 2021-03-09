@@ -71,6 +71,7 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.patientAddress()).isNull();
+    assertThat(response.eligible()).isNull();
   }
 
   @Test
@@ -81,6 +82,7 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.patientCoordinates()).isNull();
+    assertThat(response.eligible()).isNull();
   }
 
   @Test
