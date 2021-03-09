@@ -223,7 +223,7 @@ public class CommunityCareEligibilityV0ApiController {
       log.info("No geocoding information found for ICN: {}", request.patientIcn());
 
       return response
-          .eligible(false)
+          .eligible(null)
           .processingStatus(
               CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
           .build();
@@ -235,7 +235,7 @@ public class CommunityCareEligibilityV0ApiController {
           "Unable to determine coordinates from geocoding info found for ICN: {}",
           request.patientIcn());
       return response
-          .eligible(false)
+          .eligible(null)
           .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete)
           .build();
     }
@@ -258,7 +258,7 @@ public class CommunityCareEligibilityV0ApiController {
           geocodeXgc.toGregorianCalendar().toInstant(),
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
       return response
-          .eligible(false)
+          .eligible(null)
           .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
           .build();
     }
