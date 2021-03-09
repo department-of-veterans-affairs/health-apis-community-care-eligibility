@@ -361,9 +361,6 @@ public class CommunityCareEligibilityV0ApiController {
           .build();
     }
 
-    // Set default eligibility
-    response.eligible(true);
-
     CompletableFuture<String> pcmmRequestFuture =
         CompletableFuture.supplyAsync(this::requestPcmmResults);
 
