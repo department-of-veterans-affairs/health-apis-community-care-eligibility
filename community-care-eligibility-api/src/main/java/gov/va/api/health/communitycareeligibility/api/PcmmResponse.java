@@ -1,6 +1,5 @@
 package gov.va.api.health.communitycareeligibility.api;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.ArrayList;
@@ -19,8 +18,7 @@ import lombok.NoArgsConstructor;
 public class PcmmResponse {
 
   @Builder.Default
-  @JacksonXmlElementWrapper(localName = "patientAssignmentsAtStations")
-  public List<PatientAssignmentsAtStation> patientAssignmentsAtStation = new ArrayList<>();
+  public List<PatientAssignmentsAtStation> patientAssignmentsAtStations = new ArrayList<>();
 
   @Data
   @Builder

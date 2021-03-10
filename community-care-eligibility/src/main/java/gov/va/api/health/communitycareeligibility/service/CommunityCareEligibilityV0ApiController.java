@@ -309,14 +309,14 @@ public class CommunityCareEligibilityV0ApiController {
       // default pact status to None until a valid status is found
       response.pactStatus("None");
 
-      if (pcmmResponse.patientAssignmentsAtStation == null) {
+      if (pcmmResponse.patientAssignmentsAtStations == null) {
         return true;
       }
 
       isPactEligible = true;
 
       for (PcmmResponse.PatientAssignmentsAtStation paas :
-          pcmmResponse.patientAssignmentsAtStation) {
+          pcmmResponse.patientAssignmentsAtStations) {
         if (paas.primaryCareAssignment() != null) {
           for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
             final String pactStatus = pca.assignmentStatus();

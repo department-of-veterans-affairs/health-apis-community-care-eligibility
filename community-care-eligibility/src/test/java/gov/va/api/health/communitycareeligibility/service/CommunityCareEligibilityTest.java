@@ -744,7 +744,7 @@ public final class CommunityCareEligibilityTest {
     when(pcmmClient.pactStatusByIcn("123"))
         .thenReturn(
             PcmmResponse.builder()
-                .patientAssignmentsAtStation(
+                .patientAssignmentsAtStations(
                     List.of(
                         PcmmResponse.PatientAssignmentsAtStation.builder()
                             .primaryCareAssignment(
