@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -285,37 +286,56 @@ public class CommunityCareEligibilityV0ApiController {
     return isNearbyEligible;
   }
 
-  private CommunityCareEligibilityResponse requestPcmmResults(
+  private Boolean requestPcmmResults(
       PatientRequest request,
       CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response) {
 
     if (!request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
-      return response.build();
+      return true;
     }
 
-    // default pact status to None until a valid status is found
-    response.pactStatus("None");
-    PcmmResponse pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
+    Boolean isPactEligible = null;
 
-    if (pcmmResponse.patientAssignmentsAtStation == null) {
-      return response.build();
+    PcmmResponse pcmmResponse;
+
+    try {
+      pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
+    } catch (Exceptions.PcmmUnavailableException e) {
+      response.pactStatus(null);
+      return isPactEligible;
     }
 
-    for (PcmmResponse.PatientAssignmentsAtStation paas : pcmmResponse.patientAssignmentsAtStation) {
-      if (paas.primaryCareAssignment() != null) {
-        for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
-          final String pactStatus = pca.assignmentStatus();
-          if ("Active".equals(pactStatus)) {
-            return response.eligible(false).pactStatus(pactStatus).build();
-          } else if ("Pending".equals(pactStatus)) {
-            // Do not return here in case there is an Active status (higher priority)
-            response.eligible(false).pactStatus(pactStatus);
+    if (pcmmResponse != null) {
+      // default pact status to None until a valid status is found
+      response.pactStatus("None");
+
+      if (pcmmResponse.patientAssignmentsAtStation == null) {
+        return true;
+      }
+
+      isPactEligible = true;
+
+      for (PcmmResponse.PatientAssignmentsAtStation paas :
+          pcmmResponse.patientAssignmentsAtStation) {
+        if (paas.primaryCareAssignment() != null) {
+          for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
+            final String pactStatus = pca.assignmentStatus();
+            if ("Active".equals(pactStatus)) {
+              response.pactStatus(pactStatus);
+              return false;
+            } else if ("Pending".equals(pactStatus)) {
+              // Do not return here in case there is an Active status (higher priority)
+              isPactEligible = false;
+              response.pactStatus(pactStatus);
+            }
           }
         }
       }
+      return isPactEligible;
+    } else {
+      isPactEligible = null;
+      return isPactEligible;
     }
-
-    return response.build();
   }
 
   /** Compute community care eligibility. */
@@ -391,7 +411,7 @@ public class CommunityCareEligibilityV0ApiController {
           .build();
     }
 
-    CompletableFuture<CommunityCareEligibilityResponse> pcmmRequestFuture =
+    CompletableFuture<Boolean> pcmmRequestFuture =
         CompletableFuture.supplyAsync(() -> requestPcmmResults(request, response));
 
     CompletableFuture<Boolean> nearbyRequestFuture =
@@ -402,14 +422,18 @@ public class CommunityCareEligibilityV0ApiController {
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
             (pcmmRequestResult, nearbyRequestResult) -> {
-              // todo combine results of pcmm and nearby once both stubs are filled out
-              response.eligible(nearbyRequestResult);
+              if (pcmmRequestResult != null && nearbyRequestResult != null) {
+                response.eligible(pcmmRequestResult && nearbyRequestResult);
+              } else {
+                response.eligible(null);
+              }
               return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
             });
 
     // Stub before actual results processing
     System.out.println(
-        "Results of PCMM and Nearby Facilities calls: " + combinedPcmmAndNearbyResultsFuture.get());
+        "Results of PCMM and Nearby Facilities calls: "
+            + combinedPcmmAndNearbyResultsFuture.get(10, TimeUnit.SECONDS));
 
     return response.build();
   }

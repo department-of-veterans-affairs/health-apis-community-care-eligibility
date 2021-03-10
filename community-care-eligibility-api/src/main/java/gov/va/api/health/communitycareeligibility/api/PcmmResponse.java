@@ -41,5 +41,4 @@ public class PcmmResponse {
 
   // many used fields.
   // Only PACT status is retrieved from the "assignmentStatus" field
-
 }
