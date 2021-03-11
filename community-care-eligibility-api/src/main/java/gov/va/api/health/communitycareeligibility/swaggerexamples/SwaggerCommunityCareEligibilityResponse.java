@@ -89,7 +89,7 @@ public class SwaggerCommunityCareEligibilityResponse {
                     .build()))
         .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
         .eligible(false)
-        .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active.toString())
+        .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
         .build();
   }
 }

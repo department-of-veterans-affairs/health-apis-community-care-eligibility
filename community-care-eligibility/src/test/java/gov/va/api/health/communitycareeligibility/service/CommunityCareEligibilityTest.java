@@ -821,7 +821,7 @@ public final class CommunityCareEligibilityTest {
                 .eligible(false)
                 .eligibilityCodes(emptyList())
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
-                .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active.toString())
+                .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
                 .build());
   }
 

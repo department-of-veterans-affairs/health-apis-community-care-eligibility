@@ -48,7 +48,7 @@ public final class CommunityCareEligibilityResponse {
 
   ProcessingStatus processingStatus;
 
-  String pactStatus;
+  PcmmResponse.PrimaryCareAssignment.PactStatus pactStatus;
 
   /** Lazy getter. */
   public List<EligibilityCode> eligibilityCodes() {

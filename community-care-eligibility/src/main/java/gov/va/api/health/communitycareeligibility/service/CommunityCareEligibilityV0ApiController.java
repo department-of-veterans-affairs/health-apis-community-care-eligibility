@@ -306,7 +306,7 @@ public class CommunityCareEligibilityV0ApiController {
 
     if (pcmmResponse != null) {
       // default pact status to None until a valid status is found
-      response.pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.None.toString());
+      response.pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.None);
 
       if (pcmmResponse.patientAssignmentsAtStations == null) {
         return true;
@@ -333,7 +333,7 @@ public class CommunityCareEligibilityV0ApiController {
         isPactEligible = false;
       }
 
-      response.pactStatus(pactStatus.toString());
+      response.pactStatus(pactStatus);
     }
 
     return isPactEligible;
