@@ -315,22 +315,27 @@ public class CommunityCareEligibilityV0ApiController {
 
       isPactEligible = true;
 
+      PcmmResponse.PrimaryCareAssignment.PactStatus pactStatus =
+          PcmmResponse.PrimaryCareAssignment.PactStatus.None;
+
       for (PcmmResponse.PatientAssignmentsAtStation paas :
           pcmmResponse.patientAssignmentsAtStations) {
         if (paas.primaryCareAssignment() != null) {
           for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
-            final String pactStatus = pca.assignmentStatus();
-            if ("Active".equals(pactStatus)) {
-              response.pactStatus(pactStatus);
-              return false;
-            } else if ("Pending".equals(pactStatus)) {
-              // Do not return here in case there is an Active status (higher priority)
-              isPactEligible = false;
-              response.pactStatus(pactStatus);
+            PcmmResponse.PrimaryCareAssignment.PactStatus currentStatus = pca.assignmentStatus();
+            if (currentStatus.ordinal() > pactStatus.ordinal()) {
+              pactStatus = currentStatus;
             }
           }
         }
       }
+
+      if (pactStatus != PcmmResponse.PrimaryCareAssignment.PactStatus.None) {
+        isPactEligible = false;
+      }
+
+      response.pactStatus(pactStatus.toString());
+
       return isPactEligible;
     } else {
       isPactEligible = null;

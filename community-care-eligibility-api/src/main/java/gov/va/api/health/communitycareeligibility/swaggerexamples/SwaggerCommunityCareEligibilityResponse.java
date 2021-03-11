@@ -3,6 +3,7 @@ package gov.va.api.health.communitycareeligibility.swaggerexamples;
 import static java.util.Arrays.asList;
 
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
+import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import java.math.BigDecimal;
 
 public class SwaggerCommunityCareEligibilityResponse {
@@ -88,7 +89,7 @@ public class SwaggerCommunityCareEligibilityResponse {
                     .build()))
         .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
         .eligible(false)
-        .pactStatus("Active")
+        .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active.toString())
         .build();
   }
 }

@@ -750,7 +750,8 @@ public final class CommunityCareEligibilityTest {
                             .primaryCareAssignment(
                                 List.of(
                                     PcmmResponse.PrimaryCareAssignment.builder()
-                                        .assignmentStatus("Active")
+                                        .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
                                         .build()))
                             .build()))
                 .build());
@@ -820,7 +821,7 @@ public final class CommunityCareEligibilityTest {
                 .eligible(false)
                 .eligibilityCodes(emptyList())
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
-                .pactStatus("Active")
+                .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active.toString())
                 .build());
   }
 

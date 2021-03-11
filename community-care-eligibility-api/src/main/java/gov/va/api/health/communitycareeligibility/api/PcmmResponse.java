@@ -34,7 +34,13 @@ public class PcmmResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   public static final class PrimaryCareAssignment {
-    @JacksonXmlProperty String assignmentStatus;
+    @JacksonXmlProperty PactStatus assignmentStatus;
+
+    public enum PactStatus {
+      None,
+      Pending,
+      Active
+    }
   }
 
   // many used fields.
