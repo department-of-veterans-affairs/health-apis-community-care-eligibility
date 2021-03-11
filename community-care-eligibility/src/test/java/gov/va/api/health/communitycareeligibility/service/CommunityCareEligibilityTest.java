@@ -747,7 +747,7 @@ public final class CommunityCareEligibilityTest {
                 .patientAssignmentsAtStations(
                     List.of(
                         PcmmResponse.PatientAssignmentsAtStation.builder()
-                            .primaryCareAssignment(
+                            .primaryCareAssignments(
                                 List.of(
                                     PcmmResponse.PrimaryCareAssignment.builder()
                                         .assignmentStatus(

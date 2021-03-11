@@ -25,8 +25,7 @@ public class PcmmResponse {
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
   @AllArgsConstructor(access = AccessLevel.PRIVATE)
   public static final class PatientAssignmentsAtStation {
-    @JacksonXmlProperty(localName = "primaryCareAssignments")
-    List<PrimaryCareAssignment> primaryCareAssignment;
+    List<PrimaryCareAssignment> primaryCareAssignments;
   }
 
   @Data

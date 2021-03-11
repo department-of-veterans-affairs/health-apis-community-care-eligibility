@@ -301,13 +301,12 @@ public class CommunityCareEligibilityV0ApiController {
     try {
       pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
     } catch (Exceptions.PcmmUnavailableException e) {
-      response.pactStatus(null);
       return isPactEligible;
     }
 
     if (pcmmResponse != null) {
       // default pact status to None until a valid status is found
-      response.pactStatus("None");
+      response.pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.None.toString());
 
       if (pcmmResponse.patientAssignmentsAtStations == null) {
         return true;
@@ -320,8 +319,8 @@ public class CommunityCareEligibilityV0ApiController {
 
       for (PcmmResponse.PatientAssignmentsAtStation paas :
           pcmmResponse.patientAssignmentsAtStations) {
-        if (paas.primaryCareAssignment() != null) {
-          for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignment()) {
+        if (paas.primaryCareAssignments() != null) {
+          for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignments()) {
             PcmmResponse.PrimaryCareAssignment.PactStatus currentStatus = pca.assignmentStatus();
             if (currentStatus.ordinal() > pactStatus.ordinal()) {
               pactStatus = currentStatus;
@@ -335,12 +334,9 @@ public class CommunityCareEligibilityV0ApiController {
       }
 
       response.pactStatus(pactStatus.toString());
-
-      return isPactEligible;
-    } else {
-      isPactEligible = null;
-      return isPactEligible;
     }
+
+    return isPactEligible;
   }
 
   /** Compute community care eligibility. */
@@ -427,10 +423,10 @@ public class CommunityCareEligibilityV0ApiController {
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
             (pcmmRequestResult, nearbyRequestResult) -> {
-              if (pcmmRequestResult != null && nearbyRequestResult != null) {
-                response.eligible(pcmmRequestResult && nearbyRequestResult);
-              } else {
+              if (nearbyRequestResult == null) {
                 response.eligible(null);
+              } else if (pcmmRequestResult != null) {
+                response.eligible(pcmmRequestResult && nearbyRequestResult);
               }
               return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
             });
