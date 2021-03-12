@@ -419,24 +419,28 @@ public class CommunityCareEligibilityV0ApiController {
         CompletableFuture.supplyAsync(
             () -> requestNearbyFacilityResults(request, response, eeResponse, codeStrings));
 
-    CompletableFuture<String> combinedPcmmAndNearbyResultsFuture =
+    CompletableFuture<Void> combinedPcmmAndNearbyResultsFuture =
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
             (pcmmRequestResult, nearbyRequestResult) -> {
-              //              if (!pcmmRequestResult || !nearbyRequestResult) {
-              //                response.eligible(false);
-              //              } else if (nearbyRequestResult == null) {
-              //                response.eligible(null);
-              //              } else {
-              //                response.eligible(pcmmRequestResult && nearbyRequestResult);
-              //              }
-              return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
+
+              // Priority order:
+              // If any result is false return false
+              // Else if any result is null return null
+              // else return true (since this must be TRUE at this point)
+              if ((pcmmRequestResult != null && !pcmmRequestResult)
+                  || (nearbyRequestResult != null && !nearbyRequestResult)) {
+                response.eligible(false);
+              } else if (pcmmRequestResult == null || nearbyRequestResult == null) {
+                response.eligible(null);
+              } else {
+                response.eligible(true);
+              }
+              return null;
             });
 
-    // Stub before actual results processing
-    System.out.println(
-        "Results of PCMM and Nearby Facilities calls: "
-            + combinedPcmmAndNearbyResultsFuture.get(10, TimeUnit.SECONDS));
+    // If this takes longer than 10 seconds, it will probably not complete at all
+    combinedPcmmAndNearbyResultsFuture.get(10, TimeUnit.SECONDS);
 
     return response.build();
   }

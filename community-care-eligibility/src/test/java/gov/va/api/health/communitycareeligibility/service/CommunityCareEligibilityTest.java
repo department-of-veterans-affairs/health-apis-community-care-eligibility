@@ -169,7 +169,7 @@ public final class CommunityCareEligibilityTest {
                     .latitude(new BigDecimal("28.112506"))
                     .longitude(new BigDecimal("-80.7000423"))
                     .build())
-            // .eligible(false)
+            .eligible(false)
             .eligibilityCodes(emptyList())
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
@@ -292,7 +292,7 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                // .eligible(true)
+                .eligible(true)
                 .eligibilityCodes(
                     Collections.singletonList(
                         CommunityCareEligibilityResponse.EligibilityCode.builder()
@@ -421,7 +421,7 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                // .eligible(true)
+                .eligible(true)
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
@@ -529,7 +529,7 @@ public final class CommunityCareEligibilityTest {
                                     .longitude(new BigDecimal("100"))
                                     .build())
                             .build()))
-                // .eligible(true)
+                .eligible(true)
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
@@ -818,7 +818,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                // .eligible(false)
+                .eligible(false)
                 .eligibilityCodes(emptyList())
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
