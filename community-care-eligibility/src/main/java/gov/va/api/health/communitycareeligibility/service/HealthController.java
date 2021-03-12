@@ -70,7 +70,7 @@ public class HealthController {
       log.info("E&E exception", ex);
       status = HttpStatus.SERVICE_UNAVAILABLE;
     } catch (Exceptions.UnknownPatientIcnException ex) {
-       log.info("E&E unknown patient ICN exception. Service seems available.", ex);
+      log.info("E&E unknown patient ICN exception. Service seems available.", ex);
     }
     return toHealth("E&E", status, time);
   }

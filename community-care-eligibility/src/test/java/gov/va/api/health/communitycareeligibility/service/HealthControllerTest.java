@@ -13,44 +13,12 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import javax.xml.ws.Response;
-
 public class HealthControllerTest {
-  private enum HealthServices {
-    EE,
-    FACILITIES,
-    PCMM
-  }
-
-  @Test
-  public void eeUnknownIcn() {
-    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    when(eeClient.requestEligibility(any()))
-            .thenThrow(
-                    new Exceptions.UnknownPatientIcnException("000", new RuntimeException("E&E Service Exception")));
-    HealthController controller =
-            HealthController.builder()
-                    .eeClient(eeClient)
-                    .facilitiesClient(mock(FacilitiesClient.class))
-                    .pcmmClient(mock(PcmmClient.class))
-                    .build();
-    Instant currentTime = Instant.now();
-    checkResponse(controller.health(currentTime), currentTime, List.of());
-  }
-
-  private Health makeHealth(String name, Instant callTime, boolean isDown) {
-    return Health.status(new Status(isDown ? "DOWN" : "UP", name))
-            .withDetail("name", name)
-            .withDetail("statusCode", isDown ? 503 : 200)
-            .withDetail("status", isDown ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.OK)
-            .withDetail("time", callTime)
-            .build();
-  }
-
-  private void checkResponse(ResponseEntity<Health> response, Instant callTime, List<HealthServices> downServices) {
-    HttpStatus expectedStatus = downServices.isEmpty() ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
+  private void checkResponse(
+      ResponseEntity<Health> response, Instant callTime, List<HealthServices> downServices) {
+    HttpStatus expectedStatus =
+        downServices.isEmpty() ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
     String expectedStatusCode = downServices.isEmpty() ? "UP" : "DOWN";
-
     assertThat(response)
         .isEqualTo(
             ResponseEntity.status(expectedStatus)
@@ -60,9 +28,14 @@ public class HealthControllerTest {
                         .withDetail(
                             "downstreamServices",
                             List.of(
-                                makeHealth("E&E", callTime, downServices.contains(HealthServices.EE)),
-                                makeHealth("Facilities", callTime, downServices.contains(HealthServices.FACILITIES)),
-                                makeHealth("PCMM", callTime, downServices.contains(HealthServices.PCMM))))
+                                makeHealth(
+                                    "E&E", callTime, downServices.contains(HealthServices.EE)),
+                                makeHealth(
+                                    "Facilities",
+                                    callTime,
+                                    downServices.contains(HealthServices.FACILITIES)),
+                                makeHealth(
+                                    "PCMM", callTime, downServices.contains(HealthServices.PCMM))))
                         .withDetail("time", callTime)
                         .build()));
   }
@@ -84,6 +57,23 @@ public class HealthControllerTest {
   }
 
   @Test
+  public void eeUnknownIcn() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility(any()))
+        .thenThrow(
+            new Exceptions.UnknownPatientIcnException(
+                "000", new RuntimeException("E&E Service Exception")));
+    HealthController controller =
+        HealthController.builder()
+            .eeClient(eeClient)
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .pcmmClient(mock(PcmmClient.class))
+            .build();
+    Instant currentTime = Instant.now();
+    checkResponse(controller.health(currentTime), currentTime, List.of());
+  }
+
+  @Test
   public void facilitiesDown() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     when(facilitiesClient.facilitiesByIds(any()))
@@ -98,6 +88,15 @@ public class HealthControllerTest {
             .build();
     Instant currentTime = Instant.now();
     checkResponse(controller.health(currentTime), currentTime, List.of(HealthServices.FACILITIES));
+  }
+
+  private Health makeHealth(String name, Instant callTime, boolean isDown) {
+    return Health.status(new Status(isDown ? "DOWN" : "UP", name))
+        .withDetail("name", name)
+        .withDetail("statusCode", isDown ? 503 : 200)
+        .withDetail("status", isDown ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.OK)
+        .withDetail("time", callTime)
+        .build();
   }
 
   @Test
@@ -127,5 +126,11 @@ public class HealthControllerTest {
             .build();
     Instant currentTime = Instant.now();
     checkResponse(controller.health(currentTime), currentTime, List.of());
+  }
+
+  private enum HealthServices {
+    EE,
+    FACILITIES,
+    PCMM
   }
 }
