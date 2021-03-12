@@ -13,75 +13,108 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.xml.ws.Response;
+
 public class HealthControllerTest {
+  private enum HealthServices {
+    EE,
+    FACILITIES,
+    PCMM
+  }
+
   @Test
-  public void eeDown() {
+  public void eeUnknownIcn() {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    when(eeClient.requestEligibility(any())).thenThrow(new RuntimeException("oh noez"));
+    when(eeClient.requestEligibility(any()))
+            .thenThrow(
+                    new Exceptions.UnknownPatientIcnException("000", new RuntimeException("E&E Service Exception")));
     HealthController controller =
-        HealthController.builder()
-            .eeClient(eeClient)
-            .facilitiesClient(mock(FacilitiesClient.class))
+            HealthController.builder()
+                    .eeClient(eeClient)
+                    .facilitiesClient(mock(FacilitiesClient.class))
+                    .pcmmClient(mock(PcmmClient.class))
+                    .build();
+    Instant currentTime = Instant.now();
+    checkResponse(controller.health(currentTime), currentTime, List.of());
+  }
+
+  private Health makeHealth(String name, Instant callTime, boolean isDown) {
+    return Health.status(new Status(isDown ? "DOWN" : "UP", name))
+            .withDetail("name", name)
+            .withDetail("statusCode", isDown ? 503 : 200)
+            .withDetail("status", isDown ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.OK)
+            .withDetail("time", callTime)
             .build();
-    Instant time = Instant.now();
-    assertThat(controller.health(time))
+  }
+
+  private void checkResponse(ResponseEntity<Health> response, Instant callTime, List<HealthServices> downServices) {
+    HttpStatus expectedStatus = downServices.isEmpty() ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
+    String expectedStatusCode = downServices.isEmpty() ? "UP" : "DOWN";
+
+    assertThat(response)
         .isEqualTo(
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            ResponseEntity.status(expectedStatus)
                 .body(
-                    Health.status(new Status("DOWN", "Downstream services"))
+                    Health.status(new Status(expectedStatusCode, "Downstream services"))
                         .withDetail("name", "All downstream services")
                         .withDetail(
                             "downstreamServices",
                             List.of(
-                                Health.status(new Status("DOWN", "E&E"))
-                                    .withDetail("name", "E&E")
-                                    .withDetail("statusCode", 503)
-                                    .withDetail("status", HttpStatus.SERVICE_UNAVAILABLE)
-                                    .withDetail("time", time)
-                                    .build(),
-                                Health.status(new Status("UP", "Facilities"))
-                                    .withDetail("name", "Facilities")
-                                    .withDetail("statusCode", 200)
-                                    .withDetail("status", HttpStatus.OK)
-                                    .withDetail("time", time)
-                                    .build()))
-                        .withDetail("time", time)
+                                makeHealth("E&E", callTime, downServices.contains(HealthServices.EE)),
+                                makeHealth("Facilities", callTime, downServices.contains(HealthServices.FACILITIES)),
+                                makeHealth("PCMM", callTime, downServices.contains(HealthServices.PCMM))))
+                        .withDetail("time", callTime)
                         .build()));
+  }
+
+  @Test
+  public void eeDown() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility(any()))
+        .thenThrow(
+            new Exceptions.EeUnavailableException(new RuntimeException("E&E Service Exception")));
+    HealthController controller =
+        HealthController.builder()
+            .eeClient(eeClient)
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .pcmmClient(mock(PcmmClient.class))
+            .build();
+    Instant currentTime = Instant.now();
+    checkResponse(controller.health(currentTime), currentTime, List.of(HealthServices.EE));
   }
 
   @Test
   public void facilitiesDown() {
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    when(facilitiesClient.facilitiesByIds(any())).thenThrow(new RuntimeException("oh noez"));
+    when(facilitiesClient.facilitiesByIds(any()))
+        .thenThrow(
+            new Exceptions.FacilitiesUnavailableException(
+                new RuntimeException("Facilities service exception")));
     HealthController controller =
         HealthController.builder()
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .facilitiesClient(facilitiesClient)
+            .pcmmClient(mock(PcmmClient.class))
             .build();
-    Instant time = Instant.now();
-    assertThat(controller.health(time))
-        .isEqualTo(
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(
-                    Health.status(new Status("DOWN", "Downstream services"))
-                        .withDetail("name", "All downstream services")
-                        .withDetail(
-                            "downstreamServices",
-                            List.of(
-                                Health.status(new Status("UP", "E&E"))
-                                    .withDetail("name", "E&E")
-                                    .withDetail("statusCode", 200)
-                                    .withDetail("status", HttpStatus.OK)
-                                    .withDetail("time", time)
-                                    .build(),
-                                Health.status(new Status("DOWN", "Facilities"))
-                                    .withDetail("name", "Facilities")
-                                    .withDetail("statusCode", 503)
-                                    .withDetail("status", HttpStatus.SERVICE_UNAVAILABLE)
-                                    .withDetail("time", time)
-                                    .build()))
-                        .withDetail("time", time)
-                        .build()));
+    Instant currentTime = Instant.now();
+    checkResponse(controller.health(currentTime), currentTime, List.of(HealthServices.FACILITIES));
+  }
+
+  @Test
+  public void pcmmDown() {
+    PcmmClient pcmmClient = mock(PcmmClient.class);
+    when(pcmmClient.pactStatusByIcn(any()))
+        .thenThrow(
+            new Exceptions.PcmmUnavailableException(
+                new RuntimeException("PCMM Service Exception")));
+    HealthController controller =
+        HealthController.builder()
+            .eeClient(mock(EligibilityAndEnrollmentClient.class))
+            .facilitiesClient(mock(FacilitiesClient.class))
+            .pcmmClient(pcmmClient)
+            .build();
+    Instant currentTime = Instant.now();
+    checkResponse(controller.health(currentTime), currentTime, List.of(HealthServices.PCMM));
   }
 
   @Test
@@ -90,30 +123,9 @@ public class HealthControllerTest {
         HealthController.builder()
             .eeClient(mock(EligibilityAndEnrollmentClient.class))
             .facilitiesClient(mock(FacilitiesClient.class))
+            .pcmmClient(mock(PcmmClient.class))
             .build();
-    Instant time = Instant.now();
-    assertThat(controller.health(time))
-        .isEqualTo(
-            ResponseEntity.ok()
-                .body(
-                    Health.status(new Status("UP", "Downstream services"))
-                        .withDetail("name", "All downstream services")
-                        .withDetail(
-                            "downstreamServices",
-                            List.of(
-                                Health.status(new Status("UP", "E&E"))
-                                    .withDetail("name", "E&E")
-                                    .withDetail("statusCode", 200)
-                                    .withDetail("status", HttpStatus.OK)
-                                    .withDetail("time", time)
-                                    .build(),
-                                Health.status(new Status("UP", "Facilities"))
-                                    .withDetail("name", "Facilities")
-                                    .withDetail("statusCode", 200)
-                                    .withDetail("status", HttpStatus.OK)
-                                    .withDetail("time", time)
-                                    .build()))
-                        .withDetail("time", time)
-                        .build()));
+    Instant currentTime = Instant.now();
+    checkResponse(controller.health(currentTime), currentTime, List.of());
   }
 }

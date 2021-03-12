@@ -28,14 +28,18 @@ public class HealthController {
 
   private final FacilitiesClient facilitiesClient;
 
+  private final PcmmClient pcmmClient;
+
   private final AtomicBoolean hasCachedRecently = new AtomicBoolean(false);
 
   @Builder
   HealthController(
       @Autowired EligibilityAndEnrollmentClient eeClient,
-      @Autowired FacilitiesClient facilitiesClient) {
+      @Autowired FacilitiesClient facilitiesClient,
+      @Autowired PcmmClient pcmmClient) {
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
+    this.pcmmClient = pcmmClient;
   }
 
   private static Health toHealth(
@@ -59,20 +63,23 @@ public class HealthController {
   }
 
   private Health eeHealth(@NonNull Instant time) {
+    HttpStatus status = HttpStatus.OK;
     try {
       eeClient.requestEligibility("1008679665V880686");
-      return toHealth("E&E", HttpStatus.OK, time);
-    } catch (Exception ex) {
+    } catch (Exceptions.EeUnavailableException ex) {
       log.info("E&E exception", ex);
-      return toHealth("E&E", HttpStatus.SERVICE_UNAVAILABLE, time);
+      status = HttpStatus.SERVICE_UNAVAILABLE;
+    } catch (Exceptions.UnknownPatientIcnException ex) {
+       log.info("E&E unknown patient ICN exception. Service seems available.", ex);
     }
+    return toHealth("E&E", status, time);
   }
 
   private Health facilitiesHealth(@NonNull Instant time) {
     try {
       facilitiesClient.facilitiesByIds(List.of("vha_675GA"));
       return toHealth("Facilities", HttpStatus.OK, time);
-    } catch (Exception ex) {
+    } catch (Exceptions.FacilitiesUnavailableException ex) {
       log.info("Facilities exception", ex);
       return toHealth("Facilities", HttpStatus.SERVICE_UNAVAILABLE, time);
     }
@@ -92,7 +99,7 @@ public class HealthController {
 
   ResponseEntity<Health> health(@NonNull Instant time) {
     hasCachedRecently.set(true);
-    List<Health> services = List.of(eeHealth(time), facilitiesHealth(time));
+    List<Health> services = List.of(eeHealth(time), facilitiesHealth(time), pcmmHealth(time));
     String code = services.stream().anyMatch(d -> !d.getStatus().equals(Status.UP)) ? "DOWN" : "UP";
     Health health =
         Health.status(new Status(code, "Downstream services"))
@@ -105,5 +112,15 @@ public class HealthController {
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(health);
     }
     return ResponseEntity.ok(health);
+  }
+
+  private Health pcmmHealth(@NonNull Instant time) {
+    try {
+      pcmmClient.pactStatusByIcn("1012845331V153043");
+      return toHealth("PCMM", HttpStatus.OK, time);
+    } catch (Exceptions.PcmmUnavailableException ex) {
+      log.info("PCMM exception", ex);
+      return toHealth("PCMM", HttpStatus.SERVICE_UNAVAILABLE, time);
+    }
   }
 }
