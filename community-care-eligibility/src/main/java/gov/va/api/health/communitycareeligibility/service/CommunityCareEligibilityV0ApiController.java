@@ -423,11 +423,13 @@ public class CommunityCareEligibilityV0ApiController {
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
             (pcmmRequestResult, nearbyRequestResult) -> {
-              if (nearbyRequestResult == null) {
-                response.eligible(null);
-              } else if (pcmmRequestResult != null) {
-                response.eligible(pcmmRequestResult && nearbyRequestResult);
-              }
+              //              if (!pcmmRequestResult || !nearbyRequestResult) {
+              //                response.eligible(false);
+              //              } else if (nearbyRequestResult == null) {
+              //                response.eligible(null);
+              //              } else {
+              //                response.eligible(pcmmRequestResult && nearbyRequestResult);
+              //              }
               return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
             });
 
