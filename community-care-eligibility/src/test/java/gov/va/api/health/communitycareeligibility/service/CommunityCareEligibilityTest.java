@@ -13,6 +13,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Address;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Coordinates;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
+import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressCollection;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.CommunityCareEligibilityInfo;
@@ -28,6 +29,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.SneakyThrows;
@@ -39,36 +41,6 @@ public final class CommunityCareEligibilityTest {
     GregorianCalendar gCal = new GregorianCalendar();
     gCal.setTime(Date.from(Instant.parse(timestamp)));
     return DatatypeFactory.newInstance().newXMLGregorianCalendar(gCal);
-  }
-
-  @Test
-  public void PrimaryCareAlwaysIneligible() {
-    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
-    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
-    CommunityCareEligibilityV0ApiController controller =
-        CommunityCareEligibilityV0ApiController.builder()
-            .facilitiesClient(facilitiesClient)
-            .eeClient(eeClient)
-            .maxDriveTimePrimary(60)
-            .maxDriveTimeSpecialty(60)
-            .build();
-    CommunityCareEligibilityResponse actual =
-        controller.search("session-id", "123", "primarycare", null);
-    assertThat(actual)
-        .isEqualTo(
-            CommunityCareEligibilityResponse.builder()
-                .patientRequest(
-                    CommunityCareEligibilityResponse.PatientRequest.builder()
-                        .timestamp(actual.patientRequest().timestamp())
-                        .patientIcn("123")
-                        .serviceType("PrimaryCare")
-                        .build())
-                .grandfathered(false)
-                .noFullServiceVaMedicalFacility(false)
-                .eligible(false)
-                .eligibilityCodes(emptyList())
-                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
-                .build());
   }
 
   @Test
@@ -197,7 +169,7 @@ public final class CommunityCareEligibilityTest {
                     .latitude(new BigDecimal("28.112506"))
                     .longitude(new BigDecimal("-80.7000423"))
                     .build())
-            .eligible(false)
+            // .eligible(false)
             .eligibilityCodes(emptyList())
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
@@ -320,7 +292,7 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                .eligible(true)
+                // .eligible(true)
                 .eligibilityCodes(
                     Collections.singletonList(
                         CommunityCareEligibilityResponse.EligibilityCode.builder()
@@ -449,7 +421,7 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                .eligible(true)
+                // .eligible(true)
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
@@ -557,7 +529,7 @@ public final class CommunityCareEligibilityTest {
                                     .longitude(new BigDecimal("100"))
                                     .build())
                             .build()))
-                .eligible(true)
+                // .eligible(true)
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
@@ -667,6 +639,189 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .processingStatus(
                     CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date)
+                .build());
+  }
+
+  @Test
+  public void primaryCare() {
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    PcmmClient pcmmClient = mock(PcmmClient.class);
+    when(facilitiesClient.nearbyFacilities(
+            Coordinates.builder()
+                .latitude(new BigDecimal("28.112506"))
+                .longitude(new BigDecimal("-80.7000423"))
+                .build(),
+            60,
+            "PrimaryCare"))
+        .thenReturn(
+            VaNearbyFacilitiesResponse.builder()
+                .data(
+                    asList(
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC456").build(),
+                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                .build());
+    when(facilitiesClient.facilitiesByIds(asList("FAC456", "FAC123")))
+        .thenReturn(
+            VaFacilitiesResponse.builder()
+                .data(
+                    asList(
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC123")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .mobile(true)
+                                    .active("A")
+                                    .lat(new BigDecimal("200"))
+                                    .lng(new BigDecimal("100"))
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1("911 fac st")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build(),
+                        VaFacilitiesResponse.Facility.builder()
+                            .id("FAC456")
+                            .attributes(
+                                VaFacilitiesResponse.Attributes.builder()
+                                    .mobile(true)
+                                    .active("A")
+                                    .lat(new BigDecimal("100"))
+                                    .lng(new BigDecimal("300"))
+                                    .address(
+                                        VaFacilitiesResponse.Address.builder()
+                                            .physical(
+                                                VaFacilitiesResponse.PhysicalAddress.builder()
+                                                    .address1(" 123 who cares drive ")
+                                                    .address2("   ")
+                                                    .address3(" PO Box 321 ")
+                                                    .state("FL")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build()))
+                .build());
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    when(eeClient.requestEligibility("123"))
+        .thenReturn(
+            GetEESummaryResponse.builder()
+                .summary(
+                    EeSummary.builder()
+                        .demographics(
+                            DemographicInfo.builder()
+                                .contactInfo(
+                                    ContactInfo.builder()
+                                        .addresses(
+                                            AddressCollection.builder()
+                                                .address(
+                                                    asList(
+                                                        AddressInfo.builder()
+                                                            .addressTypeCode("Residential")
+                                                            .state(" fL")
+                                                            .city("Melbourne ")
+                                                            .line1(" 66 pat St ")
+                                                            .line2("   ")
+                                                            .line3("   Apt 777    ")
+                                                            .postalCode(" 12345 ")
+                                                            .zipPlus4(" 6789 ")
+                                                            .build()))
+                                                .build())
+                                        .build())
+                                .build())
+                        .communityCareEligibilityInfo(
+                            CommunityCareEligibilityInfo.builder()
+                                .geocodingInfo(
+                                    GeocodingInfo.builder()
+                                        .addressLatitude(new BigDecimal("28.112506"))
+                                        .addressLongitude(new BigDecimal("-80.7000423"))
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+    when(pcmmClient.pactStatusByIcn("123"))
+        .thenReturn(
+            PcmmResponse.builder()
+                .patientAssignmentsAtStations(
+                    List.of(
+                        PcmmResponse.PatientAssignmentsAtStation.builder()
+                            .primaryCareAssignments(
+                                List.of(
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
+                                        .build()))
+                            .build()))
+                .build());
+
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .facilitiesClient(facilitiesClient)
+            .eeClient(eeClient)
+            .pcmmClient(pcmmClient)
+            .maxDriveTimePrimary(60)
+            .maxDriveTimeSpecialty(60)
+            .build();
+    CommunityCareEligibilityResponse actual =
+        controller.search("session-id", "123", "primarycare", null);
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .timestamp(actual.patientRequest().timestamp())
+                        .patientIcn("123")
+                        .serviceType("PrimaryCare")
+                        .build())
+                .patientAddress(
+                    Address.builder()
+                        .state("FL")
+                        .city("Melbourne")
+                        .zip("12345-6789")
+                        .street("66 pat St Apt 777")
+                        .build())
+                .patientCoordinates(
+                    Coordinates.builder()
+                        .latitude(new BigDecimal("28.112506"))
+                        .longitude(new BigDecimal("-80.7000423"))
+                        .build())
+                .nearbyFacilities(
+                    asList(
+                        Facility.builder()
+                            .mobile(true)
+                            .active(true)
+                            .id("FAC123")
+                            .physicalAddress(
+                                Address.builder().street("911 fac st").state("FL").build())
+                            .coordinates(
+                                Coordinates.builder()
+                                    .latitude(new BigDecimal("200"))
+                                    .longitude(new BigDecimal("100"))
+                                    .build())
+                            .build(),
+                        Facility.builder()
+                            .mobile(true)
+                            .active(true)
+                            .id("FAC456")
+                            .physicalAddress(
+                                Address.builder()
+                                    .street("123 who cares drive PO Box 321")
+                                    .state("FL")
+                                    .build())
+                            .coordinates(
+                                Coordinates.builder()
+                                    .latitude(new BigDecimal("100"))
+                                    .longitude(new BigDecimal("300"))
+                                    .build())
+                            .build()))
+                .grandfathered(false)
+                .noFullServiceVaMedicalFacility(false)
+                // .eligible(false)
+                .eligibilityCodes(emptyList())
+                .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
+                .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
                 .build());
   }
 

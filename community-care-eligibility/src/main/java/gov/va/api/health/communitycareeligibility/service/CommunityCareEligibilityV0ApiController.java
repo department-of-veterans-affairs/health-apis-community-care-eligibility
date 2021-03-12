@@ -16,6 +16,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.EligibilityCode;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.Facility;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse.PatientRequest;
+import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import gov.va.med.esr.webservices.jaxws.schemas.AddressInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GeocodingInfo;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
@@ -29,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,17 +66,21 @@ public class CommunityCareEligibilityV0ApiController {
 
   private FacilitiesClient facilitiesClient;
 
+  private PcmmClient pcmmClient;
+
   /** Autowired constructor. */
   @Builder
   public CommunityCareEligibilityV0ApiController(
       @Value("${community-care.max-drive-time-min-primary}") int maxDriveTimePrimary,
       @Value("${community-care.max-drive-time-min-specialty}") int maxDriveTimeSpecialty,
       @Autowired EligibilityAndEnrollmentClient eeClient,
-      @Autowired FacilitiesClient facilitiesClient) {
+      @Autowired FacilitiesClient facilitiesClient,
+      @Autowired PcmmClient pcmmClient) {
     this.maxDriveMinsPrimary = maxDriveTimePrimary;
     this.maxDriveMinsSpecialty = maxDriveTimeSpecialty;
     this.eeClient = eeClient;
     this.facilitiesClient = facilitiesClient;
+    this.pcmmClient = pcmmClient;
   }
 
   private static List<VceEligibilityInfo> eligibilityInfos(GetEESummaryResponse response) {
@@ -280,8 +286,57 @@ public class CommunityCareEligibilityV0ApiController {
     return isNearbyEligible;
   }
 
-  private String requestPcmmResults() {
-    return "PCMM Results Stub";
+  private Boolean requestPcmmResults(
+      PatientRequest request,
+      CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response) {
+
+    if (!request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
+      return true;
+    }
+
+    Boolean isPactEligible = null;
+
+    PcmmResponse pcmmResponse;
+
+    try {
+      pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
+    } catch (Exceptions.PcmmUnavailableException e) {
+      return isPactEligible;
+    }
+
+    if (pcmmResponse != null) {
+      // default pact status to None until a valid status is found
+      response.pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.None);
+
+      if (pcmmResponse.patientAssignmentsAtStations == null) {
+        return true;
+      }
+
+      isPactEligible = true;
+
+      PcmmResponse.PrimaryCareAssignment.PactStatus pactStatus =
+          PcmmResponse.PrimaryCareAssignment.PactStatus.None;
+
+      for (PcmmResponse.PatientAssignmentsAtStation paas :
+          pcmmResponse.patientAssignmentsAtStations) {
+        if (paas.primaryCareAssignments() != null) {
+          for (PcmmResponse.PrimaryCareAssignment pca : paas.primaryCareAssignments()) {
+            PcmmResponse.PrimaryCareAssignment.PactStatus currentStatus = pca.assignmentStatus();
+            if (currentStatus.ordinal() > pactStatus.ordinal()) {
+              pactStatus = currentStatus;
+            }
+          }
+        }
+      }
+
+      if (pactStatus != PcmmResponse.PrimaryCareAssignment.PactStatus.None) {
+        isPactEligible = false;
+      }
+
+      response.pactStatus(pactStatus);
+    }
+
+    return isPactEligible;
   }
 
   /** Compute community care eligibility. */
@@ -347,10 +402,6 @@ public class CommunityCareEligibilityV0ApiController {
             .noFullServiceVaMedicalFacility(false)
             .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful);
 
-    if (request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
-      return response.eligible(false).build();
-    }
-
     List<String> codeStrings =
         eligibilityCodes.stream().map(EligibilityCode::code).collect(Collectors.toList());
     if (codeStrings.contains("X")) {
@@ -361,8 +412,8 @@ public class CommunityCareEligibilityV0ApiController {
           .build();
     }
 
-    CompletableFuture<String> pcmmRequestFuture =
-        CompletableFuture.supplyAsync(this::requestPcmmResults);
+    CompletableFuture<Boolean> pcmmRequestFuture =
+        CompletableFuture.supplyAsync(() -> requestPcmmResults(request, response));
 
     CompletableFuture<Boolean> nearbyRequestFuture =
         CompletableFuture.supplyAsync(
@@ -372,14 +423,20 @@ public class CommunityCareEligibilityV0ApiController {
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
             (pcmmRequestResult, nearbyRequestResult) -> {
-              // todo combine results of pcmm and nearby once both stubs are filled out
-              response.eligible(nearbyRequestResult);
+              //              if (!pcmmRequestResult || !nearbyRequestResult) {
+              //                response.eligible(false);
+              //              } else if (nearbyRequestResult == null) {
+              //                response.eligible(null);
+              //              } else {
+              //                response.eligible(pcmmRequestResult && nearbyRequestResult);
+              //              }
               return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
             });
 
     // Stub before actual results processing
     System.out.println(
-        "Results of PCMM and Nearby Facilities calls: " + combinedPcmmAndNearbyResultsFuture.get());
+        "Results of PCMM and Nearby Facilities calls: "
+            + combinedPcmmAndNearbyResultsFuture.get(10, TimeUnit.SECONDS));
 
     return response.build();
   }

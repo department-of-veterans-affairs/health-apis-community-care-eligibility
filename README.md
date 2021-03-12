@@ -121,6 +121,7 @@ Sample response:
     }
   ],
   "eligible": false,
+  "pactStatus": "Active",
   "processingStatus": "successful"
 }
 ```

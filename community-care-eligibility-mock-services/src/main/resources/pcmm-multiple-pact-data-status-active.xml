@@ -25,8 +25,8 @@ DAYT20 (988)
       <stationNumber>987</stationNumber>
       <primaryCareAssignments>
         <primaryCareAssignment>
-          <assignmentStatus>Active</assignmentStatus>
           <!-- THIS IS PACT STATUS-->
+          <assignmentStatus>Active</assignmentStatus>
           <teamName>LS Training *PC*</teamName>
           <careType>PRIMARY CARE</careType>
           <teamFocus>Primary Care Only</teamFocus>
@@ -105,8 +105,8 @@ DAYT20 (988)
       <stationNumber>988</stationNumber>
       <primaryCareAssignments>
         <primaryCareAssignment>
-          <assignmentStatus>Active</assignmentStatus>
           <!-- THIS IS PACT STATUS-->
+          <assignmentStatus>Pending</assignmentStatus>
           <teamName>mad_team_one</teamName>
           <careType>PRIMARY CARE</careType>
           <teamFocus>Primary Care Only</teamFocus>

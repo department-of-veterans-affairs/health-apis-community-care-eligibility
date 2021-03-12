@@ -48,6 +48,8 @@ public final class CommunityCareEligibilityResponse {
 
   ProcessingStatus processingStatus;
 
+  PcmmResponse.PrimaryCareAssignment.PactStatus pactStatus;
+
   /** Lazy getter. */
   public List<EligibilityCode> eligibilityCodes() {
     if (eligibilityCodes == null) {
