@@ -751,7 +751,23 @@ public final class CommunityCareEligibilityTest {
                                 List.of(
                                     PcmmResponse.PrimaryCareAssignment.builder()
                                         .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.Pending)
+                                        .build(),
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
                                             PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
+                                        .build()))
+                            .build(),
+                        PcmmResponse.PatientAssignmentsAtStation.builder()
+                            .primaryCareAssignments(
+                                List.of(
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.None)
+                                        .build(),
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.Pending)
                                         .build()))
                             .build()))
                 .build());
