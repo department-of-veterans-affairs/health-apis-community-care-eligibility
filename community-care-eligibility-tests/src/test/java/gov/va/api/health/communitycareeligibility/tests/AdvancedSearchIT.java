@@ -28,7 +28,7 @@ public class AdvancedSearchIT {
                 .filter(Objects::nonNull)
                 .anyMatch(c -> "N".equals(c.code())))
         .isTrue();
-    //    assertThat(response.eligible()).isTrue();
+    assertThat(response.eligible()).isTrue();
   }
 
   @Test
