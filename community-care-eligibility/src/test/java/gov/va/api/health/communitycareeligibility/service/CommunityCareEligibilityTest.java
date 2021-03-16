@@ -357,7 +357,7 @@ public final class CommunityCareEligibilityTest {
   }
 
   @Test
-  public void longRequestResponseTime() throws InterruptedException {
+  public void longRequestResponseTime() {
     EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
     FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
     PcmmClient pcmmClient = mock(PcmmClient.class);
