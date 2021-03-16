@@ -76,13 +76,14 @@ public class HealthController {
   }
 
   private Health facilitiesHealth(@NonNull Instant time) {
+    HttpStatus status = HttpStatus.OK;
     try {
       facilitiesClient.facilitiesByIds(List.of("vha_675GA"));
-      return toHealth("Facilities", HttpStatus.OK, time);
     } catch (Exceptions.FacilitiesUnavailableException ex) {
       log.info("Facilities exception", ex);
-      return toHealth("Facilities", HttpStatus.SERVICE_UNAVAILABLE, time);
+      status = HttpStatus.SERVICE_UNAVAILABLE;
     }
+    return toHealth("Facilities", status, time);
   }
 
   /**
@@ -115,12 +116,13 @@ public class HealthController {
   }
 
   private Health pcmmHealth(@NonNull Instant time) {
+    HttpStatus status = HttpStatus.OK;
     try {
       pcmmClient.pactStatusByIcn("1012845331V153043");
-      return toHealth("PCMM", HttpStatus.OK, time);
     } catch (Exceptions.PcmmUnavailableException ex) {
       log.info("PCMM exception", ex);
-      return toHealth("PCMM", HttpStatus.SERVICE_UNAVAILABLE, time);
+      status = HttpStatus.SERVICE_UNAVAILABLE;
     }
+    return toHealth("PCMM", status, time);
   }
 }
