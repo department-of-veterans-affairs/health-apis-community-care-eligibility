@@ -28,7 +28,7 @@ public class AdvancedSearchIT {
                 .filter(Objects::nonNull)
                 .anyMatch(c -> "N".equals(c.code())))
         .isTrue();
-    //    assertThat(response.eligible()).isTrue();
+    assertThat(response.eligible()).isTrue();
   }
 
   @Test
@@ -38,7 +38,7 @@ public class AdvancedSearchIT {
             "v0/eligibility/search?patient=%s&serviceType=%s", "1012845331V153043", "Cardiology");
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
-    //    assertThat(response.eligible()).isTrue();
+    assertThat(response.eligible()).isTrue();
   }
 
   @Test
@@ -49,7 +49,7 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.nearbyFacilities()).isEmpty();
-    //    assertThat(response.eligible()).isTrue();
+    assertThat(response.eligible()).isTrue();
   }
 
   @Test
@@ -60,7 +60,7 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.noFullServiceVaMedicalFacility()).isTrue();
-    //    assertThat(response.eligible()).isTrue();
+    assertThat(response.eligible()).isTrue();
   }
 
   @Test
@@ -71,7 +71,7 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.patientAddress()).isNull();
-    //    assertThat(response.eligible()).isNull();
+    assertThat(response.eligible()).isNull();
   }
 
   @Test
@@ -82,7 +82,7 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.patientCoordinates()).isNull();
-    //    assertThat(response.eligible()).isNull();
+    assertThat(response.eligible()).isNull();
   }
 
   @Test
@@ -108,6 +108,6 @@ public class AdvancedSearchIT {
     CommunityCareEligibilityResponse response =
         makeRequest(request, 200).expectValid(CommunityCareEligibilityResponse.class);
     assertThat(response.nearbyFacilities()).isNotEmpty();
-    //    assertThat(response.eligible()).isFalse();
+    assertThat(response.eligible()).isFalse();
   }
 }

@@ -34,6 +34,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
 public final class CommunityCareEligibilityTest {
   @SneakyThrows
@@ -169,7 +170,7 @@ public final class CommunityCareEligibilityTest {
                     .latitude(new BigDecimal("28.112506"))
                     .longitude(new BigDecimal("-80.7000423"))
                     .build())
-            // .eligible(false)
+            .eligible(false)
             .eligibilityCodes(emptyList())
             .grandfathered(false)
             .noFullServiceVaMedicalFacility(false)
@@ -292,7 +293,7 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                // .eligible(true)
+                .eligible(true)
                 .eligibilityCodes(
                     Collections.singletonList(
                         CommunityCareEligibilityResponse.EligibilityCode.builder()
@@ -353,6 +354,67 @@ public final class CommunityCareEligibilityTest {
     assertThrows(
         Exceptions.InvalidExtendedDriveMin.class,
         () -> controller.search("", "123", "cardiology", 20));
+  }
+
+  @Test
+  public void longRequestResponseTime() {
+    EligibilityAndEnrollmentClient eeClient = mock(EligibilityAndEnrollmentClient.class);
+    FacilitiesClient facilitiesClient = mock(FacilitiesClient.class);
+    PcmmClient pcmmClient = mock(PcmmClient.class);
+
+    when(facilitiesClient.nearbyFacilities(
+            Coordinates.builder()
+                .latitude(new BigDecimal("28.112506"))
+                .longitude(new BigDecimal("-80.7000423"))
+                .build(),
+            60,
+            "PrimaryCare"))
+        .then(
+            (Answer<VaNearbyFacilitiesResponse>)
+                invocationOnMock -> {
+                  Thread.sleep(10400);
+                  return VaNearbyFacilitiesResponse.builder()
+                      .data(
+                          asList(
+                              VaNearbyFacilitiesResponse.Facility.builder().id("FAC456").build(),
+                              VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                      .build();
+                });
+
+    when(pcmmClient.pactStatusByIcn("slowmotion"))
+        .then(
+            (Answer<PcmmResponse.PrimaryCareAssignment.PactStatus>)
+                invocationOnMock -> {
+                  Thread.sleep(10100);
+                  return PcmmResponse.PrimaryCareAssignment.PactStatus.Active;
+                });
+
+    CommunityCareEligibilityV0ApiController controller =
+        CommunityCareEligibilityV0ApiController.builder()
+            .eeClient(eeClient)
+            .facilitiesClient(facilitiesClient)
+            .pcmmClient(pcmmClient)
+            .maxDriveTimePrimary(60)
+            .maxDriveTimeSpecialty(60)
+            .build();
+
+    CommunityCareEligibilityResponse actual =
+        controller.search("session-id", "slowmotion", "primarycare", null);
+
+    assertThat(actual)
+        .isEqualTo(
+            CommunityCareEligibilityResponse.builder()
+                .patientRequest(
+                    CommunityCareEligibilityResponse.PatientRequest.builder()
+                        .patientIcn("slowmotion")
+                        .serviceType("PrimaryCare")
+                        .timestamp(actual.patientRequest().timestamp())
+                        .build())
+                .noFullServiceVaMedicalFacility(false)
+                .grandfathered(false)
+                .processingStatus(
+                    CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available)
+                .build());
   }
 
   @Test
@@ -421,7 +483,7 @@ public final class CommunityCareEligibilityTest {
                         .build())
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                // .eligible(true)
+                .eligible(true)
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
@@ -529,7 +591,7 @@ public final class CommunityCareEligibilityTest {
                                     .longitude(new BigDecimal("100"))
                                     .build())
                             .build()))
-                // .eligible(true)
+                .eligible(true)
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .build());
   }
@@ -751,7 +813,23 @@ public final class CommunityCareEligibilityTest {
                                 List.of(
                                     PcmmResponse.PrimaryCareAssignment.builder()
                                         .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.Pending)
+                                        .build(),
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
                                             PcmmResponse.PrimaryCareAssignment.PactStatus.Active)
+                                        .build()))
+                            .build(),
+                        PcmmResponse.PatientAssignmentsAtStation.builder()
+                            .primaryCareAssignments(
+                                List.of(
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.None)
+                                        .build(),
+                                    PcmmResponse.PrimaryCareAssignment.builder()
+                                        .assignmentStatus(
+                                            PcmmResponse.PrimaryCareAssignment.PactStatus.Pending)
                                         .build()))
                             .build()))
                 .build());
@@ -818,7 +896,7 @@ public final class CommunityCareEligibilityTest {
                             .build()))
                 .grandfathered(false)
                 .noFullServiceVaMedicalFacility(false)
-                // .eligible(false)
+                .eligible(false)
                 .eligibilityCodes(emptyList())
                 .processingStatus(CommunityCareEligibilityResponse.ProcessingStatus.successful)
                 .pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.Active)

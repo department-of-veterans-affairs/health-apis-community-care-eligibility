@@ -208,7 +208,7 @@ public class CommunityCareEligibilityV0ApiController {
         : maxDriveMinsSpecialty;
   }
 
-  private Boolean requestNearbyFacilityResults(
+  private FutureRequestResults requestNearbyFacilityResults(
       PatientRequest request,
       CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response,
       GetEESummaryResponse eeResponse,
@@ -218,10 +218,8 @@ public class CommunityCareEligibilityV0ApiController {
       response
           .grandfathered(codeStrings.contains("G"))
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"));
-      return true;
+      return new FutureRequestResults(true, true);
     }
-
-    Boolean geoCodingResult = null;
 
     Optional<AddressInfo> eeAddress = residentialAddress(eeResponse);
     response.patientAddress(toAddress(eeAddress));
@@ -232,7 +230,7 @@ public class CommunityCareEligibilityV0ApiController {
 
       response.processingStatus(
           CommunityCareEligibilityResponse.ProcessingStatus.geocoding_not_available);
-      return geoCodingResult;
+      return new FutureRequestResults(true, false);
     }
 
     Optional<Coordinates> patientCoordinates = toCoordinates(geocoding.get());
@@ -242,8 +240,7 @@ public class CommunityCareEligibilityV0ApiController {
           request.patientIcn());
       response.processingStatus(
           CommunityCareEligibilityResponse.ProcessingStatus.geocoding_incomplete);
-
-      return geoCodingResult;
+      return new FutureRequestResults(true, false);
     }
 
     response.patientCoordinates(patientCoordinates.get());
@@ -265,8 +262,7 @@ public class CommunityCareEligibilityV0ApiController {
           eeAddressChangeXgc.toGregorianCalendar().toInstant());
       response.processingStatus(
           CommunityCareEligibilityResponse.ProcessingStatus.geocoding_out_of_date);
-
-      return geoCodingResult;
+      return new FutureRequestResults(true, false);
     }
 
     List<Facility> nearbyFacilities =
@@ -274,7 +270,7 @@ public class CommunityCareEligibilityV0ApiController {
             patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
     response.nearbyFacilities(nearbyFacilities);
 
-    Boolean isNearbyEligible = nearbyFacilities.isEmpty();
+    boolean isNearbyEligible = nearbyFacilities.isEmpty();
 
     if (request.extendedDriveMin() != null) {
       List<Facility> extendedFacilities =
@@ -283,25 +279,25 @@ public class CommunityCareEligibilityV0ApiController {
       response.nearbyFacilities(extendedFacilities);
     }
 
-    return isNearbyEligible;
+    return new FutureRequestResults(isNearbyEligible, true);
   }
 
-  private Boolean requestPcmmResults(
+  private FutureRequestResults requestPcmmResults(
       PatientRequest request,
       CommunityCareEligibilityResponse.CommunityCareEligibilityResponseBuilder response) {
-
+    FutureRequestResults pcmmResults = new FutureRequestResults(true, false);
     if (!request.serviceType().equals(SERVICES_MAP.get("PrimaryCare"))) {
-      return true;
+      pcmmResults.isSuccessful = true;
+      return pcmmResults;
     }
-
-    Boolean isPactEligible = null;
 
     PcmmResponse pcmmResponse;
 
     try {
       pcmmResponse = pcmmClient.pactStatusByIcn(request.patientIcn());
     } catch (Exceptions.PcmmUnavailableException e) {
-      return isPactEligible;
+      e.printStackTrace();
+      return pcmmResults;
     }
 
     if (pcmmResponse != null) {
@@ -309,10 +305,9 @@ public class CommunityCareEligibilityV0ApiController {
       response.pactStatus(PcmmResponse.PrimaryCareAssignment.PactStatus.None);
 
       if (pcmmResponse.patientAssignmentsAtStations == null) {
-        return true;
+        pcmmResults.isSuccessful = true;
+        return pcmmResults;
       }
-
-      isPactEligible = true;
 
       PcmmResponse.PrimaryCareAssignment.PactStatus pactStatus =
           PcmmResponse.PrimaryCareAssignment.PactStatus.None;
@@ -330,13 +325,14 @@ public class CommunityCareEligibilityV0ApiController {
       }
 
       if (pactStatus != PcmmResponse.PrimaryCareAssignment.PactStatus.None) {
-        isPactEligible = false;
+        pcmmResults.requestResult = false;
       }
 
       response.pactStatus(pactStatus);
     }
 
-    return isPactEligible;
+    pcmmResults.isSuccessful = true;
+    return pcmmResults;
   }
 
   /** Compute community care eligibility. */
@@ -411,33 +407,36 @@ public class CommunityCareEligibilityV0ApiController {
           .noFullServiceVaMedicalFacility(codeStrings.contains("N"))
           .build();
     }
+    CompletableFuture<FutureRequestResults> pcmmRequestFuture =
+        CompletableFuture.supplyAsync(() -> requestPcmmResults(request, response))
+            .completeOnTimeout(new FutureRequestResults(true, false), 10, TimeUnit.SECONDS);
 
-    CompletableFuture<Boolean> pcmmRequestFuture =
-        CompletableFuture.supplyAsync(() -> requestPcmmResults(request, response));
-
-    CompletableFuture<Boolean> nearbyRequestFuture =
+    CompletableFuture<FutureRequestResults> nearbyRequestFuture =
         CompletableFuture.supplyAsync(
-            () -> requestNearbyFacilityResults(request, response, eeResponse, codeStrings));
+                () -> requestNearbyFacilityResults(request, response, eeResponse, codeStrings))
+            .completeOnTimeout(new FutureRequestResults(true, false), 10, TimeUnit.SECONDS);
 
-    CompletableFuture<String> combinedPcmmAndNearbyResultsFuture =
+    CompletableFuture<Void> combinedPcmmAndNearbyResultsFuture =
         pcmmRequestFuture.thenCombine(
             nearbyRequestFuture,
             (pcmmRequestResult, nearbyRequestResult) -> {
-              //              if (!pcmmRequestResult || !nearbyRequestResult) {
-              //                response.eligible(false);
-              //              } else if (nearbyRequestResult == null) {
-              //                response.eligible(null);
-              //              } else {
-              //                response.eligible(pcmmRequestResult && nearbyRequestResult);
-              //              }
-              return "Stub: " + pcmmRequestResult + ":" + nearbyRequestResult;
+
+              // Priority order:
+              // If any result is false return false
+              // Else if any result is null return null
+              // else return true (since this must be TRUE at this point)
+              if (!pcmmRequestResult.requestResult || !nearbyRequestResult.requestResult) {
+                response.eligible(false);
+              } else if (!pcmmRequestResult.isSuccessful || !nearbyRequestResult.isSuccessful) {
+                response.eligible(null);
+              } else {
+                response.eligible(true);
+              }
+              return null;
             });
 
-    // Stub before actual results processing
-    System.out.println(
-        "Results of PCMM and Nearby Facilities calls: "
-            + combinedPcmmAndNearbyResultsFuture.get(10, TimeUnit.SECONDS));
-
+    // If this takes longer than 10 seconds, it will probably not complete at all
+    combinedPcmmAndNearbyResultsFuture.get();
     return response.build();
   }
 
@@ -473,5 +472,12 @@ public class CommunityCareEligibilityV0ApiController {
                     .toFacility(vaFacility, nearbyFacilityMap.get(vaFacility.id())))
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
+  }
+
+  @Builder
+  private static class FutureRequestResults {
+    boolean requestResult;
+
+    boolean isSuccessful;
   }
 }
