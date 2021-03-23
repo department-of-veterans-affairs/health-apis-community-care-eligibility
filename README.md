@@ -40,7 +40,7 @@ The medical service type is one of:
 * WomensHealth
 
 The response includes the overall eligibility decision and the individual details
-(patient address, eligibility codes, nearby facilities, etc.) that were used to compute it.
+(patient address, eligibility codes, nearby facilities, PACT status, etc.) that were used to compute it.
 
 Sample request:
 
@@ -121,7 +121,7 @@ Sample response:
     }
   ],
   "eligible": false,
-  "pactStatus": "Active",
-  "processingStatus": "successful"
+  "processingStatus": "successful",
+  "pactStatus": "Active"
 }
 ```
