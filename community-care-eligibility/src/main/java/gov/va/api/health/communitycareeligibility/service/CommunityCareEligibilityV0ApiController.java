@@ -265,18 +265,43 @@ public class CommunityCareEligibilityV0ApiController {
       return new FutureRequestResults(true, false);
     }
 
-    List<Facility> nearbyFacilities =
-        transformFacilitiesCalls(
-            patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
-    response.nearbyFacilities(nearbyFacilities);
-
-    boolean isNearbyEligible = nearbyFacilities.isEmpty();
+    List<Facility> nearbyFacilities;
+    boolean isNearbyEligible = false;
+    int serviceTypeDriveMins = driveMins(request.serviceType());
 
     if (request.extendedDriveMin() != null) {
-      List<Facility> extendedFacilities =
+      nearbyFacilities =
           transformFacilitiesCalls(
-              patientCoordinates.get(), request.extendedDriveMin(), request.serviceType());
-      response.nearbyFacilities(extendedFacilities);
+              patientCoordinates.get(),
+              Math.max(request.extendedDriveMin(), serviceTypeDriveMins),
+              request.serviceType());
+    } else {
+      nearbyFacilities =
+          transformFacilitiesCalls(
+              patientCoordinates.get(), serviceTypeDriveMins, request.serviceType());
+    }
+
+    response.nearbyFacilities(nearbyFacilities);
+
+    if (request.extendedDriveMin() != null) {
+
+      boolean foundNearbyFacility = false;
+
+      for (CommunityCareEligibilityResponse.Facility f : nearbyFacilities) {
+        if (f.driveMinutes() != null
+            && serviceTypeDriveMins >= f.driveMinutes().min()
+            && serviceTypeDriveMins <= f.driveMinutes().max()) {
+          foundNearbyFacility = true;
+          break;
+        }
+      }
+
+      if (!foundNearbyFacility) {
+        isNearbyEligible = true;
+      }
+
+    } else {
+      isNearbyEligible = nearbyFacilities.isEmpty();
     }
 
     return new FutureRequestResults(isNearbyEligible, true);
