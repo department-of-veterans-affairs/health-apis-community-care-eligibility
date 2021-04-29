@@ -265,18 +265,31 @@ public class CommunityCareEligibilityV0ApiController {
       return new FutureRequestResults(true, false);
     }
 
-    List<Facility> nearbyFacilities =
-        transformFacilitiesCalls(
-            patientCoordinates.get(), driveMins(request.serviceType()), request.serviceType());
-    response.nearbyFacilities(nearbyFacilities);
-
-    boolean isNearbyEligible = nearbyFacilities.isEmpty();
+    List<Facility> nearbyFacilities;
+    boolean isNearbyEligible = true;
+    int serviceTypeDriveTimeMins = driveMins(request.serviceType());
+    int maxDriveTime = serviceTypeDriveTimeMins;
 
     if (request.extendedDriveMin() != null) {
-      List<Facility> extendedFacilities =
-          transformFacilitiesCalls(
-              patientCoordinates.get(), request.extendedDriveMin(), request.serviceType());
-      response.nearbyFacilities(extendedFacilities);
+      maxDriveTime = Math.max(request.extendedDriveMin(), serviceTypeDriveTimeMins);
+    }
+
+    nearbyFacilities =
+        transformFacilitiesCalls(patientCoordinates.get(), maxDriveTime, request.serviceType());
+
+    response.nearbyFacilities(nearbyFacilities);
+
+    if (request.extendedDriveMin() != null) {
+
+      for (CommunityCareEligibilityResponse.Facility f : nearbyFacilities) {
+        if (f.driveMinutes() != null && f.driveMinutes().max() <= serviceTypeDriveTimeMins) {
+          // Nearby is false since we found a facility within range
+          isNearbyEligible = false;
+          break;
+        }
+      }
+    } else {
+      isNearbyEligible = nearbyFacilities.isEmpty();
     }
 
     return new FutureRequestResults(isNearbyEligible, true);

@@ -510,7 +510,14 @@ public final class CommunityCareEligibilityTest {
             VaNearbyFacilitiesResponse.builder()
                 .data(
                     singletonList(
-                        VaNearbyFacilitiesResponse.Facility.builder().id("FAC123").build()))
+                        VaNearbyFacilitiesResponse.Facility.builder()
+                            .id("FAC123")
+                            .attributes(
+                                VaNearbyFacilitiesResponse.Attributes.builder()
+                                    .minTime(80)
+                                    .maxTime(90)
+                                    .build())
+                            .build()))
                 .build());
     when(facilitiesClient.facilitiesByIds(asList("FAC123")))
         .thenReturn(
@@ -589,6 +596,11 @@ public final class CommunityCareEligibilityTest {
                                 Coordinates.builder()
                                     .latitude(new BigDecimal("200"))
                                     .longitude(new BigDecimal("100"))
+                                    .build())
+                            .driveMinutes(
+                                CommunityCareEligibilityResponse.DriveMinutes.builder()
+                                    .min(80)
+                                    .max(90)
                                     .build())
                             .build()))
                 .eligible(true)
