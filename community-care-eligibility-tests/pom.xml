@@ -124,7 +124,7 @@
                 <argument>-Dee.endpoint.url=http://localhost:9090/v0/ws</argument>
                 <argument>-Dloader=gov.va.api.health.communitycareeligibility.service.Application</argument>
                 <argument>-Dlogging.level.root=INFO</argument>
-                <argument>-Dspring.config.location=classpath:/application.properties,file:${project.basedir}/config/secrets.properties</argument>
+                <argument>-Dspring.config.additional-location=classpath:/application.properties,optional:file:${project.basedir}/config/secrets.properties</argument>
                 <argument>-Dva-facilities.url=http://localhost:8319</argument>
                 <argument>org.springframework.boot.loader.PropertiesLauncher</argument>
               </arguments>
