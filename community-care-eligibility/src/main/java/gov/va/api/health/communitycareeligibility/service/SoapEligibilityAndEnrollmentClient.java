@@ -34,6 +34,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
+/** SoapEligibilityAndEnrollmentClient. */
 @Slf4j
 @Component
 public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollmentClient {

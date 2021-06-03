@@ -2,6 +2,7 @@ package gov.va.api.health.communitycareeligibility.swaggerexamples;
 
 import gov.va.api.health.communitycareeligibility.api.ErrorResponse;
 
+/** Swagger example for error responses. */
 public class SwaggerErrorResponse {
   /** Swagger BadRequest Example. */
   public static ErrorResponse.BadRequest badRequest() {

@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/** EeSummaryPortSupplier. */
 @Component
 public final class EeSummaryPortSupplier implements Supplier<EeSummaryPort> {
   private final String endpointUrl;
