@@ -33,6 +33,7 @@ public abstract class ErrorResponse {
     response.message(e.getMessage());
   }
 
+  /** Bad request error response. */
   @NoArgsConstructor
   @Schema(
       example =
@@ -46,6 +47,7 @@ public abstract class ErrorResponse {
     }
   }
 
+  /** Internal server error response. */
   @NoArgsConstructor
   public static final class InternalServerError extends ErrorResponse {
     @Builder
@@ -54,6 +56,7 @@ public abstract class ErrorResponse {
     }
   }
 
+  /** Not found error response. */
   @NoArgsConstructor
   @Schema(
       example =
@@ -67,6 +70,7 @@ public abstract class ErrorResponse {
     }
   }
 
+  /** Service unavailable error response. */
   @NoArgsConstructor
   public static final class ServiceUnavailable extends ErrorResponse {
     @Builder

@@ -20,6 +20,7 @@ import javax.validation.constraints.NotBlank;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
+/** Resource class for open api. */
 @OpenAPIDefinition(
     security =
         @SecurityRequirement(

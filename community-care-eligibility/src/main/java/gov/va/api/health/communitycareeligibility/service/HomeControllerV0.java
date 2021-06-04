@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+/** Endpoint for openapi.json and home redirect to open api. */
 @RestController
 @RequestMapping(value = "/v0/eligibility", produces = "application/json")
 public class HomeControllerV0 {

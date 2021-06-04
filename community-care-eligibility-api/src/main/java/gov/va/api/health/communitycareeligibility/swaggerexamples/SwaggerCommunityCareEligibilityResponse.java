@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityResponse;
 import java.math.BigDecimal;
 
+/** Swagger example for CCE response. */
 public class SwaggerCommunityCareEligibilityResponse {
   /** Swagger CommunityCareEligibilityResponse Example. */
   public static CommunityCareEligibilityResponse communityCareEligibilityResponse() {

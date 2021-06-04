@@ -4,17 +4,17 @@
   <parent>
     <groupId>gov.va.api.health</groupId>
     <artifactId>service-starter</artifactId>
-    <version>7.0.22</version>
+    <version>8.0.9</version>
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility</artifactId>
-  <version>3.0.16-SNAPSHOT</version>
+  <version>4.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <properties>
-    <ee-client.version>4.0.2</ee-client.version>
+    <ee-client.version>4.0.4</ee-client.version>
     <jacoco.coverage>0.90</jacoco.coverage>
-    <swagger-examples-plugin.version>1.0.1</swagger-examples-plugin.version>
-    <swagger-maven-plugin.version>2.1.1</swagger-maven-plugin.version>
+    <swagger-examples-plugin.version>3.0.0</swagger-examples-plugin.version>
+    <swagger-maven-plugin.version>2.1.9</swagger-maven-plugin.version>
   </properties>
   <dependencies>
     <dependency>
@@ -72,6 +72,16 @@
             <artifactId>community-care-eligibility-api</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
+          </dependency>
+          <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-bom.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-bom.version}</version>
           </dependency>
         </dependencies>
         <executions>
