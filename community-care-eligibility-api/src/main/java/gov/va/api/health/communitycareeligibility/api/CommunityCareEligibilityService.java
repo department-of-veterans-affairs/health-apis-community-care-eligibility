@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.OAuthFlow;
@@ -152,7 +153,8 @@ public interface CommunityCareEligibilityService {
               in = ParameterIn.QUERY,
               required = true,
               name = "patient",
-              description = "The patient ICN")
+              description = "The patient ICN",
+              examples = @ExampleObject(name = "patient", value = "John Doe"))
           @NotBlank
           String patientIcn,
       @Parameter(
@@ -160,6 +162,7 @@ public interface CommunityCareEligibilityService {
               required = true,
               name = "serviceType",
               description = "Patient's desired medical service type for community care",
+              examples = @ExampleObject(name = "serviceType", value = "Gastroenterology"),
               schema =
                   @Schema(
                       allowableValues = {
@@ -186,7 +189,8 @@ public interface CommunityCareEligibilityService {
               description =
                   "Optional extended drive-radius to include more VA medical facilities in response"
                       + " (Does not change overall eligibility."
-                      + " Must exceed standard drive time for service-type.)")
+                      + " Must exceed standard drive time for service-type.)",
+              examples = @ExampleObject(name = "extendedDriveMin", value = "45"))
           @Max(90)
           Integer driveMin);
 }
