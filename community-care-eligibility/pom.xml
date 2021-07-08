@@ -4,11 +4,11 @@
   <parent>
     <groupId>gov.va.api.health</groupId>
     <artifactId>service-starter</artifactId>
-    <version>8.0.20</version>
+    <version>8.0.22</version>
     <relativePath/>
   </parent>
   <artifactId>community-care-eligibility</artifactId>
-  <version>4.0.5-SNAPSHOT</version>
+  <version>4.0.5</version>
   <packaging>jar</packaging>
   <properties>
     <ee-client.version>4.0.4</ee-client.version>
