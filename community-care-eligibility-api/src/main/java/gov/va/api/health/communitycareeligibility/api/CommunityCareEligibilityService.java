@@ -190,7 +190,7 @@ public interface CommunityCareEligibilityService {
                   "Optional extended drive-radius to include more VA medical facilities in response"
                       + " (Does not change overall eligibility."
                       + " Must exceed standard drive time for service-type.)",
-              examples = @ExampleObject(name = "extendedDriveMin", value = "45"))
+              examples = @ExampleObject(name = "extendedDriveMin", value = "40"))
           @Max(90)
           Integer driveMin);
 }
