@@ -6,6 +6,7 @@ import gov.va.api.health.communitycareeligibility.api.CommunityCareEligibilityRe
 import gov.va.api.health.communitycareeligibility.api.PcmmResponse;
 import java.math.BigDecimal;
 
+/** Swagger example for CCE response. */
 public class SwaggerCommunityCareEligibilityResponse {
   /** Swagger CommunityCareEligibilityResponse Example. */
   public static CommunityCareEligibilityResponse communityCareEligibilityResponse() {

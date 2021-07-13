@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/** VaNearbyFacilitiesResponse. */
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,6 +29,7 @@ public final class VaNearbyFacilitiesResponse {
     return data;
   }
 
+  /** Facility. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,6 +42,7 @@ public final class VaNearbyFacilitiesResponse {
     private Attributes attributes;
   }
 
+  /** Attributes. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)

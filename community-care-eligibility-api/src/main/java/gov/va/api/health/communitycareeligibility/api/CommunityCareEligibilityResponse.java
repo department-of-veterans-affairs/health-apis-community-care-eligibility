@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Synchronized;
 
+/** Defines response from Community Care Eligibility. */
 @Data
 @Builder
 @Setter(onMethod = @__(@Synchronized))
@@ -66,6 +67,10 @@ public final class CommunityCareEligibilityResponse {
     return nearbyFacilities;
   }
 
+  /**
+   * The status result of a CCE process, which can be successful, geocoding not available, geocoding
+   * out of date, or geocoding incomplete.
+   */
   public enum ProcessingStatus {
     successful,
     @JsonProperty("geocoding-not-available")
@@ -76,6 +81,7 @@ public final class CommunityCareEligibilityResponse {
     geocoding_incomplete
   }
 
+  /** Address object used for CCE response. */
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -93,6 +99,7 @@ public final class CommunityCareEligibilityResponse {
     String zip;
   }
 
+  /** Coordinate object used for CCE response. */
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -104,6 +111,7 @@ public final class CommunityCareEligibilityResponse {
     BigDecimal longitude;
   }
 
+  /** Drive minutes object used for CCE response. */
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -115,6 +123,7 @@ public final class CommunityCareEligibilityResponse {
     Integer max;
   }
 
+  /** Eligibility Code object used for CCE response. */
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -126,6 +135,7 @@ public final class CommunityCareEligibilityResponse {
     String code;
   }
 
+  /** Facility object used for CCE response. */
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -151,6 +161,7 @@ public final class CommunityCareEligibilityResponse {
     Boolean active;
   }
 
+  /** Patient Request object used for CCE response. */
   @Data
   @Builder
   @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/** VaFacilitiesResponse. */
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,6 +30,7 @@ public final class VaFacilitiesResponse {
     return data;
   }
 
+  /** Address. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -39,6 +41,7 @@ public final class VaFacilitiesResponse {
     private PhysicalAddress physical;
   }
 
+  /** Attributes. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -65,6 +68,7 @@ public final class VaFacilitiesResponse {
     private String active;
   }
 
+  /** Facility. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -77,6 +81,7 @@ public final class VaFacilitiesResponse {
     private Attributes attributes;
   }
 
+  /** Phone. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -87,6 +92,7 @@ public final class VaFacilitiesResponse {
     private String main;
   }
 
+  /** PhysicalAddress. */
   @Data
   @Builder
   @JsonIgnoreProperties(ignoreUnknown = true)
