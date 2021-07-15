@@ -5,15 +5,15 @@ import static java.util.Collections.emptySet;
 import gov.va.med.esr.webservices.jaxws.schemas.EeSummaryPort;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryRequest;
 import gov.va.med.esr.webservices.jaxws.schemas.GetEESummaryResponse;
-import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
@@ -32,9 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
-/** SoapEligibilityAndEnrollmentClient. */
 @Slf4j
 @Component
 public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollmentClient {
@@ -46,32 +44,17 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
 
   private final String endpointUrl;
 
-  private final String keystorePath;
-
-  private final String keystorePassword;
-
   /** Autowired constructor. */
   @Builder
   public SoapEligibilityAndEnrollmentClient(
       @Autowired Supplier<EeSummaryPort> eeSummaryPortSupplier,
       @Value("${ee.header.username}") String username,
       @Value("${ee.header.password}") String password,
-      @Value("${ee.endpoint.url}") String endpointUrl,
-      @Value("${ee.keystore.path}") String keystorePath,
-      @Value("${ee.keystore.password}") String keystorePassword) {
+      @Value("${ee.endpoint.url}") String endpointUrl) {
     this.eeSummaryPortSupplier = eeSummaryPortSupplier;
     this.username = username;
     this.password = password;
     this.endpointUrl = endpointUrl.endsWith("/") ? endpointUrl : endpointUrl + "/";
-    this.keystorePath = keystorePath;
-    this.keystorePassword = keystorePassword;
-  }
-
-  private static String fileOrClasspath(String path) {
-    if (StringUtils.startsWith(path, "file:") || StringUtils.startsWith(path, "classpath:")) {
-      return path;
-    }
-    throw new IllegalArgumentException("Expected file or classpath resources. Got " + path);
   }
 
   /** Initialize SSL. */
@@ -83,18 +66,23 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
     }
 
     log.info("Initializing SSL for E&E");
-    try (InputStream keystoreInputStream =
-        ResourceUtils.getURL(fileOrClasspath(keystorePath)).openStream()) {
-      KeyStore ts = KeyStore.getInstance("JKS");
-      ts.load(keystoreInputStream, keystorePassword.toCharArray());
-      TrustManagerFactory trustManagerFactory =
-          TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-      trustManagerFactory.init(ts);
-      SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
-      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-      return true;
-    }
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(
+        null,
+        new TrustManager[] {
+          new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+              return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+          }
+        },
+        new SecureRandom());
+    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+    return true;
   }
 
   @Override
