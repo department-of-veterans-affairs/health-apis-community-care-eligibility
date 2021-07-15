@@ -72,7 +72,7 @@ public class SoapEligibilityAndEnrollmentClient implements EligibilityAndEnrollm
         new TrustManager[] {
           new X509TrustManager() {
             public X509Certificate[] getAcceptedIssuers() {
-              return null;
+              return new X509Certificate[] {};
             }
 
             public void checkClientTrusted(X509Certificate[] certs, String authType) {}

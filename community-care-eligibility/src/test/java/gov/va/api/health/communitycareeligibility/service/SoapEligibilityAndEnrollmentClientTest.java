@@ -49,9 +49,7 @@ public final class SoapEligibilityAndEnrollmentClientTest {
   @Test
   public void initSsl() {
     SoapEligibilityAndEnrollmentClient client =
-        SoapEligibilityAndEnrollmentClient.builder()
-            .endpointUrl("https://foo.bar")
-            .build();
+        SoapEligibilityAndEnrollmentClient.builder().endpointUrl("https://foo.bar").build();
     assertThat(client.initSsl()).isTrue();
   }
 
