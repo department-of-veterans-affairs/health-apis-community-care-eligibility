@@ -8,7 +8,7 @@
     <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
   </Match>
   <Match>
-    <Class name="gov.va.api.health.communitycareeligibility.service.SoapEligibilityAndEnrollmentClient"/>
-    <Bug pattern="URLCONNECTION_SSRF_FD"/>
+    <Class name="gov.va.api.health.communitycareeligibility.service.SoapEligibilityAndEnrollmentClient$1"/>
+    <Bug pattern="WEAK_TRUST_MANAGER"/>
   </Match>
 </FindBugsFilter>
