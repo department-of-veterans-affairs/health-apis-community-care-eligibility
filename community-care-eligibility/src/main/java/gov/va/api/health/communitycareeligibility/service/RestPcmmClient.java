@@ -19,6 +19,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class RestPcmmClient implements PcmmClient {
   private static final String PCMM_URL_SUFFIX = "pcmmr_web/ws/patientSummary/icn/";
 
+  private static final String ICN_SUFFIX = "/LH";
+
   private final String pcmmUsername;
 
   private final String pcmmPassword;
@@ -54,7 +56,7 @@ public class RestPcmmClient implements PcmmClient {
   @SneakyThrows
   public PcmmResponse pactStatusByIcn(String patientIcn) {
     String url =
-        UriComponentsBuilder.fromHttpUrl(baseUrl + PCMM_URL_SUFFIX + patientIcn)
+        UriComponentsBuilder.fromHttpUrl(baseUrl + PCMM_URL_SUFFIX + patientIcn + ICN_SUFFIX)
             .build()
             .toUriString();
     try {

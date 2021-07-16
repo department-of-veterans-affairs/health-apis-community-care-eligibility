@@ -24,7 +24,7 @@ public final class RestPcmmClientTest {
 
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
-            eq("http://foo/bar/v0/pcmmr_web/ws/patientSummary/icn/123"),
+            eq("http://foo/bar/v0/pcmmr_web/ws/patientSummary/icn/123/LH"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(PcmmResponse.class)))
@@ -40,7 +40,7 @@ public final class RestPcmmClientTest {
   public void pactStatusByIcnException() {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplate.exchange(
-            eq("http://foo/bar/v0/pcmmr_web/ws/patientSummary/icn/123"),
+            eq("http://foo/bar/v0/pcmmr_web/ws/patientSummary/icn/123/LH"),
             eq(HttpMethod.GET),
             any(HttpEntity.class),
             eq(PcmmResponse.class)))
