@@ -42,8 +42,6 @@ public final class SoapEligibilityAndEnrollmentClientTest {
                 .username("bobnelson")
                 .password("12345")
                 .endpointUrl("https://foo.bar")
-                .keystorePath("xyz")
-                .keystorePassword("12345")
                 .build()
                 .requestEligibility("0V0"));
   }
@@ -51,11 +49,7 @@ public final class SoapEligibilityAndEnrollmentClientTest {
   @Test
   public void initSsl() {
     SoapEligibilityAndEnrollmentClient client =
-        SoapEligibilityAndEnrollmentClient.builder()
-            .endpointUrl("https://foo.bar")
-            .keystorePath("classpath:test.jks")
-            .keystorePassword("123456")
-            .build();
+        SoapEligibilityAndEnrollmentClient.builder().endpointUrl("https://foo.bar").build();
     assertThat(client.initSsl()).isTrue();
   }
 
@@ -76,8 +70,6 @@ public final class SoapEligibilityAndEnrollmentClientTest {
             .username("bobnelson")
             .password("12345")
             .endpointUrl("https://foo.bar")
-            .keystorePath("xyz")
-            .keystorePassword("12345")
             .build();
     assertThat(client.requestEligibility("0V0"))
         .isEqualTo(GetEESummaryResponse.builder().noDataMessage("hello").build());
@@ -146,8 +138,6 @@ public final class SoapEligibilityAndEnrollmentClientTest {
                 .username("bobnelson")
                 .password("12345")
                 .endpointUrl("https://foo.bar")
-                .keystorePath("xyz")
-                .keystorePassword("12345")
                 .build()
                 .requestEligibility("0V0"));
   }
