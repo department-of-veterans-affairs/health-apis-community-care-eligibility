@@ -30,6 +30,8 @@ import org.springframework.stereotype.Component;
 public class MockServices {
   public static final String PCMM_PATH = "/pcmmr_web/ws/patientSummary/icn/";
 
+  public static final String ICN_SUFFIX = "/LH";
+
   /** All queries added to the mock server are listed here, except for /help. */
   private final List<String> supportedQueries = new ArrayList<>();
 
@@ -85,19 +87,19 @@ public class MockServices {
     final String pactStatusNoDataIcn = "1012870703V135989";
     final String pactStatusPendingIcn = "1012853802V084487";
     final String pactStatusMultiDataStatusActiveIcn = "1013060957V646684";
-    mock.when(addQuery(PCMM_PATH + pactStatusNoDataIcn))
+    mock.when(addQuery(PCMM_PATH + pactStatusNoDataIcn + ICN_SUFFIX))
         .respond(
             response()
                 .withStatusCode(200)
                 .withHeader(contentApplicationXml())
                 .withBody(contentOf("/pcmm-no-pact-data.xml")));
-    mock.when(addQuery(PCMM_PATH + pactStatusPendingIcn))
+    mock.when(addQuery(PCMM_PATH + pactStatusPendingIcn + ICN_SUFFIX))
         .respond(
             response()
                 .withStatusCode(200)
                 .withHeader(contentApplicationXml())
                 .withBody(contentOf("/pcmm-single-pact-data-status-pending.xml")));
-    mock.when(addQuery(PCMM_PATH + pactStatusMultiDataStatusActiveIcn))
+    mock.when(addQuery(PCMM_PATH + pactStatusMultiDataStatusActiveIcn + ICN_SUFFIX))
         .respond(
             response()
                 .withStatusCode(200)
